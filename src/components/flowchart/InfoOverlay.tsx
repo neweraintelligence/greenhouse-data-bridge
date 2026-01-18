@@ -324,15 +324,15 @@ function InfoOverlayComponent({
         <div className={`w-2/3 pr-12 pt-32 pb-16 flex flex-col justify-center overflow-y-auto ${
           info.imageOnLeft ? 'pr-24 pl-12' : 'pl-24'
         }`}>
-          {/* Subtitle with mode badge */}
-          <div className="flex items-center gap-3 mb-4">
+          {/* Subtitle with mode badge - only show badge if flowContext exists */}
+          <div className="flex items-center gap-3 mb-6">
             <p
-              className="text-sm tracking-[0.25em] uppercase text-gray-500"
+              className="text-base tracking-[0.2em] uppercase text-gray-500"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               {info.subtitle}
             </p>
-            {activeDirection !== 'both' && (
+            {hasDirectionalContent && activeDirection !== 'both' && (
               <span className={`text-xs px-2 py-1 rounded-full ${
                 activeDirection === 'inbound'
                   ? 'bg-emerald-100 text-emerald-700'
@@ -343,59 +343,59 @@ function InfoOverlayComponent({
             )}
           </div>
 
-          {/* Title */}
+          {/* Title - larger */}
           <h1
-            className="text-5xl font-semibold text-gray-900 tracking-tight mb-8 leading-[1.1]"
+            className="text-6xl font-semibold text-gray-900 tracking-tight mb-10 leading-[1.05]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {info.title}
           </h1>
 
-          {/* Description */}
+          {/* Description - larger */}
           <p
-            className="text-lg text-gray-700 leading-relaxed mb-10"
+            className="text-2xl text-gray-700 leading-relaxed mb-12"
             style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
           >
             {getActiveContent('description')}
           </p>
 
-          {/* Pain point */}
-          <div className="mb-8">
+          {/* Pain point - larger */}
+          <div className="mb-10">
             <p
-              className="text-xs tracking-[0.2em] uppercase text-amber-600 mb-3"
+              className="text-sm tracking-[0.15em] uppercase text-amber-600 mb-4"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Problem
             </p>
             <p
-              className="text-xl text-gray-800 leading-snug font-light"
+              className="text-2xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('painPoint')}"
             </p>
           </div>
 
-          {/* Solution */}
-          <div className="mb-8">
+          {/* Solution - larger */}
+          <div className="mb-10">
             <p
-              className="text-xs tracking-[0.2em] uppercase text-emerald-600 mb-3"
+              className="text-sm tracking-[0.15em] uppercase text-emerald-600 mb-4"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Solution
             </p>
             <p
-              className="text-xl text-gray-800 leading-snug font-light"
+              className="text-2xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('solution')}"
             </p>
           </div>
 
-          {/* Key insight */}
+          {/* Key insight - larger */}
           {getActiveContent('keyInsight') && (
-            <div className="border-l-2 border-gray-300 pl-6 mb-8">
+            <div className="border-l-2 border-gray-300 pl-6 mb-10">
               <p
-                className="text-base text-gray-600 italic"
+                className="text-xl text-gray-600 italic"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
               >
                 {getActiveContent('keyInsight')}
@@ -473,7 +473,7 @@ function InfoOverlayComponent({
                 alt="Visual representation"
                 className="w-full h-full object-cover"
                 style={{
-                  filter: 'brightness(0.92) contrast(1.08) saturate(0.85) sepia(0.08)',
+                  filter: 'brightness(0.85) contrast(1.05) saturate(0.7) sepia(0.12) opacity(0.8)',
                 }}
               />
             ) : (
