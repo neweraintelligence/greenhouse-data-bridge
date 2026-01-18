@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -13,12 +13,25 @@ import { SourceNode } from './nodes/SourceNode';
 import { IntakeNode } from './nodes/IntakeNode';
 import { ProcessingNode } from './nodes/ProcessingNode';
 import { OutputNode } from './nodes/OutputNode';
+import { UseCaseSelectorNode } from './nodes/UseCaseSelectorNode';
+import { ExpandedNodeModal } from './ExpandedNodeModal';
+import { InfoOverlay, type NodeInfo } from './InfoOverlay';
+import { OutlookMiniApp } from './nodes/mini-apps/OutlookMiniApp';
+import { OneDriveMiniApp } from './nodes/mini-apps/OneDriveMiniApp';
+import { ExcelMiniApp } from './nodes/mini-apps/ExcelMiniApp';
+import { PaperScanMiniApp } from './nodes/mini-apps/PaperScanMiniApp';
+import { ScanBarcode } from 'lucide-react';
 import type { IntakeItem } from './nodes/IntakeNode';
 import type { OutputFile } from './nodes/OutputNode';
 import type { UseCase } from '../../lib/useCases/types';
 import type { EmailItem } from './nodes/mini-apps/OutlookMiniApp';
 import type { FileItem } from './nodes/mini-apps/OneDriveMiniApp';
 import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';
+import { getAllUseCases } from '../../lib/useCases/registry';
+import { getNodeInfo } from '../../lib/nodeInfoContent';
+import { getNodeImage } from '../../lib/nodeImages';
+import { GlassButton } from '../design-system';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -26,12 +39,14 @@ const nodeTypes: Record<string, any> = {
   intake: IntakeNode,
   processing: ProcessingNode,
   output: OutputNode,
+  useCaseSelector: UseCaseSelectorNode,
 };
 
 interface FlowCanvasProps {
-  useCase: UseCase;
   sessionCode: string;
   onProcessComplete?: (stats: { processed: number; flagged: number }) => void;
+  startPresentationMode?: boolean;
+  onPresentationStart?: () => void;
 }
 
 // Demo data generators
@@ -92,11 +107,48 @@ function generateDemoSpreadsheet(): SpreadsheetData {
   };
 }
 
-export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
+function generateTrainingRoster(): SpreadsheetData {
+  return {
+    sheetName: 'Employee Roster',
+    headers: ['Employee ID', 'Name', 'Department', 'Hire Date'],
+    rows: [
+      ['EMP-1047', 'Sarah Johnson', 'Greenhouse', '2023-03-15'],
+      ['EMP-1052', 'Mike Chen', 'Packing', '2023-06-22'],
+      ['EMP-1063', 'Maria Rodriguez', 'Shipping', '2024-01-10'],
+      ['EMP-1071', 'John Williams', 'Maintenance', '2024-05-08'],
+      ['EMP-1089', 'Emily Davis', 'Greenhouse', '2024-09-12'],
+    ],
+  };
+}
+
+function generateTrainingAcknowledgements(): SpreadsheetData {
+  return {
+    sheetName: 'Training Acknowledgements',
+    headers: ['Employee ID', 'Module', 'Date Completed', 'Method'],
+    rows: [
+      ['EMP-1047', 'Safety & SOP', '2025-01-23', 'In-person'],
+      ['EMP-1052', 'Safety & SOP', '', 'Missing'],
+      ['EMP-1063', 'Safety & SOP', '2025-01-23', 'In-person'],
+      ['EMP-1071', 'Safety & SOP', '2025-01-26', 'Email'],
+      ['EMP-1089', 'Safety & SOP', '', 'Pending'],
+    ],
+  };
+}
+
+export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMode, onPresentationStart }: FlowCanvasProps) {
+  const useCases = getAllUseCases();
+
+  // Selected use case
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null);
+
+  // Track focused node for focus mode
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+
+  // Track progressive reveal for presentation mode
+  const [revealedNodeIndices, setRevealedNodeIndices] = useState<Set<number>>(new Set());
+
   // Track source statuses
-  const [sourceStatuses, setSourceStatuses] = useState<Record<string, 'pending' | 'loading' | 'complete'>>(
-    Object.fromEntries(useCase.sources.map((s) => [s.name, 'pending']))
-  );
+  const [sourceStatuses, setSourceStatuses] = useState<Record<string, 'pending' | 'loading' | 'complete'>>({});
 
   // Track source data
   const [sourceData, setSourceData] = useState<Record<string, {
@@ -112,30 +164,143 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
   const [processingStats, setProcessingStats] = useState({ processed: 0, flagged: 0, errors: 0 });
 
   // Track outputs
-  const [outputFiles, setOutputFiles] = useState<OutputFile[]>(
-    useCase.outputTemplates.map((t) => ({
+  const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
+
+  // Track expanded node for modal view
+  const [expandedNode, setExpandedNode] = useState<{
+    id: string;
+    type: 'outlook' | 'onedrive' | 'excel' | 'paper';
+    label: string;
+  } | null>(null);
+
+  // Auto-pipeline simulation mode
+  const [isSimulating, setIsSimulating] = useState(false);
+  const simulationRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track node position overrides from dragging
+  const [nodePositionOverrides, setNodePositionOverrides] = useState<Record<string, { x: number; y: number }>>({});
+
+  // Track which node is currently being dragged (for z-index)
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+
+  // Track info overlay
+  const [infoOverlayContent, setInfoOverlayContent] = useState<NodeInfo | null>(null);
+  const [infoNodeId, setInfoNodeId] = useState<string | null>(null);
+  const [infoNodeIndex, setInfoNodeIndex] = useState<number | null>(null);
+  const [infoNodeType, setInfoNodeType] = useState<string | null>(null);
+  const [infoNodeLabel, setInfoNodeLabel] = useState<string | null>(null);
+  const [infoNodeFetchHandler, setInfoNodeFetchHandler] = useState<(() => void) | null>(null);
+  const [infoNodeCanFetch, setInfoNodeCanFetch] = useState(false);
+
+  // Reset node positions to original
+  const handleResetPositions = useCallback(() => {
+    setNodePositionOverrides({});
+  }, []);
+
+  // Handle node drag start - set dragging node for z-index
+  const handleNodeDragStart = useCallback((_event: React.MouseEvent, node: Node) => {
+    setDraggingNodeId(node.id);
+  }, []);
+
+  // Handle node drag end - store the new position and clear dragging state
+  const handleNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
+    setNodePositionOverrides(prev => ({
+      ...prev,
+      [node.id]: { x: node.position.x, y: node.position.y }
+    }));
+    setDraggingNodeId(null);
+  }, []);
+
+  // Handle expand node
+  const handleExpandNode = useCallback((sourceName: string, sourceType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode') => {
+    // Only expand for supported types
+    if (sourceType === 'barcode') return;
+    setExpandedNode({ id: sourceName, type: sourceType, label: sourceName });
+  }, []);
+
+  // Handle show info overlay
+  const handleShowInfo = useCallback((
+    nodeType: string,
+    nodeId: string,
+    sourceName: string,
+    sourceIndex: number,
+    onActivate?: () => void,
+    status?: string
+  ) => {
+    const useCaseId = selectedUseCase?.id || 'shipping';
+    const info = getNodeInfo(useCaseId, nodeType);
+    if (info) {
+      setInfoOverlayContent(info);
+      setInfoNodeId(nodeId);
+      setInfoNodeIndex(sourceIndex);
+      setInfoNodeType(nodeType);
+      setInfoNodeLabel(sourceName);
+
+      // Auto-reveal this node and all previous nodes when navigating to slide
+      if (sourceIndex >= 0) {
+        setRevealedNodeIndices(prev => {
+          const newSet = new Set(prev);
+          for (let i = 0; i <= sourceIndex; i++) {
+            newSet.add(i);
+          }
+          return newSet;
+        });
+      }
+
+      // Store fetch handler for the "Fetch Data" button
+      if (onActivate) {
+        setInfoNodeFetchHandler(() => onActivate);
+      } else {
+        setInfoNodeFetchHandler(null);
+      }
+      // Can fetch if pending and not paper type
+      setInfoNodeCanFetch(status === 'pending' && nodeType !== 'paper');
+    }
+  }, [selectedUseCase]);
+
+  // Toggle simulation
+  const toggleSimulation = useCallback(() => {
+    setIsSimulating(prev => !prev);
+  }, []);
+
+  // Handle use case selection
+  const handleUseCaseSelect = useCallback((useCase: UseCase) => {
+    setSelectedUseCase(useCase);
+    // Initialize source statuses for the selected use case
+    setSourceStatuses(Object.fromEntries(useCase.sources.map((s) => [s.name, 'pending'])));
+    // Initialize output files
+    setOutputFiles(useCase.outputTemplates.map((t) => ({
       id: t.id,
       name: t.name,
       type: t.fileType,
       ready: false,
-    }))
-  );
+    })));
+    // Reset other state
+    setSourceData({});
+    setProcessingStatus('idle');
+    setProcessingProgress(0);
+    setFocusedNodeId(null);
+    // Start with only first source node revealed for progressive presentation
+    setRevealedNodeIndices(new Set([0]));
+  }, []);
 
   // Build intake items from sources
   const buildIntakeItems = useCallback((): IntakeItem[] => {
-    return useCase.sources.map((s) => ({
+    if (!selectedUseCase) return [];
+    return selectedUseCase.sources.map((s) => ({
       id: s.name,
       name: s.name,
       received: sourceStatuses[s.name] === 'complete',
       required: !s.optional,
     }));
-  }, [useCase.sources, sourceStatuses]);
+  }, [selectedUseCase, sourceStatuses]);
 
   // Handle source activation (simulate fetching data)
   const handleSourceActivate = useCallback((sourceName: string, sourceType: string) => {
     setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'loading' }));
+    setFocusedNodeId(`source-${sourceName}`);
 
-    // Simulate loading delay and generate demo data
+    // Simulate loading delay and generate demo data - extended for presentation visibility
     setTimeout(() => {
       const newData: Record<string, unknown> = {};
 
@@ -144,18 +309,26 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
       } else if (sourceType === 'onedrive') {
         newData.files = generateDemoFiles();
       } else if (sourceType === 'excel') {
-        newData.spreadsheet = generateDemoSpreadsheet();
+        // Route to correct spreadsheet based on use case and source name
+        if (selectedUseCase?.id === 'training') {
+          newData.spreadsheet = sourceName === 'Acknowledgements'
+            ? generateTrainingAcknowledgements()
+            : generateTrainingRoster();
+        } else {
+          newData.spreadsheet = generateDemoSpreadsheet();
+        }
       }
 
       setSourceData((prev) => ({ ...prev, [sourceName]: newData }));
       setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
-    }, 1000 + Math.random() * 1000);
-  }, []);
+    }, 2500 + Math.random() * 1000); // Extended from 1-2s to 2.5-3.5s for visibility
+  }, [selectedUseCase]);
 
   // Handle processing
   const handleProcess = useCallback(() => {
     setProcessingStatus('processing');
     setProcessingProgress(0);
+    setFocusedNodeId('processing');
 
     // Simulate processing with progress updates
     const interval = setInterval(() => {
@@ -180,6 +353,7 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
       };
       setProcessingStats(stats);
       setProcessingStatus('complete');
+      setFocusedNodeId('output');
 
       // Mark outputs as ready
       setOutputFiles((prev) =>
@@ -190,102 +364,278 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
     }, 3000);
   }, [onProcessComplete]);
 
+  // Trigger presentation mode - open first slide
+  useEffect(() => {
+    if (startPresentationMode && selectedUseCase && selectedUseCase.sources.length > 0) {
+      const firstSource = selectedUseCase.sources[0];
+      const firstNodeId = `source-${firstSource.name}`;
+      handleShowInfo(
+        firstSource.type,
+        firstNodeId,
+        firstSource.name,
+        0,
+        () => handleSourceActivate(firstSource.name, firstSource.type),
+        sourceStatuses[firstSource.name]
+      );
+      onPresentationStart?.();
+    }
+  }, [startPresentationMode, selectedUseCase, handleShowInfo, handleSourceActivate, sourceStatuses, onPresentationStart]);
+
+  // Navigate to next/previous slide
+  const handleNextSlide = useCallback(() => {
+    if (!selectedUseCase || infoNodeIndex === null) return;
+    const nextIndex = infoNodeIndex + 1;
+    if (nextIndex < selectedUseCase.sources.length) {
+      const nextSource = selectedUseCase.sources[nextIndex];
+      const nextNodeId = `source-${nextSource.name}`;
+      handleShowInfo(
+        nextSource.type,
+        nextNodeId,
+        nextSource.name,
+        nextIndex,
+        () => handleSourceActivate(nextSource.name, nextSource.type),
+        sourceStatuses[nextSource.name]
+      );
+    }
+  }, [selectedUseCase, infoNodeIndex, handleShowInfo, handleSourceActivate, sourceStatuses]);
+
+  const handlePreviousSlide = useCallback(() => {
+    if (!selectedUseCase || infoNodeIndex === null) return;
+    const prevIndex = infoNodeIndex - 1;
+    if (prevIndex >= 0) {
+      const prevSource = selectedUseCase.sources[prevIndex];
+      const prevNodeId = `source-${prevSource.name}`;
+      handleShowInfo(
+        prevSource.type,
+        prevNodeId,
+        prevSource.name,
+        prevIndex,
+        () => handleSourceActivate(prevSource.name, prevSource.type),
+        sourceStatuses[prevSource.name]
+      );
+    }
+  }, [selectedUseCase, infoNodeIndex, handleShowInfo, handleSourceActivate, sourceStatuses]);
+
   // Check if can process
-  const canProcess = useCase.sources
-    .filter((s) => !s.optional)
-    .every((s) => sourceStatuses[s.name] === 'complete');
+  const canProcess = selectedUseCase
+    ? selectedUseCase.sources
+        .filter((s) => !s.optional)
+        .every((s) => sourceStatuses[s.name] === 'complete')
+    : false;
+
+  // Auto-simulation effect
+  useEffect(() => {
+    if (!isSimulating || !selectedUseCase) return;
+
+    const pendingSources = selectedUseCase.sources.filter(
+      s => sourceStatuses[s.name] === 'pending'
+    );
+
+    if (pendingSources.length > 0) {
+      // Simulate staggered data arrival
+      const randomSource = pendingSources[Math.floor(Math.random() * pendingSources.length)];
+      simulationRef.current = setTimeout(() => {
+        handleSourceActivate(randomSource.name, randomSource.type);
+      }, 2000 + Math.random() * 3000);
+    } else if (canProcess && processingStatus === 'idle') {
+      // All sources complete, start processing
+      simulationRef.current = setTimeout(() => {
+        handleProcess();
+      }, 1500);
+    }
+
+    return () => {
+      if (simulationRef.current) clearTimeout(simulationRef.current);
+    };
+  }, [isSimulating, selectedUseCase, sourceStatuses, canProcess, processingStatus, handleProcess, handleSourceActivate]);
+
+  // Handle node click for focus mode
+  // Use case selector is excluded from focus mode - it's a control node, not a data node
+  const handleNodeClick = useCallback((nodeId: string) => {
+    if (nodeId === 'use-case-selector') return; // Don't focus the selector
+    setFocusedNodeId((prev) => (prev === nodeId ? null : nodeId));
+  }, []);
+
+  // Clear focus when clicking canvas background
+  const handlePaneClick = useCallback(() => {
+    setFocusedNodeId(null);
+  }, []);
 
   // Build nodes
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buildNodes = useCallback((): Node[] => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const nodes: Node[] = [];
-    const ySpacing = 100;
-    const xSpacing = 320;
+    const xSpacing = 360; // Increased horizontal spacing
 
-    // Source nodes (left column)
-    useCase.sources.forEach((source, index) => {
-      const yOffset = (index - (useCase.sources.length - 1) / 2) * ySpacing;
-      const data = sourceData[source.name] || {};
+    // Helper to get position with override
+    const getPosition = (nodeId: string, defaultPos: { x: number; y: number }) => {
+      return nodePositionOverrides[nodeId] || defaultPos;
+    };
 
-      nodes.push({
-        id: `source-${source.name}`,
-        type: 'source',
-        position: { x: 0, y: 180 + yOffset },
-        data: {
-          label: source.name,
-          type: source.type,
-          status: sourceStatuses[source.name],
-          optional: source.optional,
-          onActivate: () => handleSourceActivate(source.name, source.type),
-          emails: data.emails,
-          files: data.files,
-          spreadsheet: data.spreadsheet,
-          capturedImage: data.capturedImage,
-        },
+    // Use case selector node (always first, positioned to the left and higher up)
+    // This is a control node - it doesn't participate in focus mode
+    nodes.push({
+      id: 'use-case-selector',
+      type: 'useCaseSelector',
+      position: getPosition('use-case-selector', { x: -120, y: 80 }),
+      data: {
+        useCases,
+        selectedUseCase,
+        onSelect: handleUseCaseSelect,
+      },
+      // No className - selector never gets focused or unfocused styling
+    });
+
+    // Only show rest of flow if use case is selected
+    if (selectedUseCase) {
+      const ySpacing = 150; // Increased spacing for better presentation
+      // Add slight stagger for visual interest
+      const staggerOffsets = [0, 15, -10, 20, -15];
+
+      // Source nodes
+      selectedUseCase.sources.forEach((source, index) => {
+        const yOffset = (index - (selectedUseCase.sources.length - 1) / 2) * ySpacing;
+        const stagger = staggerOffsets[index % staggerOffsets.length];
+        const data = sourceData[source.name] || {};
+        const nodeId = `source-${source.name}`;
+        const isFocused = focusedNodeId === nodeId;
+        const isUnfocused = focusedNodeId && !isFocused;
+
+        // Check if this node is revealed for progressive presentation
+        const isRevealed = revealedNodeIndices.has(index);
+
+        // Generate QR code URL for paper sources
+        const qrCodeUrl = source.type === 'paper'
+          ? `${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(source.name)}`
+          : undefined;
+
+        nodes.push({
+          id: nodeId,
+          type: 'source',
+          position: getPosition(nodeId, { x: xSpacing + stagger, y: 180 + yOffset }),
+          data: {
+            label: source.name,
+            type: source.type,
+            status: sourceStatuses[source.name],
+            optional: source.optional,
+            onActivate: () => handleSourceActivate(source.name, source.type),
+            onExpand: () => handleExpandNode(source.name, source.type),
+            onShowInfo: () => handleShowInfo(
+              source.type,
+              nodeId,
+              source.name,
+              index, // Pass the source index
+              () => handleSourceActivate(source.name, source.type),
+              sourceStatuses[source.name]
+            ),
+            isFocused,
+            emails: data.emails,
+            files: data.files,
+            spreadsheet: data.spreadsheet,
+            capturedImage: data.capturedImage,
+            qrCodeUrl,
+          },
+          className: isUnfocused ? 'node-unfocused' : isFocused ? 'node-focused' : !isRevealed ? 'node-unrevealed' : '',
+        });
       });
-    });
 
-    // Intake node (center-left)
-    nodes.push({
-      id: 'intake',
-      type: 'intake',
-      position: { x: xSpacing, y: 140 },
-      data: {
-        label: 'Intake Folder',
-        items: buildIntakeItems(),
-        canProcess,
-        onProcess: handleProcess,
-      },
-    });
+      // Intake node
+      const intakeIsFocused = focusedNodeId === 'intake';
+      const intakeIsUnfocused = focusedNodeId && !intakeIsFocused;
+      nodes.push({
+        id: 'intake',
+        type: 'intake',
+        position: getPosition('intake', { x: xSpacing * 2 - 20, y: 140 }),
+        data: {
+          label: 'Intake Folder',
+          items: buildIntakeItems(),
+          canProcess,
+          onProcess: handleProcess,
+          onShowInfo: () => handleShowInfo('intake', 'intake', 'Intake Folder', -1, undefined, undefined),
+        },
+        className: intakeIsUnfocused ? 'node-unfocused' : intakeIsFocused ? 'node-focused' : '',
+      });
 
-    // Processing node (center)
-    nodes.push({
-      id: 'processing',
-      type: 'processing',
-      position: { x: xSpacing * 2, y: 160 },
-      data: {
-        label: 'AI Processing',
-        status: processingStatus,
-        progress: processingProgress,
-        stats: processingStatus === 'complete' ? processingStats : undefined,
-      },
-    });
+      // Processing node - build source statuses for status messages
+      const processingSourceStatuses = selectedUseCase.sources.map(s => ({
+        name: s.name,
+        received: sourceStatuses[s.name] === 'complete',
+      }));
 
-    // Output node (right)
-    nodes.push({
-      id: 'output',
-      type: 'output',
-      position: { x: xSpacing * 3, y: 120 },
-      data: {
-        label: 'Outputs',
-        files: outputFiles,
-        onPreview: (file: OutputFile) => console.log('Preview:', file),
-        onDownload: (file: OutputFile) => console.log('Download:', file),
-      },
-    });
+      const processingIsFocused = focusedNodeId === 'processing';
+      const processingIsUnfocused = focusedNodeId && !processingIsFocused;
+      nodes.push({
+        id: 'processing',
+        type: 'processing',
+        position: getPosition('processing', { x: xSpacing * 3 + 10, y: 160 }),
+        data: {
+          label: 'Data Engine',
+          status: processingStatus,
+          progress: processingProgress,
+          stats: processingStatus === 'complete' ? processingStats : undefined,
+          sources: processingSourceStatuses,
+          onShowInfo: () => handleShowInfo('processing', 'processing', 'Data Engine', -1, undefined, undefined),
+        },
+        className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : '',
+      });
 
-    return nodes;
+      // Output node
+      const outputIsFocused = focusedNodeId === 'output';
+      const outputIsUnfocused = focusedNodeId && !outputIsFocused;
+      nodes.push({
+        id: 'output',
+        type: 'output',
+        position: getPosition('output', { x: xSpacing * 4 - 30, y: 120 }),
+        data: {
+          label: 'Outputs',
+          files: outputFiles,
+          onPreview: (file: OutputFile) => console.log('Preview:', file),
+          onDownload: (file: OutputFile) => console.log('Download:', file),
+        },
+        className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : '',
+      });
+    }
+
+    // Set zIndex on dragged node to keep it on top
+    return nodes.map(node => ({
+      ...node,
+      zIndex: node.id === draggingNodeId ? 10000 : undefined,
+      style: node.id === draggingNodeId ? { zIndex: 10000 } : undefined,
+    }));
   }, [
-    useCase.sources,
+    useCases,
+    selectedUseCase,
     sourceStatuses,
     sourceData,
     buildIntakeItems,
     canProcess,
     handleProcess,
     handleSourceActivate,
+    handleUseCaseSelect,
+    handleExpandNode,
+    handleShowInfo,
     processingStatus,
     processingProgress,
     processingStats,
     outputFiles,
+    focusedNodeId,
+    sessionCode,
+    nodePositionOverrides,
+    draggingNodeId,
   ]);
 
-  // Build edges with gradient animation
+  // Build edges
   const buildEdges = useCallback((): Edge[] => {
     const edges: Edge[] = [];
 
+    if (!selectedUseCase) return edges;
+
+    // No edges from use case selector - it's a standalone control node
+    // This allows users to freely position the flow nodes without being anchored
+
     // Edges from sources to intake
-    useCase.sources.forEach((source) => {
+    selectedUseCase.sources.forEach((source) => {
       const isComplete = sourceStatuses[source.name] === 'complete';
       const isLoading = sourceStatuses[source.name] === 'loading';
 
@@ -295,12 +645,12 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
         target: 'intake',
         animated: isLoading,
         style: {
-          stroke: isComplete ? '#10b981' : isLoading ? '#2596be' : 'rgba(255,255,255,0.2)',
-          strokeWidth: isComplete ? 3 : 2,
+          stroke: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
+          strokeWidth: isComplete ? 2.5 : 2,
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: isComplete ? '#10b981' : isLoading ? '#2596be' : 'rgba(255,255,255,0.2)',
+          color: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
         },
       });
     });
@@ -315,12 +665,12 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
       target: 'processing',
       animated: isProcessing,
       style: {
-        stroke: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : 'rgba(255,255,255,0.2)',
-        strokeWidth: isComplete || isProcessing ? 3 : 2,
+        stroke: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#e2e8f0',
+        strokeWidth: isComplete || isProcessing ? 2.5 : 2,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : 'rgba(255,255,255,0.2)',
+        color: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#e2e8f0',
       },
     });
 
@@ -331,39 +681,211 @@ export function FlowCanvas({ useCase, onProcessComplete }: FlowCanvasProps) {
       target: 'output',
       animated: false,
       style: {
-        stroke: isComplete ? '#10b981' : 'rgba(255,255,255,0.2)',
-        strokeWidth: isComplete ? 3 : 2,
+        stroke: isComplete ? '#10b981' : '#e2e8f0',
+        strokeWidth: isComplete ? 2.5 : 2,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete ? '#10b981' : 'rgba(255,255,255,0.2)',
+        color: isComplete ? '#10b981' : '#e2e8f0',
       },
     });
 
     return edges;
-  }, [useCase.sources, sourceStatuses, processingStatus]);
+  }, [selectedUseCase, sourceStatuses, processingStatus]);
+
+  // Get source data for expanded modal
+  const getExpandedSourceData = () => {
+    if (!expandedNode) return {};
+    return sourceData[expandedNode.id] || {};
+  };
+
+  // Check if any positions have been overridden
+  const hasPositionOverrides = Object.keys(nodePositionOverrides).length > 0;
+
+  // Build node preview content for info overlay
+  const getNodePreviewContent = (): React.ReactNode => {
+    if (!infoNodeId || !selectedUseCase) {
+      console.log('No infoNodeId or selectedUseCase');
+      return null;
+    }
+
+    // Find the source that matches
+    const source = selectedUseCase.sources.find(s => `source-${s.name}` === infoNodeId);
+    if (!source) {
+      console.log('No source found for infoNodeId:', infoNodeId);
+      return null;
+    }
+
+    const data = sourceData[source.name] || {};
+    console.log('Building preview for:', source.type, 'with data:', data, 'use case:', selectedUseCase.id);
+
+    // Barcode always has preview (hardcoded data) - check first
+    if (source.type === 'barcode') {
+      console.log('Rendering barcode preview - always available');
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-2">
+            <ScanBarcode className="w-3 h-3" />
+            <span>Recent scans</span>
+          </div>
+          <div className="space-y-1 max-h-[300px] overflow-y-auto">
+            {[
+              { code: 'SHP-2025-0001', time: '10:42 AM', type: 'Shipment', sku: 'SKU-3382' },
+              { code: 'PLT-8847-A', time: '10:38 AM', type: 'Pallet', sku: 'SKU-1247' },
+              { code: 'SHP-2025-0002', time: '10:35 AM', type: 'Shipment', sku: 'SKU-5891' },
+              { code: 'BOX-44521', time: '10:31 AM', type: 'Box', sku: 'SKU-7733' },
+            ].map((entry, i) => (
+              <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs">
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <code className="font-mono text-violet-600 font-semibold text-[11px]">{entry.code}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600">
+                      {entry.type}
+                    </span>
+                  </div>
+                  <code className="font-mono text-gray-500 text-[10px]">{entry.sku}</code>
+                </div>
+                <span className="text-gray-400 text-[10px]">{entry.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Always show preview - with demo data or "awaiting" state
+    // No scaling - match flowchart appearance exactly
+    if (source.type === 'outlook') {
+      const emails = data.emails || generateDemoEmails();
+      return <OutlookMiniApp emails={emails} isLoading={false} />;
+    }
+
+    if (source.type === 'onedrive') {
+      const files = data.files || generateDemoFiles();
+      return <OneDriveMiniApp files={files} isLoading={false} />;
+    }
+
+    if (source.type === 'excel') {
+      // Route to correct spreadsheet based on use case and source name
+      let spreadsheet = data.spreadsheet;
+      if (!spreadsheet) {
+        if (selectedUseCase.id === 'training') {
+          spreadsheet = source.name === 'Acknowledgements'
+            ? generateTrainingAcknowledgements()
+            : generateTrainingRoster();
+        } else {
+          spreadsheet = generateDemoSpreadsheet();
+        }
+      }
+      return <ExcelMiniApp data={spreadsheet} isLoading={false} />;
+    }
+
+    // Paper nodes - show actual upload interface with QR code
+    if (source.type === 'paper') {
+      // Generate QR code URL for this source
+      const qrCodeUrl = `${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(source.name)}`;
+
+      return (
+        <PaperScanMiniApp
+          capturedImage={data.capturedImage}
+          extractedFields={data.extractedFields}
+          isAnalyzing={false}
+          qrCodeUrl={qrCodeUrl}
+        />
+      );
+    }
+
+    return null;
+  };
 
   return (
-    <div className="w-full h-[600px] canvas-dark-gradient rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+    <div className="relative w-full h-[calc(100vh-200px)] min-h-[500px]">
+      {/* Control buttons - floating */}
+      {selectedUseCase && (
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {hasPositionOverrides && (
+            <GlassButton
+              variant="ghost"
+              size="sm"
+              onClick={handleResetPositions}
+              icon={<RotateCcw className="w-4 h-4" />}
+            >
+              Reset Layout
+            </GlassButton>
+          )}
+          <GlassButton
+            variant={isSimulating ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={toggleSimulation}
+            icon={isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          >
+            {isSimulating ? 'Pause Pipeline' : 'Auto Pipeline'}
+          </GlassButton>
+        </div>
+      )}
+
       <ReactFlow
         nodes={buildNodes()}
         edges={buildEdges()}
         nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        nodesDraggable={false}
+        fitView={!!selectedUseCase} // Only fitView after use case is selected
+        fitViewOptions={{ padding: 0.3, maxZoom: 0.85 }}
+        defaultViewport={{ x: 150, y: 200, zoom: 0.85 }} // Start with selector on left
+        nodesDraggable={true}
         nodesConnectable={false}
-        zoomOnScroll={false}
-        panOnScroll={false}
-        panOnDrag={false}
+        zoomOnScroll={true}
+        panOnScroll={true}
+        panOnDrag={true}
         proOptions={{ hideAttribution: true }}
+        onNodeClick={(_, node) => handleNodeClick(node.id)}
+        onNodeDragStart={handleNodeDragStart}
+        onNodeDragStop={handleNodeDragStop}
+        onPaneClick={handlePaneClick}
+        className="bg-transparent"
       >
-        <Background color="rgba(255,255,255,0.05)" gap={24} size={1} />
+        <Background color="#d6d3d1" gap={24} size={1} />
         <Controls
           showInteractive={false}
-          className="!bg-white/10 !border-white/20 !rounded-lg [&>button]:!bg-white/10 [&>button]:!border-white/20 [&>button]:!text-white [&>button:hover]:!bg-white/20"
+          className="!bg-white/80 !backdrop-blur-sm !border-stone-200 !rounded-lg !shadow-sm [&>button]:!bg-white [&>button]:!border-stone-200 [&>button]:!text-stone-600 [&>button:hover]:!bg-stone-50"
         />
       </ReactFlow>
+
+      {/* Expanded node modal */}
+      {expandedNode && (
+        <ExpandedNodeModal
+          nodeType={expandedNode.type}
+          label={expandedNode.label}
+          onClose={() => setExpandedNode(null)}
+          emails={getExpandedSourceData().emails}
+          files={getExpandedSourceData().files}
+          spreadsheet={getExpandedSourceData().spreadsheet}
+          capturedImage={getExpandedSourceData().capturedImage}
+        />
+      )}
+
+      {/* Info overlay */}
+      <InfoOverlay
+        info={infoOverlayContent}
+        onClose={() => {
+          setInfoOverlayContent(null);
+          setInfoNodeId(null);
+          setInfoNodeIndex(null);
+          setInfoNodeType(null);
+          setInfoNodeLabel(null);
+          setInfoNodeFetchHandler(null);
+          setInfoNodeCanFetch(false);
+        }}
+        nodePreviewContent={getNodePreviewContent()}
+        onFetchData={infoNodeFetchHandler || undefined}
+        canFetch={infoNodeCanFetch}
+        onNext={handleNextSlide}
+        onPrevious={handlePreviousSlide}
+        hasNext={infoNodeIndex !== null && selectedUseCase ? infoNodeIndex < selectedUseCase.sources.length - 1 : false}
+        hasPrevious={infoNodeIndex !== null ? infoNodeIndex > 0 : false}
+        imageUrl={infoNodeType && selectedUseCase ? getNodeImage(selectedUseCase.id, infoNodeType) : null}
+        nodeType={infoNodeType || undefined}
+        nodeLabel={infoNodeLabel || undefined}
+      />
     </div>
   );
 }

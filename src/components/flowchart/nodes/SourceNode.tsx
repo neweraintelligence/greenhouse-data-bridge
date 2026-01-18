@@ -1,17 +1,24 @@
 import { memo, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Mail, FolderOpen, FileSpreadsheet, FileText, Camera, Check, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, FolderOpen, FileSpreadsheet, FileText, Camera, Check, Loader2, ChevronDown, ChevronUp, Maximize2, Clock, Zap, QrCode, ScanBarcode, Presentation } from 'lucide-react';
 import { OutlookMiniApp, type EmailItem } from './mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp, type SpreadsheetData } from './mini-apps/ExcelMiniApp';
 import { PaperScanMiniApp, type ExtractedField } from './mini-apps/PaperScanMiniApp';
 
+export type DisplayMode = 'collapsed' | 'preview' | 'maximized';
+
 export interface SourceNodeData {
   label: string;
-  type: 'outlook' | 'onedrive' | 'excel' | 'paper';
+  type: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode';
   status: 'pending' | 'loading' | 'complete';
   optional?: boolean;
+  // Scheduling - 'auto' means system generates data on schedule, 'manual' means user uploads
+  scheduling?: 'auto' | 'manual';
   onActivate?: () => void;
+  onExpand?: () => void;
+  onShowInfo?: () => void;
+  isFocused?: boolean;
   // Mini-app data
   emails?: EmailItem[];
   files?: FileItem[];
@@ -23,6 +30,8 @@ export interface SourceNodeData {
   onImageCapture?: (file: File) => void;
   onImageClear?: () => void;
   onConfirm?: () => void;
+  // QR code URL for paper sources
+  qrCodeUrl?: string;
 }
 
 const iconMap = {
@@ -30,6 +39,7 @@ const iconMap = {
   onedrive: FolderOpen,
   excel: FileSpreadsheet,
   paper: Camera,
+  barcode: ScanBarcode,
 };
 
 const headerColors = {
@@ -49,6 +59,10 @@ const headerColors = {
     bg: 'bg-gradient-to-r from-amber-500 to-orange-500',
     glow: 'shadow-[0_4px_20px_rgba(245,158,11,0.3)]',
   },
+  barcode: {
+    bg: 'bg-gradient-to-r from-violet-500 to-purple-600',
+    glow: 'shadow-[0_4px_20px_rgba(139,92,246,0.3)]',
+  },
 };
 
 interface SourceNodeProps {
@@ -56,31 +70,148 @@ interface SourceNodeProps {
 }
 
 function SourceNodeComponent({ data }: SourceNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(data.status !== 'pending');
+  // Display mode: collapsed (just header), preview (inline content), maximized (modal - handled by parent)
+  // Always start collapsed - user clicks to expand
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('collapsed');
+
   const Icon = iconMap[data.type] || FileText;
   const colors = headerColors[data.type] || headerColors.paper;
+  const isScheduled = data.scheduling === 'auto' || (data.type !== 'paper'); // Default: non-paper sources are auto
 
-  const handleHeaderClick = () => {
-    if (data.status === 'pending') {
-      data.onActivate?.();
-    } else {
-      setIsExpanded(!isExpanded);
-    }
+  // Handle header click - toggle between collapsed and preview
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDisplayMode(prev => prev === 'collapsed' ? 'preview' : 'collapsed');
   };
+
+  // Explicit activation via play button
+  const handleActivate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onActivate?.();
+  };
+
+  // Explicit expand to full modal view
+  const handleMaximize = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onExpand?.();
+  };
+
+  // Show info overlay
+  const handleShowInfo = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onShowInfo?.();
+  };
+
+  // Collapsed mode - compact header with essential controls
+  if (displayMode === 'collapsed') {
+    return (
+      <div className={`min-w-[200px] relative mt-3 rounded-2xl bg-white border border-gray-200/50 shadow-sm ${data.status === 'complete' ? 'shadow-[0_4px_16px_rgba(37,150,190,0.25)]' : ''}`}>
+        <Handle type="target" position={Position.Left} className="!bg-white !border-2 !border-gray-400 !w-3 !h-3" />
+        <Handle type="source" position={Position.Right} className="!bg-white !border-2 !border-bmf-blue !w-3 !h-3" />
+
+        {/* Scheduling badge - positioned top-left outside */}
+        {isScheduled && data.status === 'pending' && (
+          <div className="absolute -top-3 left-3 z-10">
+            <div className="flex items-center gap-1 px-2 py-1 bg-slate-700 text-white text-[10px] font-medium rounded-full shadow-md">
+              <Clock className="w-3 h-3" />
+              <span>Auto</span>
+            </div>
+          </div>
+        )}
+        {!isScheduled && data.status === 'pending' && (
+          <div className="absolute -top-3 left-3 z-10">
+            <div className="flex items-center gap-1 px-2 py-1 bg-amber-600 text-white text-[10px] font-medium rounded-full shadow-md">
+              <Zap className="w-3 h-3" />
+              <span>Manual</span>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`px-4 py-2.5 ${colors.bg} cursor-pointer flex items-center justify-between rounded-2xl ${data.status === 'complete' ? colors.glow : ''}`}
+          onClick={handleHeaderClick}
+        >
+          <div className="flex items-center gap-2.5">
+            {data.status === 'loading' ? (
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+            ) : data.status === 'complete' ? (
+              <Check className="w-4 h-4 text-white" />
+            ) : (
+              <Icon className="w-4 h-4 text-white" />
+            )}
+            <span className="text-sm font-medium text-white">{data.label}</span>
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            {/* Info button - circular */}
+            {data.onShowInfo && (
+              <button
+                onClick={handleShowInfo}
+                className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
+                title="Present this node"
+              >
+                <Presentation className="w-3.5 h-3.5 text-white" />
+              </button>
+            )}
+            {/* Fetch/Download button for digital sources - circular */}
+            {data.status === 'pending' && data.type !== 'paper' && (
+              <button
+                onClick={handleActivate}
+                className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
+                title="Fetch data"
+              >
+                <Zap className="w-3.5 h-3.5 text-white" />
+              </button>
+            )}
+            {/* QR indicator for paper - circular */}
+            {data.status === 'pending' && data.type === 'paper' && (
+              <div
+                className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+                title="Scan via QR code"
+              >
+                <QrCode className="w-3.5 h-3.5 text-white" />
+              </div>
+            )}
+            <ChevronDown className="w-4 h-4 text-white/60" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={`
-        glass-node min-w-[220px] max-w-[280px] overflow-hidden
-        ${data.status === 'complete' ? 'glass-node-active' : ''}
+        min-w-[220px] max-w-[280px] relative mt-3 rounded-2xl
+        bg-white border border-gray-200/50 shadow-sm
+        ${data.status === 'complete' ? 'shadow-[0_4px_16px_rgba(37,150,190,0.25)]' : ''}
       `}
     >
+      <Handle type="target" position={Position.Left} className="!bg-white !border-2 !border-gray-400 !w-3 !h-3" />
       <Handle type="source" position={Position.Right} className="!bg-white !border-2 !border-bmf-blue !w-3 !h-3" />
+
+      {/* Scheduling badge - positioned top-left outside */}
+      {isScheduled && data.status === 'pending' && (
+        <div className="absolute -top-3 left-3 z-10">
+          <div className="flex items-center gap-1 px-2 py-1 bg-slate-700 text-white text-[10px] font-medium rounded-full shadow-md">
+            <Clock className="w-3 h-3" />
+            <span>Auto</span>
+          </div>
+        </div>
+      )}
+
+      {!isScheduled && data.status === 'pending' && (
+        <div className="absolute -top-3 left-3 z-10">
+          <div className="flex items-center gap-1 px-2 py-1 bg-amber-600 text-white text-[10px] font-medium rounded-full shadow-md">
+            <Zap className="w-3 h-3" />
+            <span>Manual</span>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div
         className={`
-          px-4 py-2.5 ${colors.bg} cursor-pointer
+          px-4 py-2.5 ${colors.bg} cursor-pointer rounded-t-2xl
           flex items-center justify-between
           ${data.status === 'complete' ? colors.glow : ''}
         `}
@@ -97,65 +228,167 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
           <span className="text-sm font-medium text-white">{data.label}</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 ml-4">
           {data.optional && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white">
               Optional
             </span>
           )}
+          {/* Info button - circular */}
+          {data.onShowInfo && (
+            <button
+              onClick={handleShowInfo}
+              className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
+              title="What is this?"
+            >
+              <Info className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
+          {/* Fetch/Download button for digital sources - circular */}
+          {data.status === 'pending' && data.type !== 'paper' && (
+            <button
+              onClick={handleActivate}
+              className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
+              title="Fetch data"
+            >
+              <Download className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
+          {/* QR indicator for paper - circular */}
+          {data.status === 'pending' && data.type === 'paper' && (
+            <div
+              className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+              title="Scan via QR code"
+            >
+              <QrCode className="w-3.5 h-3.5 text-white" />
+            </div>
+          )}
+          {/* Maximize button when data is loaded - circular */}
+          {data.status === 'complete' && data.onExpand && (
+            <button
+              onClick={handleMaximize}
+              className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
+              title="Expand to full view"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
+          {/* Collapse/expand toggle */}
           {data.status !== 'pending' && (
-            isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-white/70" />
+            displayMode === 'preview' ? (
+              <ChevronUp className="w-4 h-4 text-white/60" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-white/70" />
+              <ChevronDown className="w-4 h-4 text-white/60" />
             )
           )}
         </div>
       </div>
 
-      {/* Mini-app content */}
-      {isExpanded && data.status !== 'pending' && (
-        <div className="p-3 bg-white/80">
-          {data.type === 'outlook' && (
-            <OutlookMiniApp
-              emails={data.emails || []}
-              onSelect={data.onEmailSelect}
-              isLoading={data.status === 'loading'}
-            />
-          )}
+      {/* Mini-app content - preview mode */}
+      {/* For digital sources: only show after data arrives */}
+      {/* For paper sources: always show upload/QR options */}
+      {displayMode === 'preview' && (data.status !== 'pending' || data.type === 'paper') && (
+        <div className="p-3 bg-white rounded-b-2xl">
+          <div className="node-content-inset p-3 rounded-xl">
+            {data.type === 'outlook' && (
+              <OutlookMiniApp
+                emails={data.emails || []}
+                onSelect={data.onEmailSelect}
+                isLoading={data.status === 'loading'}
+              />
+            )}
 
-          {data.type === 'onedrive' && (
-            <OneDriveMiniApp
-              files={data.files || []}
-              onSelect={data.onFileSelect}
-              isLoading={data.status === 'loading'}
-            />
-          )}
+            {data.type === 'onedrive' && (
+              <OneDriveMiniApp
+                files={data.files || []}
+                onSelect={data.onFileSelect}
+                isLoading={data.status === 'loading'}
+              />
+            )}
 
-          {data.type === 'excel' && data.spreadsheet && (
-            <ExcelMiniApp
-              data={data.spreadsheet}
-              isLoading={data.status === 'loading'}
-            />
-          )}
+            {data.type === 'excel' && data.spreadsheet && (
+              <ExcelMiniApp
+                data={data.spreadsheet}
+                isLoading={data.status === 'loading'}
+              />
+            )}
 
-          {data.type === 'paper' && (
-            <PaperScanMiniApp
-              capturedImage={data.capturedImage}
-              extractedFields={data.extractedFields}
-              isAnalyzing={data.status === 'loading'}
-              onCapture={data.onImageCapture}
-              onClear={data.onImageClear}
-              onConfirm={data.onConfirm}
-            />
-          )}
+            {data.type === 'paper' && (
+              <PaperScanMiniApp
+                capturedImage={data.capturedImage}
+                extractedFields={data.extractedFields}
+                isAnalyzing={data.status === 'loading'}
+                onCapture={data.onImageCapture}
+                onClear={data.onImageClear}
+                onConfirm={data.onConfirm}
+                qrCodeUrl={data.qrCodeUrl}
+              />
+            )}
+
+            {data.type === 'barcode' && (
+              <div className="space-y-2">
+                {data.status === 'loading' ? (
+                  <div className="space-y-1.5">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded bg-gray-50">
+                        <div className="w-16 h-3 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-2">
+                      <ScanBarcode className="w-3 h-3" />
+                      <span>Recent scans</span>
+                    </div>
+                    <div className="space-y-1 max-h-[120px] overflow-y-auto">
+                      {/* Demo barcode entries with SKUs */}
+                      {[
+                        { code: 'SHP-2025-0001', time: '10:42 AM', type: 'Shipment', sku: 'SKU-3382' },
+                        { code: 'PLT-8847-A', time: '10:38 AM', type: 'Pallet', sku: 'SKU-1247' },
+                        { code: 'SHP-2025-0002', time: '10:35 AM', type: 'Shipment', sku: 'SKU-5891' },
+                        { code: 'BOX-44521', time: '10:31 AM', type: 'Box', sku: 'SKU-7733' },
+                      ].map((entry, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs">
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <code className="font-mono text-violet-600 font-semibold text-[11px]">{entry.code}</code>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600">
+                                {entry.type}
+                              </span>
+                            </div>
+                            <code className="font-mono text-gray-500 text-[10px]">{entry.sku}</code>
+                          </div>
+                          <span className="text-gray-400 text-[10px]">{entry.time}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-center pt-1">
+                      <span className="text-[10px] text-gray-400">4 scans logged</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Collapsed state hint */}
-      {data.status === 'pending' && (
-        <div className="px-4 py-2 bg-white/60 text-center">
-          <span className="text-xs text-gray-500">Click to activate</span>
+      {/* Pending state footer - only for non-paper sources */}
+      {data.status === 'pending' && data.type !== 'paper' && (
+        <div className="px-4 py-3 bg-white rounded-b-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse" />
+              <span className="text-xs text-gray-500">
+                {data.type === 'paper' ? 'Awaiting scan' : 'Awaiting export'}
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-400">
+              {data.type === 'paper' ? 'Use QR code' : isScheduled ? 'Auto-fetch' : 'Manual'}
+            </span>
+          </div>
         </div>
       )}
     </div>

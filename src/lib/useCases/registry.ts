@@ -23,15 +23,15 @@ export function getUseCaseIds(): string[] {
 registerUseCase({
   id: 'shipping',
   name: 'Shipping & Receiving',
-  description: 'Reconcile shipments, match BOLs, invoices, and delivery receipts',
+  description: 'Reconcile shipments, match Bills of Lading, invoices, and delivery receipts',
   icon: 'Truck',
   color: 'blue',
   sources: [
-    { type: 'outlook', name: 'BOL Email', icon: 'Mail', description: 'Email with Bill of Lading attachment' },
     { type: 'excel', name: 'Expected Shipments', icon: 'Table', description: 'Export from inventory/ERP system' },
+    { type: 'outlook', name: 'Bill of Lading Email', icon: 'Mail', description: 'Email with Bill of Lading attachment' },
     { type: 'onedrive', name: 'Invoice PDF', icon: 'FileText', description: 'Vendor invoice from OneDrive' },
-    { type: 'paper', name: 'Delivery Receipt', icon: 'ClipboardCheck', description: 'Scanned paper receipt' },
     { type: 'barcode', name: 'Barcode Log', icon: 'ScanLine', description: 'Barcode-to-PC scan log', optional: true },
+    { type: 'paper', name: 'Delivery Receipt', icon: 'ClipboardCheck', description: 'Scanned paper receipt' },
   ],
   outputTemplates: [
     { id: 'reconciliation-report', name: 'Reconciliation Report', fileType: 'pdf', description: 'Summary of matched and mismatched shipments' },

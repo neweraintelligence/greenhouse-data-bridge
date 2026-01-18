@@ -1,5 +1,6 @@
 import { memo, useState, useRef } from 'react';
-import { Camera, Upload, X, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { Camera, Upload, X, Check, AlertCircle, Sparkles, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { ConfidenceBadge } from '../../../design-system';
 
 export interface ExtractedField {
@@ -15,6 +16,8 @@ interface PaperScanMiniAppProps {
   onCapture?: (file: File) => void;
   onClear?: () => void;
   onConfirm?: () => void;
+  expanded?: boolean;
+  qrCodeUrl?: string;
 }
 
 function PaperScanMiniAppComponent({
@@ -24,8 +27,11 @@ function PaperScanMiniAppComponent({
   onCapture,
   onClear,
   onConfirm,
+  expanded = false,
+  qrCodeUrl,
 }: PaperScanMiniAppProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -53,7 +59,7 @@ function PaperScanMiniAppComponent({
           <img
             src={capturedImage}
             alt="Captured document"
-            className="w-full h-24 object-cover"
+            className={`w-full object-cover ${expanded ? 'h-64' : 'h-24'}`}
           />
 
           {/* Analysis overlay */}
@@ -122,56 +128,102 @@ function PaperScanMiniAppComponent({
     );
   }
 
-  // Show upload/capture interface
-  return (
-    <div
-      className={`
-        scanner-viewfinder relative
-        border-2 border-dashed rounded-xl p-4
-        transition-colors cursor-pointer
-        ${isDragging ? 'border-bmf-blue bg-bmf-blue/5' : 'border-gray-300 hover:border-bmf-blue/50'}
-      `}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-      onClick={() => fileInputRef.current?.click()}
-    >
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-bmf-blue/10">
-            <Camera className="w-4 h-4 text-bmf-blue" />
-          </div>
-          <div className="text-gray-300">|</div>
-          <div className="p-2 rounded-full bg-bmf-blue/10">
-            <Upload className="w-4 h-4 text-bmf-blue" />
-          </div>
+  // Show QR code view
+  if (showQrCode && qrCodeUrl) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium text-gray-700">Scan to upload from phone</p>
+          <button
+            onClick={() => setShowQrCode(false)}
+            className="text-[10px] text-bmf-blue hover:underline"
+          >
+            Back to upload
+          </button>
         </div>
 
-        <div className="text-center">
-          <p className="text-xs font-medium text-gray-700">
-            {isDragging ? 'Drop image here' : 'Capture or upload'}
-          </p>
-          <p className="text-[10px] text-gray-500 mt-0.5">
-            Photo of physical document
+        <div className="flex flex-col items-center p-4 bg-white rounded-xl border border-gray-200">
+          <QRCodeSVG
+            value={qrCodeUrl}
+            size={expanded ? 180 : 120}
+            level="M"
+            includeMargin
+            className="rounded"
+          />
+          <p className="text-[10px] text-gray-500 mt-2 text-center">
+            Scan with your phone camera
           </p>
         </div>
       </div>
+    );
+  }
 
-      {/* Scanner corner decorations */}
-      <div className="scanner-corners" />
-      <div className="scanner-corners-bottom" />
+  // Show upload/capture interface
+  return (
+    <div className="space-y-2">
+      <div
+        className={`
+          scanner-viewfinder relative
+          border-2 border-dashed rounded-xl p-4
+          transition-colors cursor-pointer
+          ${isDragging ? 'border-bmf-blue bg-bmf-blue/5' : 'border-gray-300 hover:border-bmf-blue/50'}
+        `}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-bmf-blue/10">
+              <Camera className="w-4 h-4 text-bmf-blue" />
+            </div>
+            <div className="text-gray-300">|</div>
+            <div className="p-2 rounded-full bg-bmf-blue/10">
+              <Upload className="w-4 h-4 text-bmf-blue" />
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs font-medium text-gray-700">
+              {isDragging ? 'Drop image here' : 'Capture or upload'}
+            </p>
+            <p className="text-[10px] text-gray-500 mt-0.5">
+              Photo of physical document
+            </p>
+          </div>
+        </div>
+
+        {/* Scanner corner decorations */}
+        <div className="scanner-corners" />
+        <div className="scanner-corners-bottom" />
+      </div>
+
+      {/* QR code option */}
+      {qrCodeUrl && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowQrCode(true);
+          }}
+          className="w-full py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 text-xs text-gray-600"
+        >
+          <QrCode className="w-3.5 h-3.5" />
+          <span>Or scan QR code with phone</span>
+        </button>
+      )}
     </div>
   );
 }

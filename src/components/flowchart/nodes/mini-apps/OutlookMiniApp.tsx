@@ -18,6 +18,7 @@ interface OutlookMiniAppProps {
   onSelect?: (email: EmailItem) => void;
   selectedId?: string;
   isLoading?: boolean;
+  expanded?: boolean;
 }
 
 // Generate realistic placeholder avatar colors
@@ -65,6 +66,7 @@ function OutlookMiniAppComponent({
   onSelect,
   selectedId,
   isLoading,
+  expanded = false,
 }: OutlookMiniAppProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -86,7 +88,7 @@ function OutlookMiniAppComponent({
   }
 
   return (
-    <div className="space-y-0.5 max-h-[200px] overflow-y-auto scrollbar-thin">
+    <div className={`space-y-0.5 overflow-y-auto scrollbar-thin ${expanded ? 'max-h-[500px]' : 'max-h-[200px]'}`}>
       {emails.map((email) => (
         <div
           key={email.id}

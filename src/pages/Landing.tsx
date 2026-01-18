@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Hash, ArrowRight, Sparkles } from 'lucide-react';
+import { User, Hash, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateSessionCode, isValidSessionCode } from '../lib/sessionCodes';
 import { useSessionStore } from '../store/sessionStore';
 import { seedSession } from '../lib/seedSession';
-import { GlassPanel, GlassButton, GlassInput } from '../components/design-system';
 
 export function Landing() {
   const [name, setName] = useState('');
@@ -88,107 +87,136 @@ export function Landing() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-bg-animated relative overflow-hidden">
-      {/* Floating decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-bmf-blue/20 rounded-full blur-2xl" />
-      </div>
-
-      <GlassPanel variant="heavy" className="max-w-md w-full mx-4 p-8 relative z-10">
-        {/* Logos */}
-        <div className="flex items-center justify-center gap-6 mb-6">
-          <div className="flex flex-col items-center">
-            <img
-              src="/bmf-logo.png"
-              alt="Big Marble Farms"
-              className="h-16 w-auto object-contain drop-shadow-lg"
-            />
-          </div>
-          <div className="h-12 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
-          <div className="flex flex-col items-center">
+    <div className="min-h-screen bg-stone-100 flex">
+      {/* Left side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-bmf-blue items-center justify-center p-12">
+        <div className="max-w-md text-center">
+          <img
+            src="/bmf-logo.png"
+            alt="Big Marble Farms"
+            className="h-20 w-auto mx-auto mb-8 brightness-0 invert"
+          />
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Greenhouse Data Bridge
+          </h1>
+          <p className="text-blue-100 text-lg mb-8">
+            AI-powered pipeline automation for seamless data reconciliation
+          </p>
+          <div className="flex items-center justify-center gap-3 text-blue-200 text-sm">
+            <span>Powered by</span>
             <img
               src="/nei-logo.png"
               alt="New Era Intelligence"
-              className="h-16 w-auto object-contain drop-shadow-lg"
+              className="h-6 w-auto brightness-0 invert opacity-80"
             />
           </div>
         </div>
+      </div>
 
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Greenhouse Data Bridge
-          </h1>
-          <p className="text-gray-600 flex items-center justify-center gap-2">
-            <Sparkles className="w-4 h-4 text-ai-purple" />
-            <span>AI-powered pipeline automation</span>
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <GlassInput
-            label="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            disabled={!!code}
-            icon={<User className="w-4 h-4" />}
-          />
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200/50" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white/50 text-gray-500 rounded-full text-xs backdrop-blur-sm">
-                or resume with code
-              </span>
-            </div>
+      {/* Right side - Login form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <img
+              src="/bmf-logo.png"
+              alt="Big Marble Farms"
+              className="h-12 w-auto mx-auto mb-4"
+            />
+            <h1 className="text-xl font-bold text-gray-800">
+              Greenhouse Data Bridge
+            </h1>
           </div>
 
-          <GlassInput
-            label="Session Code"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="ABC123"
-            maxLength={6}
-            icon={<Hash className="w-4 h-4" />}
-            className="font-mono text-center text-lg tracking-widest"
-          />
+          {/* Form card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Welcome
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Enter your name to start or use a code to resume
+            </p>
 
-          {error && (
-            <div className="bg-red-50/80 backdrop-blur-sm text-red-700 px-4 py-3 rounded-xl text-sm border border-red-200/50">
-              {error}
-            </div>
-          )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Your Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    disabled={!!code}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 transition-shadow"
+                  />
+                </div>
+              </div>
 
-          <GlassButton
-            type="submit"
-            variant="primary"
-            size="lg"
-            loading={isLoading}
-            disabled={!name.trim() && !code.trim()}
-            icon={<ArrowRight className="w-5 h-5" />}
-            iconPosition="right"
-            className="w-full"
-          >
-            {code ? 'Resume Session' : 'Start New Session'}
-          </GlassButton>
-        </form>
+              {/* Divider */}
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="px-3 bg-white text-gray-400 text-sm">
+                    or resume session
+                  </span>
+                </div>
+              </div>
 
-        {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200/30">
-          <p className="text-xs text-gray-500 text-center">
+              {/* Session code input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Session Code
+                </label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue focus:border-transparent font-mono text-center text-lg tracking-widest transition-shadow"
+                  />
+                </div>
+              </div>
+
+              {/* Error message */}
+              {error && (
+                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100">
+                  {error}
+                </div>
+              )}
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={isLoading || (!name.trim() && !code.trim())}
+                className="w-full py-3 px-4 bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <span>{code ? 'Resume Session' : 'Start Session'}</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-gray-400 text-sm mt-6">
             Big Marble Farms Workshop Demo
           </p>
-          <p className="text-xs text-gray-400 text-center mt-1">
-            Powered by New Era Intelligence
-          </p>
         </div>
-      </GlassPanel>
+      </div>
     </div>
   );
 }

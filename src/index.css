@@ -5,6 +5,10 @@
    ============================================ */
 
 @theme {
+  /* Typography - Premium Font Pairing */
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
   /* Brand Colors - Big Marble Farms */
   --color-bmf-blue: #2596be;
   --color-bmf-blue-light: #3db8e5;
@@ -103,22 +107,77 @@ body {
 }
 
 .glass-node {
-  background: var(--color-glass-white-heavy);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-node);
-  box-shadow: var(--shadow-node);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-node:hover {
-  box-shadow: var(--shadow-node-active);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 .glass-node-active {
-  box-shadow: var(--shadow-node-active), var(--shadow-glow-blue);
+  box-shadow: 0 4px 16px rgba(37, 150, 190, 0.25);
+}
+
+/* Debossed/inset style for expanded content */
+.node-content-inset {
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+}
+
+/* Focus mode - faded state for unfocused nodes */
+.node-unfocused {
+  opacity: 0.15;
+  filter: blur(3px);
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+  pointer-events: none !important;
+}
+
+/* Apply to React Flow node wrapper */
+.react-flow__node.node-unfocused {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Progressive presentation mode - unrevealed nodes */
+.react-flow__node.node-unrevealed {
+  opacity: 0.3;
+  filter: blur(4px);
+  pointer-events: none;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+.react-flow__node:not(.node-unrevealed) {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+.node-focused {
+  z-index: 1000 !important;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Ensure React Flow node wrapper gets proper z-index when focused */
+.react-flow__node.node-focused {
+  z-index: 1000 !important;
+}
+
+/* Ensure content inside focused node is interactive */
+.node-focused * {
+  pointer-events: auto;
 }
 
 /* ============================================
@@ -376,8 +435,51 @@ body {
   box-shadow: none !important;
 }
 
+/* Node being dragged should always be on top */
+.react-flow__node.dragging,
+.react-flow__node.selected,
+.react-flow__node.selectable.dragging,
+.react-flow__node[data-dragging="true"] {
+  z-index: 10000 !important;
+}
+
+/* Ensure dragged node stays above everything */
+.react-flow__node:active {
+  z-index: 10000 !important;
+}
+
+/* Additional specificity for drag state */
+.react-flow__node.draggable.dragging {
+  z-index: 10000 !important;
+}
+
+/* Target the node wrapper during drag via pointer events */
+.react-flow .react-flow__node:has(.glass-node:active) {
+  z-index: 10000 !important;
+}
+
 .react-flow__edge-path {
   stroke-width: 2px;
+}
+
+/* Edge pulse animation for data flow */
+@keyframes edge-pulse {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 6 6;
+  animation: edge-pulse 0.5s linear infinite;
+}
+
+/* Smooth transition when edge becomes "complete" */
+.react-flow__edge-path {
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
 .react-flow__background {
@@ -419,4 +521,39 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
+}
+
+/* ============================================
+   PROCESSING NODE ANIMATIONS
+   ============================================ */
+
+.processing-node-active {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+}
+
+@keyframes gradient-shift-fast {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift-fast 3s ease infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Pulsing glow effect for processing node */
+@keyframes processing-glow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(99, 102, 241, 0.4);
+  }
+}
+
+.processing-node-active {
+  animation: processing-glow 2s ease-in-out infinite;
 }

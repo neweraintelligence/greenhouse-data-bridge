@@ -23,6 +23,7 @@ interface OneDriveMiniAppProps {
   onSelect?: (file: FileItem) => void;
   selectedId?: string;
   isLoading?: boolean;
+  expanded?: boolean;
 }
 
 const iconMap = {
@@ -48,6 +49,7 @@ function OneDriveMiniAppComponent({
   onSelect,
   selectedId,
   isLoading,
+  expanded = false,
 }: OneDriveMiniAppProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -80,7 +82,7 @@ function OneDriveMiniAppComponent({
       </div>
 
       {/* File list */}
-      <div className="space-y-0.5 max-h-[160px] overflow-y-auto scrollbar-thin">
+      <div className={`space-y-0.5 overflow-y-auto scrollbar-thin ${expanded ? 'max-h-[400px]' : 'max-h-[160px]'}`}>
         {files.map((file) => {
           const Icon = iconMap[file.type] || FileText;
           const iconColor = iconColorMap[file.type] || 'text-gray-500';
