@@ -13,6 +13,7 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
   },
   training: {
     excel: '/demo_pack/use_case_images/09_training_roster_grid.png',
+    'excel-ack': '/demo_pack/use_case_images/10b_training_acknowledgement.png',
     paper: '/demo_pack/use_case_images/10_paper_signoff_digitization.png',
     // Reuse images for other training nodes
     outlook: '/demo_pack/use_case_images/10_paper_signoff_digitization.png',
@@ -30,6 +31,10 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
   },
 };
 
-export function getNodeImage(useCase: string, nodeType: string): string | null {
+export function getNodeImage(useCase: string, nodeType: string, sourceName?: string): string | null {
+  // Special case: Training use case has two excel nodes - route by source name
+  if (useCase === 'training' && nodeType === 'excel' && sourceName === 'Acknowledgements') {
+    return nodeImageMap[useCase]?.['excel-ack'] || null;
+  }
   return nodeImageMap[useCase]?.[nodeType] || null;
 }

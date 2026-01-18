@@ -883,7 +883,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         onPrevious={handlePreviousSlide}
         hasNext={infoNodeIndex !== null && selectedUseCase ? infoNodeIndex < selectedUseCase.sources.length - 1 : false}
         hasPrevious={infoNodeIndex !== null ? infoNodeIndex > 0 : false}
-        imageUrl={infoNodeType && selectedUseCase ? getNodeImage(selectedUseCase.id, infoNodeType) : null}
+        imageUrl={infoNodeType && selectedUseCase && infoNodeLabel ? getNodeImage(selectedUseCase.id, infoNodeType, infoNodeLabel) : null}
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
       />
