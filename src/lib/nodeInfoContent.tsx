@@ -189,11 +189,24 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
     id: 'excel',
     title: 'Employee List',
     subtitle: 'Who Needs Training',
+    imageOnLeft: false,
     description:
       'The master roster from your HR system: all employees, their departments, hire dates, and which training they need. This is the baseline — who SHOULD complete training.',
     painPoint: 'Today: cross-referencing three spreadsheets to figure out who still needs safety training.',
     solution: 'Single roster automatically compared against all completion records. No manual cross-referencing.',
     keyInsight: 'New hires automatically flagged for required training. Nobody slips through the cracks.',
+  },
+
+  'excel-ack': {
+    id: 'excel-ack',
+    title: 'Training Acknowledgements',
+    subtitle: 'Completion Records',
+    imageOnLeft: true,
+    description:
+      'Digital records showing which employees completed which training modules, when, and how (in-person, email, online). This is the completion data that gets compared against the roster.',
+    painPoint: 'Today: completion data scattered across LMS exports, email confirmations, and paper forms. No single view of who\'s done.',
+    solution: 'All completion records in one place. Employee ID links directly to roster. Status per person instantly visible.',
+    keyInsight: 'Compare roster (who should be trained) against acknowledgements (who is trained). Gap = overdue employees.',
   },
 
   paper: {
@@ -328,7 +341,8 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 // ============================================================================
 export function getNodeInfo(
   useCase: string,
-  nodeType: string
+  nodeType: string,
+  sourceName?: string
 ): NodeInfo | null {
   const contentMap: Record<string, Record<string, NodeInfo>> = {
     shipping: shippingNodeInfo,
@@ -338,6 +352,10 @@ export function getNodeInfo(
 
   const useCaseContent = contentMap[useCase];
   if (useCaseContent) {
+    // Special case: Training use case has two excel nodes - route by source name
+    if (useCase === 'training' && nodeType === 'excel' && sourceName === 'Acknowledgements') {
+      return useCaseContent['excel-ack'] || useCaseContent[nodeType] || null;
+    }
     return useCaseContent[nodeType] || null;
   }
 

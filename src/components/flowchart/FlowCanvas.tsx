@@ -229,7 +229,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     status?: string
   ) => {
     const useCaseId = selectedUseCase?.id || 'shipping';
-    const info = getNodeInfo(useCaseId, nodeType);
+    const info = getNodeInfo(useCaseId, nodeType, sourceName);
     if (info) {
       setInfoOverlayContent(info);
       setInfoNodeId(nodeId);

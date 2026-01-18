@@ -84,9 +84,17 @@ function ExcelMiniAppComponent({ data, highlightRows = [], isLoading }: ExcelMin
                     {row.map((cell, colIndex) => (
                       <td
                         key={colIndex}
-                        className={`spreadsheet-cell ${
+                        contentEditable
+                        suppressContentEditableWarning
+                        className={`spreadsheet-cell cursor-text ${
                           typeof cell === 'number' ? 'text-right font-mono' : ''
-                        } ${isHighlighted ? 'font-medium' : ''}`}
+                        } ${isHighlighted ? 'font-medium' : ''} hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400/50`}
+                        onKeyDown={(e) => {
+                          // Allow normal text editing keys
+                          if (e.key === 'Escape') {
+                            e.currentTarget.blur();
+                          }
+                        }}
                       >
                         {cell}
                       </td>
