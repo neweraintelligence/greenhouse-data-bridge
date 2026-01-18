@@ -1,15 +1,422 @@
 @import "tailwindcss";
 
-/* Base styles */
-body {
-  @apply min-h-screen bg-gray-50 text-gray-900 antialiased;
+/* ============================================
+   GREENHOUSE DATA BRIDGE - PREMIUM DESIGN SYSTEM
+   ============================================ */
+
+@theme {
+  /* Brand Colors - Big Marble Farms */
+  --color-bmf-blue: #2596be;
+  --color-bmf-blue-light: #3db8e5;
+  --color-bmf-blue-dark: #1a7a9c;
+  --color-bmf-blue-50: #e8f6fb;
+  --color-bmf-blue-100: #c5e9f5;
+
+  /* Brand Colors - New Era Intelligence */
+  --color-nei-green: #1a4d4d;
+  --color-nei-green-light: #2a6d6d;
+  --color-nei-green-dark: #0f3333;
+  --color-nei-green-50: #e6eded;
+  --color-nei-green-100: #c0d4d4;
+
+  /* AI/Gemini Accent */
+  --color-ai-purple: #8b5cf6;
+  --color-ai-purple-light: #a78bfa;
+  --color-ai-purple-glow: rgba(139, 92, 246, 0.4);
+
+  /* Confidence Score Colors */
+  --color-confidence-high: #10b981;
+  --color-confidence-medium: #f59e0b;
+  --color-confidence-low: #ef4444;
+
+  /* Glass Surface Colors */
+  --color-glass-white: rgba(255, 255, 255, 0.75);
+  --color-glass-white-light: rgba(255, 255, 255, 0.5);
+  --color-glass-white-heavy: rgba(255, 255, 255, 0.9);
+  --color-glass-dark: rgba(15, 25, 35, 0.8);
+  --color-glass-dark-light: rgba(15, 25, 35, 0.6);
+
+  /* Canvas/Background Colors */
+  --color-canvas-dark: #0f1419;
+  --color-canvas-dark-accent: #1a2f2f;
+
+  /* Custom Shadows */
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-glass-hover: 0 16px 48px rgba(0, 0, 0, 0.18);
+  --shadow-glass-active: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-node: 0 4px 24px rgba(37, 150, 190, 0.2);
+  --shadow-node-active: 0 8px 40px rgba(37, 150, 190, 0.35);
+  --shadow-glow-blue: 0 0 30px rgba(37, 150, 190, 0.4);
+  --shadow-glow-green: 0 0 30px rgba(26, 77, 77, 0.4);
+  --shadow-glow-purple: 0 0 30px rgba(139, 92, 246, 0.4);
+  --shadow-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  /* Border Radius */
+  --radius-glass: 20px;
+  --radius-node: 16px;
+  --radius-button: 12px;
+
+  /* Blur Values */
+  --blur-glass: 20px;
+  --blur-glass-heavy: 40px;
 }
 
-/* React Flow custom styles */
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+body {
+  @apply min-h-screen text-gray-900 antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================
+   GLASS PANEL UTILITIES
+   ============================================ */
+
+.glass-panel {
+  background: var(--color-glass-white);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass), var(--shadow-inset-highlight);
+}
+
+.glass-panel-heavy {
+  background: var(--color-glass-white-heavy);
+  backdrop-filter: blur(var(--blur-glass-heavy));
+  -webkit-backdrop-filter: blur(var(--blur-glass-heavy));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass), var(--shadow-inset-highlight);
+}
+
+.glass-panel-dark {
+  background: var(--color-glass-dark);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass);
+  color: white;
+}
+
+.glass-node {
+  background: var(--color-glass-white-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-node);
+  box-shadow: var(--shadow-node);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-node:hover {
+  box-shadow: var(--shadow-node-active);
+  transform: translateY(-2px);
+}
+
+.glass-node-active {
+  box-shadow: var(--shadow-node-active), var(--shadow-glow-blue);
+}
+
+/* ============================================
+   ANIMATED GRADIENT BACKGROUND
+   ============================================ */
+
+.gradient-bg-animated {
+  background: linear-gradient(135deg, var(--color-bmf-blue) 0%, var(--color-nei-green) 50%, var(--color-bmf-blue-dark) 100%);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Dark canvas gradient for flowchart */
+.canvas-dark-gradient {
+  background: linear-gradient(180deg, var(--color-canvas-dark) 0%, var(--color-canvas-dark-accent) 100%);
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+
+.btn-glass {
+  background: var(--color-glass-white);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-button);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-glass-active), var(--shadow-inset-highlight);
+}
+
+.btn-glass:hover {
+  background: var(--color-glass-white-heavy);
+  box-shadow: var(--shadow-glass);
+  transform: translateY(-1px);
+}
+
+.btn-glass:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-glass-active);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-bmf-blue) 0%, var(--color-bmf-blue-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-button);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(37, 150, 190, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(37, 150, 190, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(37, 150, 190, 0.3);
+}
+
+/* ============================================
+   INPUT STYLES
+   ============================================ */
+
+.input-glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-button);
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--color-bmf-blue);
+  box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.2);
+}
+
+.input-glass::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   CONFIDENCE INDICATOR ANIMATIONS
+   ============================================ */
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+.confidence-low {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ============================================
+   MINI-APP STYLES
+   ============================================ */
+
+/* Email Inbox Styles */
+.email-row {
+  @apply flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all;
+}
+
+.email-row:hover {
+  background: rgba(37, 150, 190, 0.1);
+}
+
+.email-row-unread {
+  background: rgba(37, 150, 190, 0.05);
+  font-weight: 500;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* File Browser Styles */
+.file-item {
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all;
+}
+
+.file-item:hover {
+  background: rgba(37, 150, 190, 0.1);
+}
+
+.file-item-selected {
+  background: rgba(37, 150, 190, 0.2);
+  border: 1px solid rgba(37, 150, 190, 0.3);
+}
+
+/* Spreadsheet Styles */
+.spreadsheet-cell {
+  @apply px-2 py-1 text-xs border-r border-b border-gray-200 truncate;
+  min-width: 60px;
+}
+
+.spreadsheet-header {
+  @apply bg-gray-100 font-medium sticky top-0;
+}
+
+/* ============================================
+   SCANNER/CAMERA STYLES
+   ============================================ */
+
+.scanner-viewfinder {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.scanner-corners {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scanner-corners::before,
+.scanner-corners::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-bmf-blue);
+}
+
+.scanner-corners::before {
+  top: 12px;
+  left: 12px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 8px 0 0 0;
+}
+
+.scanner-corners::after {
+  top: 12px;
+  right: 12px;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 8px 0 0;
+}
+
+.scanner-corners-bottom::before,
+.scanner-corners-bottom::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-bmf-blue);
+}
+
+.scanner-corners-bottom::before {
+  bottom: 12px;
+  left: 12px;
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 8px;
+}
+
+.scanner-corners-bottom::after {
+  bottom: 12px;
+  right: 12px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 8px 0;
+}
+
+@keyframes scan-line {
+  0%, 100% { top: 10%; }
+  50% { top: 85%; }
+}
+
+.scanner-line {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-bmf-blue), transparent);
+  animation: scan-line 2s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--color-bmf-blue);
+}
+
+/* ============================================
+   REACT FLOW OVERRIDES
+   ============================================ */
+
 .react-flow__node {
-  @apply rounded-lg shadow-md;
+  @apply rounded-xl;
+  box-shadow: none !important;
 }
 
 .react-flow__edge-path {
-  @apply stroke-gray-400;
+  stroke-width: 2px;
+}
+
+.react-flow__background {
+  background: transparent !important;
+}
+
+/* ============================================
+   LOADING & PROCESSING STATES
+   ============================================ */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.ai-processing {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-processing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
