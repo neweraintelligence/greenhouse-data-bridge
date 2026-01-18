@@ -4,6 +4,7 @@ import { Leaf } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateSessionCode, isValidSessionCode } from '../lib/sessionCodes';
 import { useSessionStore } from '../store/sessionStore';
+import { seedSession } from '../lib/seedSession';
 
 export function Landing() {
   const [name, setName] = useState('');
@@ -70,6 +71,9 @@ export function Landing() {
             throw insertError;
           }
         }
+
+        // Seed the session with demo data
+        await seedSession(sessionCode);
 
         setSession({ code: sessionCode, name: name.trim() });
       }
