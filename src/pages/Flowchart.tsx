@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, LayoutDashboard, Presentation } from 'lucide-react';
 import { useSessionStore } from '../store/sessionStore';
 import { FlowCanvas } from '../components/flowchart/FlowCanvas';
-import { GlassButton } from '../components/design-system';
 
 export function Flowchart() {
   const navigate = useNavigate();

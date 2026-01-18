@@ -156,6 +156,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     files?: FileItem[];
     spreadsheet?: SpreadsheetData;
     capturedImage?: string;
+    extractedFields?: Array<{ label: string; value: string; confidence: number }>;
   }>>({});
 
   // Track processing state

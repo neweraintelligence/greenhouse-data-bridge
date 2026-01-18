@@ -230,7 +230,7 @@ function InfoOverlayComponent({
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center animate-in fade-in duration-700"
-      onClick={(e) => {
+      onClick={() => {
         // Don't close if we're dragging or just finished dragging
         if (isDragging || hasDragged) return;
         onClose();
@@ -473,7 +473,6 @@ function InfoOverlayComponent({
                 alt="Visual representation"
                 className="w-full h-full object-cover"
                 style={{
-                  imageRendering: 'high-quality',
                   filter: 'brightness(0.92) contrast(1.08) saturate(0.85) sepia(0.08)',
                 }}
               />

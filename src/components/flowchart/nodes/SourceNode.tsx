@@ -234,24 +234,24 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
               Optional
             </span>
           )}
-          {/* Info button - circular */}
+          {/* Presentation button - circular */}
           {data.onShowInfo && (
             <button
               onClick={handleShowInfo}
               className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
-              title="What is this?"
+              title="Present this node"
             >
-              <Info className="w-3.5 h-3.5 text-white" />
+              <Presentation className="w-3.5 h-3.5 text-white" />
             </button>
           )}
-          {/* Fetch/Download button for digital sources - circular */}
+          {/* Fetch button for digital sources - circular */}
           {data.status === 'pending' && data.type !== 'paper' && (
             <button
               onClick={handleActivate}
               className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
               title="Fetch data"
             >
-              <Download className="w-3.5 h-3.5 text-white" />
+              <Zap className="w-3.5 h-3.5 text-white" />
             </button>
           )}
           {/* QR indicator for paper - circular */}
@@ -382,11 +382,11 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse" />
               <span className="text-xs text-gray-500">
-                {data.type === 'paper' ? 'Awaiting scan' : 'Awaiting export'}
+                Awaiting export
               </span>
             </div>
             <span className="text-[10px] text-gray-400">
-              {data.type === 'paper' ? 'Use QR code' : isScheduled ? 'Auto-fetch' : 'Manual'}
+              {isScheduled ? 'Auto-fetch' : 'Manual'}
             </span>
           </div>
         </div>
