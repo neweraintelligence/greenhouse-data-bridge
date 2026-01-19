@@ -1091,12 +1091,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         target: 'etl',
         animated: isLoading,
         style: {
-          stroke: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
-          strokeWidth: isComplete ? 2.5 : 2,
+          stroke: isComplete ? '#10b981' : isLoading ? '#2596be' : '#94a3b8',
+          strokeWidth: isComplete ? 3 : 2.5,
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
+          color: isComplete ? '#10b981' : isLoading ? '#2596be' : '#94a3b8',
         },
       });
     });
@@ -1109,12 +1109,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'intake',
       animated: etlStatus === 'processing',
       style: {
-        stroke: etlComplete ? '#a855f7' : '#e2e8f0',
-        strokeWidth: etlComplete ? 2.5 : 2,
+        stroke: etlComplete ? '#a855f7' : '#94a3b8',
+        strokeWidth: etlComplete ? 3 : 2.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: etlComplete ? '#a855f7' : '#e2e8f0',
+        color: etlComplete ? '#a855f7' : '#94a3b8',
       },
     });
 
@@ -1128,12 +1128,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'processing',
       animated: isProcessing,
       style: {
-        stroke: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#e2e8f0',
-        strokeWidth: isComplete || isProcessing ? 2.5 : 2,
+        stroke: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#94a3b8',
+        strokeWidth: isComplete || isProcessing ? 3 : 2.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#e2e8f0',
+        color: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#94a3b8',
       },
     });
 
@@ -1149,13 +1149,13 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'review-queue',
       animated: isComplete && hasDiscrepancies,
       style: {
-        stroke: isComplete && hasDiscrepancies ? '#f59e0b' : '#e2e8f0',
-        strokeWidth: isComplete && hasDiscrepancies ? 2.5 : 2,
-        opacity: isComplete && hasDiscrepancies ? 1 : 0.3,
+        stroke: isComplete && hasDiscrepancies ? '#f59e0b' : '#94a3b8',
+        strokeWidth: isComplete && hasDiscrepancies ? 3 : 2.5,
+        opacity: isComplete && hasDiscrepancies ? 1 : 0.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete && hasDiscrepancies ? '#f59e0b' : '#e2e8f0',
+        color: isComplete && hasDiscrepancies ? '#f59e0b' : '#94a3b8',
       },
     });
 
@@ -1166,14 +1166,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'escalation',
       animated: isComplete && hasCritical,
       style: {
-        stroke: isComplete && hasCritical ? '#ef4444' : '#e2e8f0',
-        strokeWidth: isComplete && hasCritical ? 2.5 : 2,
+        stroke: isComplete && hasCritical ? '#ef4444' : '#94a3b8',
+        strokeWidth: isComplete && hasCritical ? 3 : 2.5,
         strokeDasharray: '5,5',
-        opacity: isComplete && hasCritical ? 1 : 0.3,
+        opacity: isComplete && hasCritical ? 1 : 0.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete && hasCritical ? '#ef4444' : '#e2e8f0',
+        color: isComplete && hasCritical ? '#ef4444' : '#94a3b8',
       },
     });
 
@@ -1184,13 +1184,13 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'communications',
       animated: isComplete && hasComms,
       style: {
-        stroke: isComplete && hasComms ? '#3b82f6' : '#e2e8f0',
-        strokeWidth: isComplete && hasComms ? 2 : 2,
-        opacity: isComplete && hasComms ? 1 : 0.3,
+        stroke: isComplete && hasComms ? '#3b82f6' : '#94a3b8',
+        strokeWidth: isComplete && hasComms ? 3 : 2.5,
+        opacity: isComplete && hasComms ? 1 : 0.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete && hasComms ? '#3b82f6' : '#e2e8f0',
+        color: isComplete && hasComms ? '#3b82f6' : '#94a3b8',
       },
     });
 
@@ -1201,12 +1201,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       target: 'output',
       animated: isComplete,
       style: {
-        stroke: isComplete ? '#10b981' : '#e2e8f0',
-        strokeWidth: isComplete ? 2.5 : 2,
+        stroke: isComplete ? '#10b981' : '#94a3b8',
+        strokeWidth: isComplete ? 3 : 2.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isComplete ? '#10b981' : '#e2e8f0',
+        color: isComplete ? '#10b981' : '#94a3b8',
       },
     });
 
