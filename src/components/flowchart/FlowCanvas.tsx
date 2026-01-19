@@ -161,8 +161,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track focused node for focus mode
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
-  // Track progressive reveal for presentation mode
-  const [revealedNodeIndices, setRevealedNodeIndices] = useState<Set<number>>(new Set());
+  // Track which node is active in presentation (for highlighting)
+  const [presentationActiveNode, setPresentationActiveNode] = useState<string | null>(null);
 
   // Track source statuses
   const [sourceStatuses, setSourceStatuses] = useState<Record<string, 'pending' | 'loading' | 'complete'>>({});
@@ -370,16 +370,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       setInfoNodeType(nodeType);
       setInfoNodeLabel(sourceName);
 
-      // Auto-reveal this node and all previous nodes when navigating to slide
-      if (sourceIndex >= 0) {
-        setRevealedNodeIndices(prev => {
-          const newSet = new Set(prev);
-          for (let i = 0; i <= sourceIndex; i++) {
-            newSet.add(i);
-          }
-          return newSet;
-        });
-      }
+      // Set as presentation active node for highlighting
+      setPresentationActiveNode(nodeId);
 
       // Store fetch handler for the "Fetch Data" button
       if (onActivate) {
@@ -414,8 +406,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     setProcessingStatus('idle');
     setProcessingProgress(0);
     setFocusedNodeId(null);
-    // Start with only first source node revealed for progressive presentation
-    setRevealedNodeIndices(new Set([0]));
+    setPresentationActiveNode(null);
   }, []);
 
   // Build intake items from sources
@@ -864,8 +855,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         const isFocused = focusedNodeId === nodeId;
         const isUnfocused = focusedNodeId && !isFocused;
 
-        // Check if this node is revealed for progressive presentation
-        const isRevealed = revealedNodeIndices.has(index);
+        // Check if this node is active in presentation mode
+        const isPresentationActive = presentationActiveNode === nodeId;
 
         // Generate QR code URL for paper sources
         const qrCodeUrl = source.type === 'paper'
@@ -899,13 +890,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             qrCodeUrl,
             sessionCode, // For barcode scanner QR generation
           },
-          className: isUnfocused ? 'node-unfocused' : isFocused ? 'node-focused' : !isRevealed ? 'node-unrevealed' : '',
+          className: isUnfocused ? 'node-unfocused' : isFocused ? 'node-focused' : isPresentationActive ? 'node-presentation-active' : '',
         });
       });
 
       // ETL/Normalization node (NEW - between sources and intake)
       const etlIsFocused = focusedNodeId === 'etl';
       const etlIsUnfocused = focusedNodeId && !etlIsFocused;
+      const etlIsPresentationActive = presentationActiveNode === 'etl';
       nodes.push({
         id: 'etl',
         type: 'etl',
@@ -916,12 +908,13 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           transformations: etlStatus === 'complete' ? transformations : undefined,
           onShowInfo: () => handleShowInfo('etl', 'etl', 'ETL/Normalization', -1, undefined, undefined),
         },
-        className: etlIsUnfocused ? 'node-unfocused' : etlIsFocused ? 'node-focused' : '',
+        className: etlIsUnfocused ? 'node-unfocused' : etlIsFocused ? 'node-focused' : etlIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Intake node
       const intakeIsFocused = focusedNodeId === 'intake';
       const intakeIsUnfocused = focusedNodeId && !intakeIsFocused;
+      const intakeIsPresentationActive = presentationActiveNode === 'intake';
       nodes.push({
         id: 'intake',
         type: 'intake',
@@ -933,7 +926,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onProcess: handleProcess,
           onShowInfo: () => handleShowInfo('intake', 'intake', 'Intake Folder', -1, undefined, undefined),
         },
-        className: intakeIsUnfocused ? 'node-unfocused' : intakeIsFocused ? 'node-focused' : '',
+        className: intakeIsUnfocused ? 'node-unfocused' : intakeIsFocused ? 'node-focused' : intakeIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Processing node - build source statuses for status messages
@@ -944,6 +937,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
       const processingIsFocused = focusedNodeId === 'processing';
       const processingIsUnfocused = focusedNodeId && !processingIsFocused;
+      const processingIsPresentationActive = presentationActiveNode === 'processing';
       nodes.push({
         id: 'processing',
         type: 'processing',
@@ -958,7 +952,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onShowInfo: () => handleShowInfo('processing', 'processing', 'Data Engine', -1, undefined, undefined),
           onViewDiscrepancies: () => setShowDiscrepancyList(true),
         },
-        className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : '',
+        className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : processingIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Review Queue node (NEW - branch from processing)
@@ -980,6 +974,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onViewQueue: () => setShowDiscrepancyList(true),
           onShowInfo: () => handleShowInfo('reviewQueue', 'review-queue', 'Review Queue', -1, undefined, undefined),
         },
+        className: presentationActiveNode === 'review-queue' ? 'node-presentation-active' : '',
       });
 
       // Escalation node (NEW - branch from processing)
@@ -1004,6 +999,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onViewEscalations: () => console.log('View escalations'),
           onShowInfo: () => handleShowInfo('escalation', 'escalation', 'Escalation Router', -1, undefined, undefined),
         },
+        className: presentationActiveNode === 'escalation' ? 'node-presentation-active' : '',
       });
 
       // Communications node (NEW - parallel to output)
@@ -1017,11 +1013,13 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onViewCommunications: () => console.log('View communications'),
           onShowInfo: () => handleShowInfo('communications', 'communications', 'Communications', -1, undefined, undefined),
         },
+        className: presentationActiveNode === 'communications' ? 'node-presentation-active' : '',
       });
 
       // Output node (repositioned)
       const outputIsFocused = focusedNodeId === 'output';
       const outputIsUnfocused = focusedNodeId && !outputIsFocused;
+      const outputIsPresentationActive = presentationActiveNode === 'output';
       nodes.push({
         id: 'output',
         type: 'output',
@@ -1036,7 +1034,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           },
           onDownload: (file: OutputFile) => console.log('Download:', file),
         },
-        className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : '',
+        className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : outputIsPresentationActive ? 'node-presentation-active' : '',
       });
     }
 
@@ -1068,6 +1066,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     communications,
     outputFiles,
     focusedNodeId,
+    presentationActiveNode,
     sessionCode,
     nodePositionOverrides,
     draggingNodeId,

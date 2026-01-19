@@ -149,18 +149,46 @@ body {
   pointer-events: none !important;
 }
 
-/* Progressive presentation mode - unrevealed nodes */
-.react-flow__node.node-unrevealed {
-  opacity: 0.3;
-  filter: blur(4px);
-  pointer-events: none;
-  transition: opacity 0.6s ease, filter 0.6s ease;
+/* Presentation mode - highlight active node with visible border */
+.react-flow__node.node-presentation-active {
+  position: relative;
+  animation: presentation-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 4px #2596be, 0 0 24px rgba(37, 150, 190, 0.6);
 }
 
-.react-flow__node:not(.node-unrevealed) {
-  opacity: 1;
-  filter: blur(0);
-  transition: opacity 0.6s ease, filter 0.6s ease;
+.react-flow__node.node-presentation-active::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 1.5rem;
+  border: 3px solid #2596be;
+  background: linear-gradient(45deg, transparent, rgba(37, 150, 190, 0.1), transparent);
+  background-size: 200% 200%;
+  animation: border-shimmer 3s linear infinite;
+  z-index: -1;
+}
+
+@keyframes presentation-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px #2596be, 0 0 24px rgba(37, 150, 190, 0.6);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px #2596be, 0 0 32px rgba(37, 150, 190, 0.8);
+  }
+}
+
+@keyframes border-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .node-focused {
