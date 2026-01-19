@@ -42,6 +42,8 @@ import { reconcileShipments } from '../../lib/processing/compareShipments';
 import { supabase } from '../../lib/supabase';
 import type { Discrepancy } from '../../lib/processing/types';
 import { generateEscalationEmail } from '../../lib/ai/geminiService';
+import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
+import { ReportModal } from '../reports/ReportModal';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -193,6 +195,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
+  const [reconciliationReport, setReconciliationReport] = useState<ReconciliationReport | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Track expanded node for modal view
   const [expandedNode, setExpandedNode] = useState<{
@@ -544,6 +548,15 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           }
 
           setCommunications(newCommunications);
+
+          // Generate reconciliation report with Gemini
+          try {
+            const report = await generateReconciliationReport(result);
+            setReconciliationReport(report);
+          } catch (error) {
+            console.error('Error generating report:', error);
+          }
+
           setProcessingStatus('complete');
           setFocusedNodeId('output');
 
@@ -931,7 +944,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         data: {
           label: 'Reports',
           files: outputFiles,
-          onPreview: (file: OutputFile) => console.log('Preview:', file),
+          onPreview: (file: OutputFile) => {
+            if (file.id === 'reconciliation-report' && reconciliationReport) {
+              setShowReportModal(true);
+            }
+          },
           onDownload: (file: OutputFile) => console.log('Download:', file),
         },
         className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : '',
@@ -1323,6 +1340,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           discrepancy={selectedDiscrepancy}
           onClose={() => setSelectedDiscrepancy(null)}
           onDecision={handleDiscrepancyDecision}
+        />
+      )}
+
+      {/* Reconciliation Report Modal */}
+      {showReportModal && reconciliationReport && (
+        <ReportModal
+          report={reconciliationReport}
+          onClose={() => setShowReportModal(false)}
         />
       )}
     </div>
