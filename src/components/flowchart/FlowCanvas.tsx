@@ -181,7 +181,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track discrepancy list modal
   const [showDiscrepancyList, setShowDiscrepancyList] = useState(false);
-  const [selectedDiscrepancy, setSelectedDiscrepancy] = useState<Discrepancy | null>(null);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -336,7 +335,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Handle processing - REAL reconciliation
   const handleProcess = useCallback(async () => {
-    if (!selectedUseCase || !session) return;
+    if (!selectedUseCase || !sessionCode) return;
 
     setProcessingStatus('processing');
     setProcessingProgress(0);
@@ -945,10 +944,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         <DiscrepancyListModal
           discrepancies={discrepancies}
           onClose={() => setShowDiscrepancyList(false)}
-          onSelectDiscrepancy={(disc) => {
-            setSelectedDiscrepancy(disc);
+          onSelectDiscrepancy={() => {
             setShowDiscrepancyList(false);
-            // TODO: Open detailed decision modal
+            // TODO: Open detailed decision modal for selected discrepancy
           }}
         />
       )}
