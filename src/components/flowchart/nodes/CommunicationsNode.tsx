@@ -7,6 +7,7 @@ export interface Communication {
   comm_type: string;
   recipient: string;
   subject: string;
+  body?: string;
   sent_at: string;
 }
 

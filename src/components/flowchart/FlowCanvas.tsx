@@ -41,6 +41,7 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 import { reconcileShipments } from '../../lib/processing/compareShipments';
 import { supabase } from '../../lib/supabase';
 import type { Discrepancy } from '../../lib/processing/types';
+import { generateEscalationEmail } from '../../lib/ai/geminiService';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -185,7 +186,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track escalations and communications
   const [escalations, setEscalations] = useState<Array<{id: string; source_type: string; source_id: string; severity: string; routed_to: string; status: string}>>([]);
-  const [communications, setCommunications] = useState<Array<{id: string; comm_type: string; recipient: string; subject: string; sent_at: string}>>([]);
+  const [communications, setCommunications] = useState<Array<{id: string; comm_type: string; recipient: string; subject: string; body?: string; sent_at: string}>>([]);
 
   // Track live barcode scans (will be used when Barcode Log node displays live updates)
   const [, setLiveScans] = useState<Array<{shipment_id: string; sku: string; qty_scanned: number; scanned_at: string}>>([]);
@@ -497,27 +498,47 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             }));
           setEscalations(newEscalations);
 
-          // Generate communications for notifications
+          // Generate communications for notifications with Gemini
           const newCommunications = [];
 
-          // Email for each critical escalation
-          newEscalations.forEach(esc => {
-            newCommunications.push({
-              id: `comm-${esc.id}`,
-              comm_type: 'email',
-              recipient: esc.routed_to,
-              subject: `URGENT: Discrepancy detected on ${esc.source_id}`,
-              sent_at: new Date().toISOString(),
+          // Generate detailed escalation emails for critical/high severity items
+          const escalationEmailPromises = result.discrepancies
+            .filter(d => d.severity === 'critical' || d.severity === 'high')
+            .map(async (d) => {
+              try {
+                const email = await generateEscalationEmail(d);
+                return {
+                  id: `comm-esc-${d.id}`,
+                  comm_type: 'email',
+                  recipient: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
+                  subject: email.subject,
+                  body: email.body,
+                  sent_at: new Date().toISOString(),
+                };
+              } catch (error) {
+                console.error('Error generating escalation email:', error);
+                return {
+                  id: `comm-esc-${d.id}`,
+                  comm_type: 'email',
+                  recipient: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
+                  subject: `URGENT: ${d.type.replace(/_/g, ' ')} on ${d.shipment_id}`,
+                  body: `Discrepancy detected: ${d.details}\n\nRecommended Action: ${d.recommendedAction}`,
+                  sent_at: new Date().toISOString(),
+                };
+              }
             });
-          });
 
-          // Summary email if there are flagged items
+          const escalationEmails = await Promise.all(escalationEmailPromises);
+          newCommunications.push(...escalationEmails);
+
+          // Summary alert if there are flagged items
           if (result.totalFlagged > 0) {
             newCommunications.push({
               id: 'comm-summary',
               comm_type: 'alert',
               recipient: 'Operations Team',
-              subject: `Reconciliation complete: ${result.totalFlagged} items flagged`,
+              subject: `Reconciliation complete: ${result.totalFlagged} items need review`,
+              body: `Processing completed with ${result.totalProcessed} shipments. ${result.totalFlagged} discrepancies flagged for human review.`,
               sent_at: new Date().toISOString(),
             });
           }
