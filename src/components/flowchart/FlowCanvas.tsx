@@ -14,6 +14,10 @@ import { IntakeNode } from './nodes/IntakeNode';
 import { ProcessingNode } from './nodes/ProcessingNode';
 import { OutputNode } from './nodes/OutputNode';
 import { UseCaseSelectorNode } from './nodes/UseCaseSelectorNode';
+import { ETLNode } from './nodes/ETLNode';
+import { ReviewQueueNode } from './nodes/ReviewQueueNode';
+import { EscalationNode } from './nodes/EscalationNode';
+import { CommunicationsNode } from './nodes/CommunicationsNode';
 import { ExpandedNodeModal } from './ExpandedNodeModal';
 import { InfoOverlay, type NodeInfo } from './InfoOverlay';
 import { DiscrepancyListModal } from '../decisions/DiscrepancyListModal';
@@ -44,6 +48,10 @@ const nodeTypes: Record<string, any> = {
   processing: ProcessingNode,
   output: OutputNode,
   useCaseSelector: UseCaseSelectorNode,
+  etl: ETLNode,
+  reviewQueue: ReviewQueueNode,
+  escalation: EscalationNode,
+  communications: CommunicationsNode,
 };
 
 interface FlowCanvasProps {
@@ -168,6 +176,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingStats, setProcessingStats] = useState({ processed: 0, flagged: 0, errors: 0 });
   const [discrepancies, setDiscrepancies] = useState<Discrepancy[]>([]);
+
+  // Track ETL state
+  const [etlStatus, setEtlStatus] = useState<'idle' | 'processing' | 'complete'>('idle');
+  const [transformations, setTransformations] = useState<Array<{field: string; original: string; transformed: string; type: string}>>([]);
+
+  // Track escalations and communications
+  const [escalations, setEscalations] = useState<Array<{id: string; source_type: string; source_id: string; severity: string; routed_to: string; status: string}>>([]);
+  const [communications, setCommunications] = useState<Array<{id: string; comm_type: string; recipient: string; subject: string; sent_at: string}>>([]);
 
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
@@ -381,6 +397,46 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           };
           setProcessingStats(stats);
           setDiscrepancies(result.discrepancies);
+
+          // Generate escalations for critical/high severity discrepancies
+          const newEscalations = result.discrepancies
+            .filter(d => d.severity === 'critical' || d.severity === 'high')
+            .map(d => ({
+              id: `esc-${d.id}`,
+              source_type: 'discrepancy',
+              source_id: d.shipment_id,
+              severity: d.severity,
+              routed_to: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
+              status: 'pending',
+            }));
+          setEscalations(newEscalations);
+
+          // Generate communications for notifications
+          const newCommunications = [];
+
+          // Email for each critical escalation
+          newEscalations.forEach(esc => {
+            newCommunications.push({
+              id: `comm-${esc.id}`,
+              comm_type: 'email',
+              recipient: esc.routed_to,
+              subject: `URGENT: Discrepancy detected on ${esc.source_id}`,
+              sent_at: new Date().toISOString(),
+            });
+          });
+
+          // Summary email if there are flagged items
+          if (result.totalFlagged > 0) {
+            newCommunications.push({
+              id: 'comm-summary',
+              comm_type: 'alert',
+              recipient: 'Operations Team',
+              subject: `Reconciliation complete: ${result.totalFlagged} items flagged`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          setCommunications(newCommunications);
           setProcessingStatus('complete');
           setFocusedNodeId('output');
 
@@ -472,6 +528,27 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         .filter((s) => !s.optional)
         .every((s) => sourceStatuses[s.name] === 'complete')
     : false;
+
+  // Trigger ETL when all sources are complete
+  useEffect(() => {
+    if (canProcess && etlStatus === 'idle') {
+      setEtlStatus('processing');
+
+      // Simulate ETL processing
+      setTimeout(() => {
+        // Generate mock transformations
+        const mockTransformations = [
+          { field: 'weight', original: '1000 lbs', transformed: '453.6 kg', type: 'unit_conversion' },
+          { field: 'ship_date', original: '1/15/25', transformed: '2025-01-15', type: 'date_format' },
+          { field: 'vendor_sku', original: 'VNP-1247', transformed: 'CTN-12OZ', type: 'sku_mapping' },
+          { field: 'employee_name', original: 'JOHN DOE', transformed: 'John Doe', type: 'name_normalization' },
+          { field: 'location', original: 'Zone 3, Row 12', transformed: 'Z3-R12', type: 'location_parsing' },
+        ];
+        setTransformations(mockTransformations);
+        setEtlStatus('complete');
+      }, 1500);
+    }
+  }, [canProcess, etlStatus]);
 
   // Auto-simulation effect
   useEffect(() => {
@@ -590,13 +667,29 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         });
       });
 
+      // ETL/Normalization node (NEW - between sources and intake)
+      const etlIsFocused = focusedNodeId === 'etl';
+      const etlIsUnfocused = focusedNodeId && !etlIsFocused;
+      nodes.push({
+        id: 'etl',
+        type: 'etl',
+        position: getPosition('etl', { x: xSpacing * 2 - 40, y: 180 }),
+        data: {
+          label: 'ETL/Normalization',
+          status: etlStatus,
+          transformations: etlStatus === 'complete' ? transformations : undefined,
+          onShowInfo: () => handleShowInfo('etl', 'etl', 'ETL/Normalization', -1, undefined, undefined),
+        },
+        className: etlIsUnfocused ? 'node-unfocused' : etlIsFocused ? 'node-focused' : '',
+      });
+
       // Intake node
       const intakeIsFocused = focusedNodeId === 'intake';
       const intakeIsUnfocused = focusedNodeId && !intakeIsFocused;
       nodes.push({
         id: 'intake',
         type: 'intake',
-        position: getPosition('intake', { x: xSpacing * 2 - 20, y: 140 }),
+        position: getPosition('intake', { x: xSpacing * 3 - 40, y: 140 }),
         data: {
           label: 'Intake Folder',
           items: buildIntakeItems(),
@@ -618,7 +711,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       nodes.push({
         id: 'processing',
         type: 'processing',
-        position: getPosition('processing', { x: xSpacing * 3 + 10, y: 160 }),
+        position: getPosition('processing', { x: xSpacing * 4, y: 160 }),
         data: {
           label: 'Data Engine',
           status: processingStatus,
@@ -632,15 +725,73 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : '',
       });
 
-      // Output node
+      // Review Queue node (NEW - branch from processing)
+      const reviewQueueItems = discrepancies.slice(0, 5).map(d => ({
+        id: d.id,
+        type: d.type,
+        severity: d.severity,
+        summary: `${d.shipment_id}: ${d.details}`,
+        confidence: d.confidence,
+      }));
+
+      nodes.push({
+        id: 'review-queue',
+        type: 'reviewQueue',
+        position: getPosition('review-queue', { x: xSpacing * 5, y: 60 }),
+        data: {
+          label: 'Review Queue',
+          items: reviewQueueItems,
+          onViewQueue: () => setShowDiscrepancyList(true),
+          onShowInfo: () => handleShowInfo('reviewQueue', 'review-queue', 'Review Queue', -1, undefined, undefined),
+        },
+      });
+
+      // Escalation node (NEW - branch from processing)
+      const criticalEscalations = discrepancies
+        .filter(d => d.severity === 'critical' || d.severity === 'high')
+        .map(d => ({
+          id: d.id,
+          source_type: 'discrepancy',
+          source_id: d.shipment_id,
+          severity: d.severity,
+          routed_to: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
+          status: 'pending',
+        }));
+
+      nodes.push({
+        id: 'escalation',
+        type: 'escalation',
+        position: getPosition('escalation', { x: xSpacing * 5, y: 260 }),
+        data: {
+          label: 'Escalation Router',
+          items: criticalEscalations,
+          onViewEscalations: () => console.log('View escalations'),
+          onShowInfo: () => handleShowInfo('escalation', 'escalation', 'Escalation Router', -1, undefined, undefined),
+        },
+      });
+
+      // Communications node (NEW - parallel to output)
+      nodes.push({
+        id: 'communications',
+        type: 'communications',
+        position: getPosition('communications', { x: xSpacing * 5, y: 400 }),
+        data: {
+          label: 'Communications',
+          communications: communications,
+          onViewCommunications: () => console.log('View communications'),
+          onShowInfo: () => handleShowInfo('communications', 'communications', 'Communications', -1, undefined, undefined),
+        },
+      });
+
+      // Output node (repositioned)
       const outputIsFocused = focusedNodeId === 'output';
       const outputIsUnfocused = focusedNodeId && !outputIsFocused;
       nodes.push({
         id: 'output',
         type: 'output',
-        position: getPosition('output', { x: xSpacing * 4 - 30, y: 120 }),
+        position: getPosition('output', { x: xSpacing * 6 - 40, y: 140 }),
         data: {
-          label: 'Outputs',
+          label: 'Reports',
           files: outputFiles,
           onPreview: (file: OutputFile) => console.log('Preview:', file),
           onDownload: (file: OutputFile) => console.log('Download:', file),
@@ -670,6 +821,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     processingStatus,
     processingProgress,
     processingStats,
+    discrepancies,
+    etlStatus,
+    transformations,
+    escalations,
+    communications,
     outputFiles,
     focusedNodeId,
     sessionCode,
@@ -686,15 +842,15 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     // No edges from use case selector - it's a standalone control node
     // This allows users to freely position the flow nodes without being anchored
 
-    // Edges from sources to intake
+    // Edges from sources to ETL
     selectedUseCase.sources.forEach((source) => {
       const isComplete = sourceStatuses[source.name] === 'complete';
       const isLoading = sourceStatuses[source.name] === 'loading';
 
       edges.push({
-        id: `edge-${source.name}-intake`,
+        id: `edge-${source.name}-etl`,
         source: `source-${source.name}`,
-        target: 'intake',
+        target: 'etl',
         animated: isLoading,
         style: {
           stroke: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
@@ -705,6 +861,23 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           color: isComplete ? '#10b981' : isLoading ? '#2596be' : '#e2e8f0',
         },
       });
+    });
+
+    // Edge from ETL to intake
+    const etlComplete = etlStatus === 'complete';
+    edges.push({
+      id: 'edge-etl-intake',
+      source: 'etl',
+      target: 'intake',
+      animated: etlStatus === 'processing',
+      style: {
+        stroke: etlComplete ? '#a855f7' : '#e2e8f0',
+        strokeWidth: etlComplete ? 2.5 : 2,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: etlComplete ? '#a855f7' : '#e2e8f0',
+      },
     });
 
     // Edge from intake to processing
@@ -726,24 +899,79 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       },
     });
 
-    // Edge from processing to output
-    edges.push({
-      id: 'edge-processing-output',
-      source: 'processing',
-      target: 'output',
-      animated: false,
-      style: {
-        stroke: isComplete ? '#10b981' : '#e2e8f0',
-        strokeWidth: isComplete ? 2.5 : 2,
-      },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: isComplete ? '#10b981' : '#e2e8f0',
-      },
-    });
+    // Branching edges from processing
+    if (isComplete) {
+      // To Review Queue (if flagged items exist)
+      if (discrepancies.length > 0) {
+        edges.push({
+          id: 'edge-processing-review',
+          source: 'processing',
+          target: 'review-queue',
+          style: {
+            stroke: '#f59e0b',
+            strokeWidth: 2.5,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#f59e0b',
+          },
+        });
+      }
+
+      // To Escalation (if critical items)
+      const hasCritical = discrepancies.some(d => d.severity === 'critical' || d.severity === 'high');
+      if (hasCritical) {
+        edges.push({
+          id: 'edge-processing-escalation',
+          source: 'processing',
+          target: 'escalation',
+          style: {
+            stroke: '#ef4444',
+            strokeWidth: 2.5,
+            strokeDasharray: '5,5',
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#ef4444',
+          },
+        });
+      }
+
+      // To Communications
+      if (communications.length > 0) {
+        edges.push({
+          id: 'edge-processing-communications',
+          source: 'processing',
+          target: 'communications',
+          style: {
+            stroke: '#3b82f6',
+            strokeWidth: 2,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#3b82f6',
+          },
+        });
+      }
+
+      // To Output (always)
+      edges.push({
+        id: 'edge-processing-output',
+        source: 'processing',
+        target: 'output',
+        style: {
+          stroke: '#10b981',
+          strokeWidth: 2.5,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#10b981',
+        },
+      });
+    }
 
     return edges;
-  }, [selectedUseCase, sourceStatuses, processingStatus]);
+  }, [selectedUseCase, sourceStatuses, etlStatus, processingStatus, discrepancies, communications]);
 
   // Get source data for expanded modal
   const getExpandedSourceData = () => {
