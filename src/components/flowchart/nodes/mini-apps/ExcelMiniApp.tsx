@@ -10,9 +10,11 @@ interface ExcelMiniAppProps {
   data: SpreadsheetData;
   highlightRows?: number[];
   isLoading?: boolean;
+  onCellEdit?: (rowIndex: number, colIndex: number, newValue: string | number) => void;
+  editable?: boolean;
 }
 
-function ExcelMiniAppComponent({ data, highlightRows = [], isLoading }: ExcelMiniAppProps) {
+function ExcelMiniAppComponent({ data, highlightRows = [], isLoading, onCellEdit, editable = true }: ExcelMiniAppProps) {
   // Shimmer loading state
   if (isLoading) {
     return (
@@ -84,14 +86,24 @@ function ExcelMiniAppComponent({ data, highlightRows = [], isLoading }: ExcelMin
                     {row.map((cell, colIndex) => (
                       <td
                         key={colIndex}
-                        contentEditable
+                        contentEditable={editable}
                         suppressContentEditableWarning
-                        className={`spreadsheet-cell cursor-text ${
+                        className={`spreadsheet-cell ${editable ? 'cursor-text' : ''} ${
                           typeof cell === 'number' ? 'text-right font-mono' : ''
-                        } ${isHighlighted ? 'font-medium' : ''} hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400/50`}
+                        } ${isHighlighted ? 'font-medium' : ''} ${editable ? 'hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400/50' : ''}`}
+                        onBlur={(e) => {
+                          if (editable && onCellEdit) {
+                            const newValue = e.currentTarget.textContent || '';
+                            // Try to parse as number if it looks like one
+                            const numValue = Number(newValue);
+                            onCellEdit(rowIndex, colIndex, isNaN(numValue) ? newValue : numValue);
+                          }
+                        }}
                         onKeyDown={(e) => {
-                          // Allow normal text editing keys
                           if (e.key === 'Escape') {
+                            e.currentTarget.blur();
+                          } else if (e.key === 'Enter') {
+                            e.preventDefault();
                             e.currentTarget.blur();
                           }
                         }}
