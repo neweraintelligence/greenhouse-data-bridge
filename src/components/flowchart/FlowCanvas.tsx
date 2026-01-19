@@ -672,40 +672,60 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [startPresentationMode, selectedUseCase, handleShowInfo, handleSourceActivate, sourceStatuses, onPresentationStart]);
 
-  // Navigate to next/previous slide
+  // Build complete navigation order (all nodes, not just sources)
+  const getNavigationOrder = useCallback(() => {
+    if (!selectedUseCase) return [];
+
+    const navOrder: Array<{id: string; type: string; label: string; index: number}> = [];
+
+    // Add source nodes
+    selectedUseCase.sources.forEach((source, idx) => {
+      navOrder.push({
+        id: `source-${source.name}`,
+        type: source.type,
+        label: source.name,
+        index: idx,
+      });
+    });
+
+    // Add pipeline nodes in order
+    navOrder.push(
+      { id: 'etl', type: 'etl', label: 'ETL/Normalization', index: -1 },
+      { id: 'intake', type: 'intake', label: 'Intake Folder', index: -1 },
+      { id: 'processing', type: 'processing', label: 'Data Engine', index: -1 },
+      { id: 'review-queue', type: 'reviewQueue', label: 'Review Queue', index: -1 },
+      { id: 'escalation', type: 'escalation', label: 'Escalation Router', index: -1 },
+      { id: 'communications', type: 'communications', label: 'Communications', index: -1 },
+      { id: 'output', type: 'output', label: 'Reports', index: -1 }
+    );
+
+    return navOrder;
+  }, [selectedUseCase]);
+
+  // Navigate to next/previous slide (through ALL nodes)
   const handleNextSlide = useCallback(() => {
-    if (!selectedUseCase || infoNodeIndex === null) return;
-    const nextIndex = infoNodeIndex + 1;
-    if (nextIndex < selectedUseCase.sources.length) {
-      const nextSource = selectedUseCase.sources[nextIndex];
-      const nextNodeId = `source-${nextSource.name}`;
-      handleShowInfo(
-        nextSource.type,
-        nextNodeId,
-        nextSource.name,
-        nextIndex,
-        () => handleSourceActivate(nextSource.name, nextSource.type),
-        sourceStatuses[nextSource.name]
-      );
+    if (!infoNodeId) return;
+
+    const navOrder = getNavigationOrder();
+    const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+
+    if (currentIdx >= 0 && currentIdx < navOrder.length - 1) {
+      const next = navOrder[currentIdx + 1];
+      handleShowInfo(next.type, next.id, next.label, next.index, undefined, undefined);
     }
-  }, [selectedUseCase, infoNodeIndex, handleShowInfo, handleSourceActivate, sourceStatuses]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo]);
 
   const handlePreviousSlide = useCallback(() => {
-    if (!selectedUseCase || infoNodeIndex === null) return;
-    const prevIndex = infoNodeIndex - 1;
-    if (prevIndex >= 0) {
-      const prevSource = selectedUseCase.sources[prevIndex];
-      const prevNodeId = `source-${prevSource.name}`;
-      handleShowInfo(
-        prevSource.type,
-        prevNodeId,
-        prevSource.name,
-        prevIndex,
-        () => handleSourceActivate(prevSource.name, prevSource.type),
-        sourceStatuses[prevSource.name]
-      );
+    if (!infoNodeId) return;
+
+    const navOrder = getNavigationOrder();
+    const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+
+    if (currentIdx > 0) {
+      const prev = navOrder[currentIdx - 1];
+      handleShowInfo(prev.type, prev.id, prev.label, prev.index, undefined, undefined);
     }
-  }, [selectedUseCase, infoNodeIndex, handleShowInfo, handleSourceActivate, sourceStatuses]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo]);
 
   // Check if can process
   const canProcess = selectedUseCase
@@ -1387,8 +1407,18 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         canFetch={infoNodeCanFetch}
         onNext={handleNextSlide}
         onPrevious={handlePreviousSlide}
-        hasNext={infoNodeIndex !== null && selectedUseCase ? infoNodeIndex < selectedUseCase.sources.length - 1 : false}
-        hasPrevious={infoNodeIndex !== null ? infoNodeIndex > 0 : false}
+        hasNext={(() => {
+          if (!infoNodeId) return false;
+          const navOrder = getNavigationOrder();
+          const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+          return currentIdx >= 0 && currentIdx < navOrder.length - 1;
+        })()}
+        hasPrevious={(() => {
+          if (!infoNodeId) return false;
+          const navOrder = getNavigationOrder();
+          const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+          return currentIdx > 0;
+        })()}
         imageUrl={infoNodeType && selectedUseCase && infoNodeLabel ? getNodeImage(selectedUseCase.id, infoNodeType, infoNodeLabel) : null}
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
