@@ -6,8 +6,8 @@ import type { NodeInfo } from '../components/flowchart/InfoOverlay';
 export const shippingNodeInfo: Record<string, NodeInfo> = {
   outlook: {
     id: 'outlook',
-    title: 'Shipment Alert Emails',
-    subtitle: 'Pre-Arrival Notification',
+    title: 'PRE-ARRIVAL NOTIFICATION',
+    subtitle: 'Shipment Alert Emails',
     imageOnLeft: false, // Text on left, image on right
     description:
       'Think of this as the "heads up" email. When a shipment is created, an automated email goes out with the Bill of Lading PDF showing what\'s supposed to be on the truck.',
@@ -16,7 +16,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     keyInsight: 'This is your early warning system — you know what\'s coming before it arrives.',
     flowContext: {
       inbound: {
-        label: 'Vendor ships to you',
+        label: 'RECEIVING',
         description: 'RECEIVING MODE: When your vendor ships goods to you, they send an email notification. "500 flats of petunias heading your way on Tuesday."',
         painPoint: 'Vendor emails buried. Truck shows up at your dock — surprise! Your team isn\'t ready.',
         solution: 'Vendor shipment emails captured automatically. Receiving team gets advance notice.',
@@ -34,8 +34,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   onedrive: {
     id: 'onedrive',
-    title: 'Invoices',
-    subtitle: 'The Billing Documents',
+    title: 'THE BILLING DOCUMENTS',
+    subtitle: 'Invoices',
     imageOnLeft: true, // Image on left, text on right
     description:
       'PDF invoices with line items: SKU codes, descriptions, quantities, unit prices. Someone has to read this, find each item, and manually check if quantities match what was ordered, shipped, and received.',
@@ -44,14 +44,14 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     keyInsight: 'Invoices are complex documents with many items. Automation prevents line-by-line errors.',
     flowContext: {
       inbound: {
-        label: 'Vendor invoices you',
+        label: 'RECEIVING',
         description: 'RECEIVING MODE: Vendor PDF invoice with dozens of line items. You need to verify each line against what you ordered and what your team scanned at receiving.',
         painPoint: 'Vendor invoice: 15 SKUs, 40 total items. Did you receive everything they\'re charging for? Manual checking takes an hour per invoice.',
         solution: 'Every line item extracted and compared against purchase order and receiving scans. "SKU #1247: Ordered 50, invoiced 50, scanned 48 — shortage flagged."',
         keyInsight: 'Don\'t pay for what you didn\'t receive. Catch it before AP cuts the check.',
       },
       outbound: {
-        label: 'You invoice customers',
+        label: 'Sales orders',
         description: 'SHIPPING MODE: Your invoice to the customer with multiple line items. Each quantity must match what you actually shipped — verified by barcode scans.',
         painPoint: 'You invoice for 12 SKUs totaling 300 units. But warehouse scans show only 285 loaded. Customer will notice and dispute.',
         solution: 'Invoice line items compared against shipping scans. "SKU #3382: Invoiced 50, scanned 45 — adjust invoice before sending."',
@@ -90,8 +90,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   barcode: {
     id: 'barcode',
-    title: 'Barcode Scans',
-    subtitle: 'Real-Time Dock Verification',
+    title: 'REAL-TIME DOCK VERIFICATION',
+    subtitle: 'Barcode Scans',
     imageOnLeft: true,
     description:
       'Handheld scanners at the dock. Each pallet scanned creates a digital record: shipment ID, SKU, timestamp, and which worker did the scan. This log is the physical proof — not estimates, not paperwork, actual scans.',
@@ -100,7 +100,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     keyInsight: 'This is where you catch the short-shipment — in real-time at the dock, not weeks later.',
     flowContext: {
       inbound: {
-        label: 'Receiving dock scans',
+        label: 'RECEIVING',
         description: 'RECEIVING MODE: Workers scan items off vendor trucks. Each scan tallies toward the SKU total to verify against the vendor invoice.',
         painPoint: 'Vendor invoice: SKU-1247 shows 50 units. Workers scan pallets: only 48 scanned. Are you being shorted?',
         solution: 'Scan log auto-tallies by SKU. "SKU-1247: Expected 50, scanned 48 — 2 unit shortage." Flag before driver leaves.',
@@ -118,8 +118,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   paper: {
     id: 'paper',
-    title: 'Signed Receipt',
-    subtitle: 'Proof Someone Received It',
+    title: 'PROOF SOMEONE RECEIVED IT',
+    subtitle: 'Signed Receipt',
     imageOnLeft: false,
     description:
       'The delivery receipt with a signature. Driver hands over goods, gets someone to sign confirming they received it, snaps a photo.',
@@ -128,7 +128,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     keyInsight: 'The signature closes the loop. If there\'s a dispute, this is your proof.',
     flowContext: {
       inbound: {
-        label: 'You sign for deliveries',
+        label: 'RECEIVING',
         description: 'Your receiving staff signs vendor delivery receipts.',
         painPoint: 'Vendor claims they delivered 500 flats. Did your team sign for 500? Or note a discrepancy?',
         solution: 'Your signature and any handwritten notes captured immediately. "Received 480, 20 damaged" on record.',
@@ -170,7 +170,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   output: {
     id: 'output',
-    title: 'The Results',
+    title: 'THE RESULTS',
     subtitle: 'What Needs Attention',
     imageOnLeft: true,
     description:
@@ -206,8 +206,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   escalation: {
     id: 'escalation',
-    title: 'Escalation Router',
-    subtitle: 'Auto-Routing Critical Issues',
+    title: 'AUTO-ROUTING CRITICAL ISSUES',
+    subtitle: 'Escalation Router',
     imageOnLeft: false,
     description:
       'Severity-based intelligent routing. Critical issues (equipment failure, major shortage) escalate immediately to the right team. System knows who needs to know based on issue type and urgency.',
@@ -218,8 +218,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   communications: {
     id: 'communications',
-    title: 'Communications Layer',
-    subtitle: 'Automated Follow-Up',
+    title: 'AUTOMATED FOLLOW-UP',
+    subtitle: 'Communications Layer',
     imageOnLeft: true,
     description:
       'Automated notifications sent based on processing results. Escalations trigger emails. Flagged items generate alerts. Decisions logged and communicated. Detection + action, not just detection.',

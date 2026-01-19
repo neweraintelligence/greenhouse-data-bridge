@@ -357,7 +357,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     nodeType: string,
     nodeId: string,
     sourceName: string,
-    sourceIndex: number,
+    _sourceIndex: number, // Unused but kept for compatibility
     onActivate?: () => void,
     status?: string
   ) => {
