@@ -473,7 +473,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         );
 
         // Complete after delay with REAL stats
-        setTimeout(() => {
+        setTimeout(async () => {
           clearInterval(interval);
           setProcessingProgress(100);
 

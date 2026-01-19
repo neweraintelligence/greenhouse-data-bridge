@@ -11,7 +11,7 @@ export interface Discrepancy {
   difference?: number | string;
   confidence: number; // 0-100
   recommendedAction: string;
-  details?: string;
+  details: string;
 }
 
 export interface ReconciliationResult {
