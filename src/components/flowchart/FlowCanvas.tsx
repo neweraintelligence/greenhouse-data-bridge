@@ -110,12 +110,13 @@ function generateDemoFiles(): FileItem[] {
 function generateDemoSpreadsheet(): SpreadsheetData {
   return {
     sheetName: 'Expected Shipments',
-    headers: ['Date', 'Shipment ID', 'Vendor', 'Qty'],
+    headers: ['Ship Date', 'Shipment ID', 'Customer/Vendor', 'SKU', 'Qty'],
     rows: [
-      ['2025-01-06', 'SHP-0001', 'GreenLine', 980],
-      ['2025-01-08', 'SHP-0002', 'NorthStar', 1200],
-      ['2025-01-10', 'SHP-0003', 'Valley', 860],
-      ['2025-01-12', 'SHP-0004', 'Coastal', 540],
+      ['2025-01-06', 'OUT-0001', 'Home Depot #4521', 'PET-WAVE-606-PUR', 48],
+      ['2025-01-08', 'OUT-0002', 'Green Thumb GC', 'GER-ZON-45-RED', 24],
+      ['2025-01-10', 'OUT-0003', 'Lowes #8847', 'PET-STVB-606-PINK', 72],
+      ['2025-01-12', 'IN-0001', 'Ball Horticultural', 'PLUG-288-PETWAVE', 20],
+      ['2025-01-14', 'IN-0002', 'Sun Gro', 'SUNGRO-PROF-3CF', 150],
     ],
   };
 }
