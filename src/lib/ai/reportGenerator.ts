@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import type { Discrepancy, ReconciliationResult } from '../processing/types';
+import type { ReconciliationResult } from '../processing/types';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 

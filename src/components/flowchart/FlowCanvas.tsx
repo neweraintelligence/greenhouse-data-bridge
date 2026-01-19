@@ -287,6 +287,70 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [selectedDiscrepancy, sessionCode]);
 
+  // Handle Excel cell edits - save immediately to Supabase
+  const handleExcelCellEdit = useCallback(async (rowIndex: number, colIndex: number, newValue: string | number) => {
+    if (!selectedUseCase || selectedUseCase.id !== 'shipping') return;
+
+    try {
+      // Get current spreadsheet data
+      const currentData = sourceData['Expected Shipments'];
+      if (!currentData?.spreadsheet) return;
+
+      const row = currentData.spreadsheet.rows[rowIndex];
+      if (!row) return;
+
+      // Map column index to field name
+      const headers = currentData.spreadsheet.headers;
+      const fieldName = headers[colIndex];
+
+      // Get shipment_id from row (column index 1)
+      const shipmentId = row[1];
+
+      // Build update object based on field
+      const updates: any = {};
+      if (fieldName === 'Qty') {
+        updates.expected_qty = Number(newValue);
+      } else if (fieldName === 'SKU') {
+        updates.expected_sku = String(newValue);
+      } else if (fieldName === 'Customer/Vendor') {
+        updates.vendor = String(newValue);
+      } else if (fieldName === 'Ship Date') {
+        updates.ship_date = String(newValue);
+      }
+
+      if (Object.keys(updates).length > 0) {
+        // Update Supabase
+        const { error } = await supabase
+          .from('shipments_expected')
+          .update(updates)
+          .eq('session_code', sessionCode)
+          .eq('shipment_id', shipmentId);
+
+        if (error) throw error;
+
+        console.log('Excel cell updated in database:', shipmentId, updates);
+
+        // Update local state
+        const updatedRows = [...currentData.spreadsheet.rows];
+        updatedRows[rowIndex] = [...row];
+        updatedRows[rowIndex][colIndex] = newValue;
+
+        setSourceData(prev => ({
+          ...prev,
+          'Expected Shipments': {
+            ...currentData,
+            spreadsheet: {
+              ...currentData.spreadsheet,
+              rows: updatedRows,
+            },
+          },
+        }));
+      }
+    } catch (error) {
+      console.error('Error saving Excel edit:', error);
+    }
+  }, [selectedUseCase, sourceData, sessionCode]);
+
   // Handle show info overlay
   const handleShowInfo = useCallback((
     nodeType: string,
@@ -1212,7 +1276,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           spreadsheet = generateDemoSpreadsheet();
         }
       }
-      return <ExcelMiniApp data={spreadsheet} isLoading={false} />;
+      return (
+        <ExcelMiniApp
+          data={spreadsheet}
+          isLoading={false}
+          onCellEdit={selectedUseCase.id === 'shipping' ? handleExcelCellEdit : undefined}
+          editable={true}
+        />
+      );
     }
 
     // Paper nodes - show actual upload interface with QR code
