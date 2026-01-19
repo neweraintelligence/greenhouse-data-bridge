@@ -36,9 +36,16 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
 };
 
 export function getNodeImage(useCase: string, nodeType: string, sourceName?: string): string | null {
+  console.log('getNodeImage called:', { useCase, nodeType, sourceName });
+
   // Special case: Training use case has two excel nodes - route by source name
   if (useCase === 'training' && nodeType === 'excel' && sourceName === 'Acknowledgements') {
-    return nodeImageMap[useCase]?.['excel-ack'] || null;
+    const image = nodeImageMap[useCase]?.['excel-ack'] || null;
+    console.log('Returning training ack image:', image);
+    return image;
   }
-  return nodeImageMap[useCase]?.[nodeType] || null;
+
+  const image = nodeImageMap[useCase]?.[nodeType] || null;
+  console.log('Returning image:', image, 'for', useCase, nodeType);
+  return image;
 }
