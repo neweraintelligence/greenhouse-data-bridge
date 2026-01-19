@@ -157,6 +157,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Selected use case
   const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null);
+  const [hasInitialFit, setHasInitialFit] = useState(false);
 
   // Track focused node for focus mode
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
@@ -1356,7 +1357,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         nodes={buildNodes()}
         edges={buildEdges()}
         nodeTypes={nodeTypes}
-        fitView={!!selectedUseCase} // Only fitView after use case is selected
+        fitView={!!selectedUseCase && !hasInitialFit} // Only fitView once
+        onInit={() => setHasInitialFit(true)}
         fitViewOptions={{ padding: 0.3, maxZoom: 0.85 }}
         defaultViewport={{ x: 150, y: 200, zoom: 0.85 }} // Start with selector on left
         nodesDraggable={true}
