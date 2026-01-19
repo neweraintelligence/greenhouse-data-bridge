@@ -134,12 +134,10 @@ body {
   border-radius: 12px;
 }
 
-/* Focus mode - faded state for unfocused nodes */
+/* Focus mode - subtle dimming for unfocused nodes (no blur) */
 .node-unfocused {
-  opacity: 0.15;
-  filter: blur(3px);
-  transform: scale(0.95);
-  transition: all 0.3s ease;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
   pointer-events: none !important;
 }
 
