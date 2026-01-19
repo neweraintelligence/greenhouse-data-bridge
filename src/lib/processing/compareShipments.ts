@@ -7,7 +7,7 @@ interface ExpectedShipment {
   vendor: string;
 }
 
-interface BarcodeSign {
+interface BarcodeScan {
   shipment_id: string;
   qty_scanned: number;
   sku: string;

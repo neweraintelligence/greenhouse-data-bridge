@@ -16,6 +16,7 @@ import { OutputNode } from './nodes/OutputNode';
 import { UseCaseSelectorNode } from './nodes/UseCaseSelectorNode';
 import { ExpandedNodeModal } from './ExpandedNodeModal';
 import { InfoOverlay, type NodeInfo } from './InfoOverlay';
+import { DiscrepancyListModal } from '../decisions/DiscrepancyListModal';
 import { OutlookMiniApp } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp } from './nodes/mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp } from './nodes/mini-apps/ExcelMiniApp';
@@ -32,6 +33,9 @@ import { getNodeInfo } from '../../lib/nodeInfoContent';
 import { getNodeImage } from '../../lib/nodeImages';
 import { GlassButton } from '../design-system';
 import { Play, Pause, RotateCcw } from 'lucide-react';
+import { reconcileShipments } from '../../lib/processing/compareShipments';
+import { supabase } from '../../lib/supabase';
+import type { Discrepancy } from '../../lib/processing/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -163,6 +167,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'complete'>('idle');
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingStats, setProcessingStats] = useState({ processed: 0, flagged: 0, errors: 0 });
+  const [discrepancies, setDiscrepancies] = useState<Discrepancy[]>([]);
 
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
@@ -173,6 +178,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     type: 'outlook' | 'onedrive' | 'excel' | 'paper';
     label: string;
   } | null>(null);
+
+  // Track discrepancy list modal
+  const [showDiscrepancyList, setShowDiscrepancyList] = useState(false);
+  const [selectedDiscrepancy, setSelectedDiscrepancy] = useState<Discrepancy | null>(null);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -325,8 +334,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }, 2500 + Math.random() * 1000); // Extended from 1-2s to 2.5-3.5s for visibility
   }, [selectedUseCase]);
 
-  // Handle processing
-  const handleProcess = useCallback(() => {
+  // Handle processing - REAL reconciliation
+  const handleProcess = useCallback(async () => {
+    if (!selectedUseCase || !session) return;
+
     setProcessingStatus('processing');
     setProcessingProgress(0);
     setFocusedNodeId('processing');
@@ -342,28 +353,67 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       });
     }, 200);
 
-    // Complete processing after delay
-    setTimeout(() => {
+    try {
+      // Shipping reconciliation
+      if (selectedUseCase.id === 'shipping') {
+        // Fetch actual data from Supabase
+        const [expectedRes, scannedRes, receivedRes] = await Promise.all([
+          supabase.from('shipments_expected').select('*').eq('session_code', sessionCode),
+          supabase.from('barcode_scans').select('*').eq('session_code', sessionCode),
+          supabase.from('shipments_received').select('*').eq('session_code', sessionCode),
+        ]);
+
+        // Run real reconciliation
+        const result = reconcileShipments(
+          expectedRes.data || [],
+          scannedRes.data || [],
+          receivedRes.data || []
+        );
+
+        // Complete after delay with REAL stats
+        setTimeout(() => {
+          clearInterval(interval);
+          setProcessingProgress(100);
+
+          const stats = {
+            processed: result.totalProcessed,
+            flagged: result.totalFlagged,
+            errors: 0,
+          };
+          setProcessingStats(stats);
+          setDiscrepancies(result.discrepancies);
+          setProcessingStatus('complete');
+          setFocusedNodeId('output');
+
+          // Mark outputs as ready
+          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
+
+          onProcessComplete?.(stats);
+        }, 3000);
+      } else {
+        // For other use cases, use placeholder logic for now
+        setTimeout(() => {
+          clearInterval(interval);
+          setProcessingProgress(100);
+
+          const stats = {
+            processed: Math.floor(Math.random() * 20) + 10,
+            flagged: Math.floor(Math.random() * 5),
+            errors: 0,
+          };
+          setProcessingStats(stats);
+          setProcessingStatus('complete');
+          setFocusedNodeId('output');
+          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
+          onProcessComplete?.(stats);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Processing error:', error);
       clearInterval(interval);
-      setProcessingProgress(100);
-
-      const stats = {
-        processed: Math.floor(Math.random() * 20) + 10,
-        flagged: Math.floor(Math.random() * 5),
-        errors: 0,
-      };
-      setProcessingStats(stats);
-      setProcessingStatus('complete');
-      setFocusedNodeId('output');
-
-      // Mark outputs as ready
-      setOutputFiles((prev) =>
-        prev.map((f) => ({ ...f, ready: true }))
-      );
-
-      onProcessComplete?.(stats);
-    }, 3000);
-  }, [onProcessComplete]);
+      setProcessingStatus('idle');
+    }
+  }, [selectedUseCase, sessionCode, onProcessComplete]);
 
   // Trigger presentation mode - open first slide
   useEffect(() => {
@@ -576,7 +626,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           progress: processingProgress,
           stats: processingStatus === 'complete' ? processingStats : undefined,
           sources: processingSourceStatuses,
+          discrepancies: processingStatus === 'complete' ? discrepancies : undefined,
           onShowInfo: () => handleShowInfo('processing', 'processing', 'Data Engine', -1, undefined, undefined),
+          onViewDiscrepancies: () => setShowDiscrepancyList(true),
         },
         className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : '',
       });
@@ -887,6 +939,19 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
       />
+
+      {/* Discrepancy List Modal */}
+      {showDiscrepancyList && discrepancies.length > 0 && (
+        <DiscrepancyListModal
+          discrepancies={discrepancies}
+          onClose={() => setShowDiscrepancyList(false)}
+          onSelectDiscrepancy={(disc) => {
+            setSelectedDiscrepancy(disc);
+            setShowDiscrepancyList(false);
+            // TODO: Open detailed decision modal
+          }}
+        />
+      )}
     </div>
   );
 }

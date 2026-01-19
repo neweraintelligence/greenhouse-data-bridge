@@ -18,7 +18,16 @@ export interface ProcessingNodeData {
   };
   // Source statuses for status messages
   sources?: SourceStatus[];
+  // Actual discrepancies detected
+  discrepancies?: Array<{
+    id: string;
+    type: string;
+    severity: string;
+    shipment_id: string;
+    details: string;
+  }>;
   onShowInfo?: () => void;
+  onViewDiscrepancies?: () => void;
 }
 
 interface ProcessingNodeProps {
@@ -245,7 +254,7 @@ function ProcessingNodeComponent({ data }: ProcessingNodeProps) {
               <span className="text-sm font-bold text-emerald-600">{data.stats.processed}</span>
             </div>
             {data.stats.flagged > 0 && (
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-50">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-50 cursor-pointer hover:bg-amber-100 transition-colors" onClick={data.onViewDiscrepancies}>
                 <span className="text-xs text-gray-600">Flagged for Review</span>
                 <span className="text-sm font-bold text-amber-600">{data.stats.flagged}</span>
               </div>
