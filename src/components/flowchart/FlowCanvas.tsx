@@ -340,8 +340,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           'Expected Shipments': {
             ...currentData,
             spreadsheet: {
-              ...currentData.spreadsheet,
+              headers: currentData.spreadsheet.headers,
               rows: updatedRows,
+              sheetName: currentData.spreadsheet.sheetName,
             },
           },
         }));
