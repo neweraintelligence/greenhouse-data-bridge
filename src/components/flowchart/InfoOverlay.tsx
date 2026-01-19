@@ -482,16 +482,16 @@ function InfoOverlayComponent({
             )}
           </div>
 
-          {/* Button overlay at bottom - only Live Preview */}
-          <div className="absolute bottom-8 left-8 right-8 z-10">
-            {/* Show preview button - always available */}
-            {!showNodePreview && (
+          {/* Button overlay at bottom - compact Live Preview */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            {/* Show preview button - compact and centered */}
+            {!showNodePreview && nodePreviewContent && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNodePreview(true);
                 }}
-                className="w-full px-4 py-3 rounded-2xl bg-white border-2 border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors shadow-lg backdrop-blur-sm"
+                className="px-6 py-2 rounded-xl bg-bmf-blue/90 backdrop-blur-sm border border-white/30 text-white text-sm font-medium hover:bg-bmf-blue transition-all shadow-lg"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 Live Preview
