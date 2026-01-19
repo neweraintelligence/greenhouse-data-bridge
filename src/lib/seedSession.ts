@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { generateRandomScenario, generateDeterministicScenario } from './ai/orderGenerator';
 
 // Demo data - Realistic Big Marble Farms greenhouse operations
 // Mix of OUTBOUND (plants to customers) and INBOUND (supplies from vendors)
@@ -169,8 +170,18 @@ const incidentsData = [
 ];
 
 export async function seedSession(sessionCode: string): Promise<void> {
-  // Insert expected shipments
-  const shipmentsToInsert = expectedShipmentsData.map((row) => ({
+  // Generate random shipping scenario with AI variation
+  let scenario;
+  try {
+    scenario = await generateRandomScenario();
+    console.log('Generated random scenario with planted error:', scenario.plantedError);
+  } catch (error) {
+    console.log('Using deterministic fallback scenario');
+    scenario = generateDeterministicScenario();
+  }
+
+  // Insert expected shipments from generated scenario
+  const shipmentsToInsert = scenario.orders.map((row) => ({
     session_code: sessionCode,
     ship_date: row.ship_date,
     shipment_id: row.shipment_id,
@@ -252,8 +263,8 @@ export async function seedSession(sessionCode: string): Promise<void> {
     throw incidentsError;
   }
 
-  // Insert barcode scans
-  const scansToInsert = barcodeScansData.map((row) => ({
+  // Insert barcode scans from generated scenario
+  const scansToInsert = scenario.scans.map((row) => ({
     session_code: sessionCode,
     shipment_id: row.shipment_id,
     sku: row.sku,
@@ -271,8 +282,8 @@ export async function seedSession(sessionCode: string): Promise<void> {
     throw scansError;
   }
 
-  // Insert received shipments
-  const receivedToInsert = shipmentsReceivedData.map((row) => ({
+  // Insert received shipments from generated scenario
+  const receivedToInsert = scenario.received.map((row) => ({
     session_code: sessionCode,
     shipment_id: row.shipment_id,
     received_qty: row.received_qty,
