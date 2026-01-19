@@ -1,9 +1,11 @@
 import { supabase } from './supabase';
-import { generateRandomScenario, generateDeterministicScenario } from './ai/orderGenerator';
+import { generateDeterministicScenario } from './ai/orderGenerator';
 
-// Demo data - Realistic Big Marble Farms greenhouse operations
-// Mix of OUTBOUND (plants to customers) and INBOUND (supplies from vendors)
-const expectedShipmentsData = [
+// Training and incident data (still static for now)
+// Focus on shipping scenario for dynamic generation
+
+// Keeping old shipping data as backup reference (not used in seeding anymore)
+const expectedShipmentsDataBackup = [
   // OUTBOUND: Bedding plants to garden centers
   { ship_date: '2025-01-06', shipment_id: 'OUT-2025-0001', vendor: 'Home Depot Store #4521', destination: 'HD Distribution Center', expected_qty: 48, expected_sku: 'PET-WAVE-606-PUR', notes: 'Wave Petunia Purple, 606 packs, rush order' },
   { ship_date: '2025-01-08', shipment_id: 'OUT-2025-0002', vendor: 'Green Thumb Garden Center', destination: 'GTGC Mainstreet', expected_qty: 24, expected_sku: 'GER-ZON-45-RED', notes: 'Geranium 4.5" pots' },
@@ -70,8 +72,8 @@ const trainingAcknowledgementsData = [
   { employee_id: 'BM-1015', module: 'Safety & SOP', acknowledged_at: null, method: null, notes: 'new hire' },
 ];
 
-// Barcode scans - with deliberate discrepancies for demo
-const barcodeScansData = [
+// Backup barcode data (not used - now generated dynamically)
+const barcodeScansDataBackup = [
   // OUT-0001: Shortage - only 42 flats scanned instead of 48
   { shipment_id: 'OUT-2025-0001', sku: 'PET-WAVE-606-PUR', qty_scanned: 42, scanned_by: 'Mike Chen', scanned_at: '2025-01-06T10:15:00Z' },
   // OUT-0002: Perfect match
@@ -94,8 +96,8 @@ const barcodeScansData = [
   { shipment_id: 'OUT-2025-0007', sku: 'PET-WAVE-HB10-PUR', qty_scanned: 12, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-22T11:20:00Z' },
 ];
 
-// Received shipments - matches scans, includes condition notes for issues
-const shipmentsReceivedData = [
+// Backup received data (not used - now generated dynamically)
+const shipmentsReceivedDataBackup = [
   // OUT-0001: Shortage - customer received 42 flats, 6 flats missing
   { shipment_id: 'OUT-2025-0001', received_qty: 42, received_at: '2025-01-06T14:30:00Z', receiver_name: 'HD Receiving', condition: '6 flats missing from delivery', reconciled: false },
   // OUT-0002: Perfect
@@ -170,15 +172,9 @@ const incidentsData = [
 ];
 
 export async function seedSession(sessionCode: string): Promise<void> {
-  // Generate random shipping scenario with AI variation
-  let scenario;
-  try {
-    scenario = await generateRandomScenario();
-    console.log('Generated random scenario with planted error:', scenario.plantedError);
-  } catch (error) {
-    console.log('Using deterministic fallback scenario');
-    scenario = generateDeterministicScenario();
-  }
+  // Generate random shipping scenario with variation
+  const scenario = generateDeterministicScenario();
+  console.log('Generated scenario with planted error:', scenario.plantedError);
 
   // Insert expected shipments from generated scenario
   const shipmentsToInsert = scenario.orders.map((row) => ({

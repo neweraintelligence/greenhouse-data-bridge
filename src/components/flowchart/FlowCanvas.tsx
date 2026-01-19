@@ -359,34 +359,81 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }));
   }, [selectedUseCase, sourceStatuses]);
 
-  // Handle source activation (simulate fetching data)
-  const handleSourceActivate = useCallback((sourceName: string, sourceType: string) => {
+  // Handle source activation - fetch REAL data from Supabase
+  const handleSourceActivate = useCallback(async (sourceName: string, sourceType: string) => {
     setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'loading' }));
     setFocusedNodeId(`source-${sourceName}`);
 
-    // Simulate loading delay and generate demo data - extended for presentation visibility
-    setTimeout(() => {
+    // Simulate loading delay for visibility
+    setTimeout(async () => {
       const newData: Record<string, unknown> = {};
 
-      if (sourceType === 'outlook') {
-        newData.emails = generateDemoEmails();
-      } else if (sourceType === 'onedrive') {
-        newData.files = generateDemoFiles();
-      } else if (sourceType === 'excel') {
-        // Route to correct spreadsheet based on use case and source name
-        if (selectedUseCase?.id === 'training') {
-          newData.spreadsheet = sourceName === 'Acknowledgements'
-            ? generateTrainingAcknowledgements()
-            : generateTrainingRoster();
-        } else {
-          newData.spreadsheet = generateDemoSpreadsheet();
-        }
-      }
+      try {
+        if (sourceType === 'excel') {
+          // Fetch actual orders from Supabase
+          if (selectedUseCase?.id === 'shipping') {
+            const { data } = await supabase
+              .from('shipments_expected')
+              .select('ship_date, shipment_id, vendor, expected_sku, expected_qty')
+              .eq('session_code', sessionCode)
+              .order('ship_date');
 
-      setSourceData((prev) => ({ ...prev, [sourceName]: newData }));
-      setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
-    }, 2500 + Math.random() * 1000); // Extended from 1-2s to 2.5-3.5s for visibility
-  }, [selectedUseCase]);
+            newData.spreadsheet = {
+              sheetName: 'Expected Shipments',
+              headers: ['Ship Date', 'Shipment ID', 'Customer/Vendor', 'SKU', 'Qty'],
+              rows: (data || []).map(s => [
+                s.ship_date,
+                s.shipment_id,
+                s.vendor,
+                s.expected_sku,
+                s.expected_qty
+              ]),
+            };
+          } else if (selectedUseCase?.id === 'training') {
+            newData.spreadsheet = sourceName === 'Acknowledgements'
+              ? generateTrainingAcknowledgements()
+              : generateTrainingRoster();
+          } else {
+            newData.spreadsheet = generateDemoSpreadsheet();
+          }
+        } else if (sourceType === 'outlook') {
+          // Generate email from actual order data
+          const { data: orders } = await supabase
+            .from('shipments_expected')
+            .select('*')
+            .eq('session_code', sessionCode)
+            .limit(5);
+
+          // Use first order for email demo
+          if (orders && orders.length > 0) {
+            const order = orders[0];
+            newData.emails = [
+              {
+                id: '1',
+                from: order.vendor,
+                fromEmail: `orders@${order.vendor.toLowerCase().replace(/\s+/g, '').replace('#', '')}.com`,
+                subject: `${order.shipment_id} - Shipment Notification`,
+                preview: `Order confirmed: ${order.expected_qty} units of ${order.expected_sku}`,
+                timestamp: new Date().toISOString(),
+                hasAttachment: true,
+                unread: true,
+              },
+            ];
+          } else {
+            newData.emails = generateDemoEmails();
+          }
+        } else if (sourceType === 'onedrive') {
+          newData.files = generateDemoFiles();
+        }
+
+        setSourceData((prev) => ({ ...prev, [sourceName]: newData }));
+        setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
+      } catch (error) {
+        console.error('Error fetching source data:', error);
+        setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
+      }
+    }, 2500 + Math.random() * 1000);
+  }, [selectedUseCase, sessionCode]);
 
   // Handle processing - REAL reconciliation
   const handleProcess = useCallback(async () => {

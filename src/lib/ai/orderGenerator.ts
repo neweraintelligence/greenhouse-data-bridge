@@ -1,7 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
 // Product catalog for Big Marble Farms
 const PRODUCT_CATALOG = {
   outbound: [
@@ -78,7 +74,7 @@ export interface GeneratedScenario {
   } | null;
 }
 
-export async function generateRandomScenario(): Promise<GeneratedScenario> {
+export function generateRandomScenario(): GeneratedScenario {
   // For demo reliability, use deterministic selection with variation
   // Instead of full AI generation, pick from catalog and add variation
 
@@ -183,7 +179,11 @@ export async function generateRandomScenario(): Promise<GeneratedScenario> {
   }
 
   // Plant ONE subtle error (50% chance qty shortage, 50% chance SKU mismatch)
-  let plantedError = null;
+  let plantedError: {
+    shipment_id: string;
+    type: 'qty_shortage' | 'sku_mismatch';
+    description: string;
+  } | null = null;
 
   if (orders.length > 2 && Math.random() > 0.2) { // 80% chance of planting error
     const errorType = Math.random() > 0.5 ? 'qty_shortage' : 'sku_mismatch';
@@ -228,7 +228,5 @@ export async function generateRandomScenario(): Promise<GeneratedScenario> {
   };
 }
 
-// Fallback if Gemini fails - use deterministic generation
-export function generateDeterministicScenario(): GeneratedScenario {
-  return generateRandomScenario(); // Same logic, no Gemini call needed
-}
+// Export as deterministic scenario (can add Gemini enhancement later)
+export { generateRandomScenario as generateDeterministicScenario };
