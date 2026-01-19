@@ -1,0 +1,207 @@
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { Html5Qrcode } from 'html5-qrcode';
+import { Camera, Check, X, AlertTriangle, Package } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+export function MobileScanner() {
+  const { sessionCode } = useParams<{ sessionCode: string }>();
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedItems, setScannedItems] = useState<Array<{shipmentId: string; productName: string; qty: number; status: 'success' | 'error'; message: string}>>([]);
+  const [error, setError] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+
+  useEffect(() => {
+    // Initialize scanner
+    const scanner = new Html5Qrcode('qr-reader');
+    scannerRef.current = scanner;
+
+    return () => {
+      if (scannerRef.current?.isScanning) {
+        scannerRef.current.stop();
+      }
+    };
+  }, []);
+
+  const startScanning = async () => {
+    if (!scannerRef.current) return;
+
+    try {
+      await scannerRef.current.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        async (decodedText) => {
+          try {
+            // Parse QR data
+            const data = JSON.parse(decodedText);
+
+            // Validate it's for this session
+            if (data.sessionCode !== sessionCode) {
+              addScanResult(data.shipmentId || 'Unknown', data.productName || 'Unknown Product', 0, 'error', 'Wrong session - scan from your own screen');
+              return;
+            }
+
+            // Insert scan to Supabase
+            const { error: insertError } = await supabase.from('barcode_scans').insert({
+              session_code: sessionCode,
+              shipment_id: data.shipmentId,
+              sku: data.sku,
+              qty_scanned: data.qty,
+              scanned_by: 'Mobile Scanner',
+            });
+
+            if (insertError) {
+              addScanResult(data.shipmentId, data.productName, data.qty, 'error', 'Failed to save scan');
+            } else {
+              addScanResult(data.shipmentId, data.productName, data.qty, 'success', 'Scan recorded');
+            }
+
+            // Brief pause before allowing next scan
+            setTimeout(() => {
+              // Ready for next scan
+            }, 500);
+
+          } catch (err) {
+            console.error('Error processing scan:', err);
+            addScanResult('Unknown', 'Invalid QR Code', 0, 'error', 'Could not parse QR code');
+          }
+        },
+        (errorMessage) => {
+          // Scanning error - usually camera not found or permission denied
+          console.log('Scan error:', errorMessage);
+        }
+      );
+
+      setIsScanning(true);
+      setCameraReady(true);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to start scanner:', err);
+      setError('Camera access denied or not available');
+      setCameraReady(false);
+    }
+  };
+
+  const stopScanning = () => {
+    if (scannerRef.current?.isScanning) {
+      scannerRef.current.stop();
+      setIsScanning(false);
+    }
+  };
+
+  const addScanResult = (shipmentId: string, productName: string, qty: number, status: 'success' | 'error', message: string) => {
+    setScannedItems(prev => [{
+      shipmentId,
+      productName,
+      qty,
+      status,
+      message,
+    }, ...prev].slice(0, 10)); // Keep last 10 scans
+  };
+
+  if (!sessionCode) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-6 shadow-lg text-center max-w-sm w-full">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-gray-800 mb-2">Invalid Session</h1>
+          <p className="text-gray-600">
+            Please scan the QR code from the Barcode Log node to start scanning.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-bmf-blue to-bmf-blue-dark p-4">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-4 shadow-lg">
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/bmf-logo.png" alt="BMF" className="h-10" />
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">Barcode Scanner</h1>
+            <p className="text-sm text-gray-600">Session: <code className="font-mono">{sessionCode}</code></p>
+          </div>
+        </div>
+      </div>
+
+      {/* Scanner area */}
+      <div className="bg-white rounded-2xl p-6 mb-4 shadow-lg">
+        <div id="qr-reader" className={`${isScanning ? 'block' : 'hidden'}`} />
+
+        {!cameraReady && (
+          <div className="text-center py-12">
+            <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 mb-6">Ready to scan shipping labels</p>
+            <button
+              onClick={startScanning}
+              className="px-8 py-4 rounded-2xl bg-bmf-blue hover:bg-bmf-blue-dark text-white font-semibold transition-all shadow-lg flex items-center gap-2 mx-auto"
+            >
+              <Camera className="w-5 h-5" />
+              Start Camera
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 rounded-xl bg-red-100 border border-red-300 text-red-700 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {isScanning && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={stopScanning}
+              className="px-6 py-3 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition-colors"
+            >
+              Stop Scanning
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Scanned items log */}
+      {scannedItems.length > 0 && (
+        <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            Recent Scans ({scannedItems.length})
+          </h2>
+          <div className="space-y-2">
+            {scannedItems.map((item, idx) => (
+              <div
+                key={idx}
+                className={`p-3 rounded-xl border-2 ${
+                  item.status === 'success'
+                    ? 'bg-green-50 border-green-300'
+                    : 'bg-red-50 border-red-300'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {item.status === 'success' ? (
+                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">{item.shipmentId}</p>
+                    <p className="text-sm text-gray-700">{item.productName}</p>
+                    <p className="text-sm text-gray-600">{item.qty} units</p>
+                    <p className="text-xs text-gray-500 mt-1 italic">{item.message}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

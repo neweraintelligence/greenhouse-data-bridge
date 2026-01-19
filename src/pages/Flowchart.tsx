@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Presentation } from 'lucide-react';
+import { LogOut, LayoutDashboard, Presentation, Printer } from 'lucide-react';
 import { useSessionStore } from '../store/sessionStore';
 import { FlowCanvas } from '../components/flowchart/FlowCanvas';
 
@@ -54,6 +54,15 @@ export function Flowchart() {
             >
               <Presentation className="w-4 h-4" />
               <span>Present</span>
+            </button>
+
+            {/* Print Labels - for barcode demo */}
+            <button
+              onClick={() => window.open(`/print-labels/${session.code}`, '_blank')}
+              className="w-9 h-9 rounded-xl hover:bg-stone-100 transition-colors flex items-center justify-center text-stone-600 hover:text-stone-900"
+              title="Print QR Labels"
+            >
+              <Printer className="w-4 h-4" />
             </button>
 
             {/* Dashboard - subtle icon button */}
