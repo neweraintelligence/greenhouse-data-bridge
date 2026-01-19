@@ -223,7 +223,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track info overlay
   const [infoOverlayContent, setInfoOverlayContent] = useState<NodeInfo | null>(null);
   const [infoNodeId, setInfoNodeId] = useState<string | null>(null);
-  const [infoNodeIndex, setInfoNodeIndex] = useState<number | null>(null);
   const [infoNodeType, setInfoNodeType] = useState<string | null>(null);
   const [infoNodeLabel, setInfoNodeLabel] = useState<string | null>(null);
   const [infoNodeFetchHandler, setInfoNodeFetchHandler] = useState<(() => void) | null>(null);
@@ -367,7 +366,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (info) {
       setInfoOverlayContent(info);
       setInfoNodeId(nodeId);
-      setInfoNodeIndex(sourceIndex);
       setInfoNodeType(nodeType);
       setInfoNodeLabel(sourceName);
 
@@ -1399,11 +1397,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         onClose={() => {
           setInfoOverlayContent(null);
           setInfoNodeId(null);
-          setInfoNodeIndex(null);
           setInfoNodeType(null);
           setInfoNodeLabel(null);
           setInfoNodeFetchHandler(null);
           setInfoNodeCanFetch(false);
+          setPresentationActiveNode(null);
         }}
         nodePreviewContent={getNodePreviewContent()}
         onFetchData={infoNodeFetchHandler || undefined}
