@@ -179,6 +179,54 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     solution: 'Instant answer. Click for details. Focus on the 12 that need attention, ignore the 147 that are fine.',
     keyInsight: 'Turns chaos into clarity. You know exactly what needs your time.',
   },
+
+  etl: {
+    id: 'etl',
+    title: 'Data Normalization',
+    subtitle: 'Making Data Comparable',
+    imageOnLeft: false,
+    description:
+      'Think of this as translation: converting different formats into one standard so AI can compare apples to apples. Vendors send data in their format, this converts it to yours.',
+    painPoint: 'Vendor uses pounds, you track kilograms. BOL shows "1/15/25", database needs ISO format. Vendor SKU codes don\'t match your internal SKUs. Can\'t compare without manual conversion.',
+    solution: 'Automatic transformation: units converted, dates standardized, vendor SKUs mapped to internal codes. Every source normalized before comparison.',
+    keyInsight: 'Without normalization, you can\'t compare. Garbage in, garbage out. This ensures clean inputs.',
+  },
+
+  reviewQueue: {
+    id: 'reviewQueue',
+    title: 'Review Queue',
+    subtitle: 'Human-in-the-Loop',
+    imageOnLeft: true,
+    description:
+      'Items flagged during processing that need human judgment. Low confidence extractions, quantity mismatches, condition issues - anything AI can\'t auto-resolve goes here for your decision.',
+    painPoint: 'Issues buried in email, spreadsheets, sticky notes. "Did we resolve that shortage?" No one knows. Follow-up is manual and inconsistent.',
+    solution: 'All flagged items in one queue. Click item, see details, make decision (Approve/Reject/Escalate), log it. Nothing forgotten.',
+    keyInsight: 'AI handles certainty. Humans handle ambiguity. This is the handoff point.',
+  },
+
+  escalation: {
+    id: 'escalation',
+    title: 'Escalation Router',
+    subtitle: 'Auto-Routing Critical Issues',
+    imageOnLeft: false,
+    description:
+      'Severity-based intelligent routing. Critical issues (equipment failure, major shortage) escalate immediately to the right team. System knows who needs to know based on issue type and urgency.',
+    painPoint: 'Everything funnels to one email inbox. Critical equipment failure sits next to routine check. Urgent buried in noise. Response delayed.',
+    solution: 'Auto-routing by severity: Critical → Safety Team (immediate). High → Operations Manager. Medium → Supervisor. Right person, right urgency, every time.',
+    keyInsight: 'Escalation shouldn\'t need human triage. Rules-based routing ensures urgent gets urgent treatment.',
+  },
+
+  communications: {
+    id: 'communications',
+    title: 'Communications Layer',
+    subtitle: 'Automated Follow-Up',
+    imageOnLeft: true,
+    description:
+      'Automated notifications sent based on processing results. Escalations trigger emails. Flagged items generate alerts. Decisions logged and communicated. Detection + action, not just detection.',
+    painPoint: 'Issue detected, then manual email to notify people. Delays happen. Follow-up forgotten. Loop never closes.',
+    solution: 'Instant notifications: Safety emailed on critical. Manager alerted on major discrepancy. Training reminders sent. Automatic, consistent, logged.',
+    keyInsight: 'Detection without action is pointless. This closes the loop automatically.',
+  },
 };
 
 // ============================================================================

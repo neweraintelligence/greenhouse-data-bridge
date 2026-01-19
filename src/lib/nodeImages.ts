@@ -7,7 +7,11 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
     onedrive: '/demo_pack/use_case_images/03_invoice_line_items.png',
     barcode: '/demo_pack/use_case_images/04_barcode_scanning_action.png',
     paper: '/demo_pack/use_case_images/05_digital_signature_tablet.png',
+    etl: '/demo_pack/use_case_images/06_data_reconciliation_flow.png', // Reuse for ETL visualization
     processing: '/demo_pack/use_case_images/06_data_reconciliation_flow.png',
+    reviewQueue: '/demo_pack/use_case_images/07_data_staging_inbox.png', // Reuse for review queue
+    escalation: '/demo_pack/use_case_images/06_data_reconciliation_flow.png', // Reuse for escalation
+    communications: '/demo_pack/use_case_images/02_email_bol_notification.png', // Reuse for communications
     intake: '/demo_pack/use_case_images/07_data_staging_inbox.png',
     output: '/demo_pack/use_case_images/08_dashboard_kpi_results.png',
   },
