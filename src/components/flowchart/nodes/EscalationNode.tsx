@@ -24,7 +24,6 @@ interface EscalationNodeProps {
 
 function EscalationNodeComponent({ data }: EscalationNodeProps) {
   const hasCritical = data.items.some((i) => i.severity === 'critical');
-  const hasItems = data.items.length > 0;
 
   return (
     <div

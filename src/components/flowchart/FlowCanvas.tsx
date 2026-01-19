@@ -186,6 +186,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const [escalations, setEscalations] = useState<Array<{id: string; source_type: string; source_id: string; severity: string; routed_to: string; status: string}>>([]);
   const [communications, setCommunications] = useState<Array<{id: string; comm_type: string; recipient: string; subject: string; sent_at: string}>>([]);
 
+  // Track live barcode scans
+  const [liveScans, setLiveScans] = useState<Array<{shipment_id: string; sku: string; qty_scanned: number; scanned_at: string}>>([]);
+
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
 
@@ -584,6 +587,36 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       }, 1500);
     }
   }, [canProcess, etlStatus]);
+
+  // Subscribe to realtime barcode scans
+  useEffect(() => {
+    if (!sessionCode) return;
+
+    const channel = supabase
+      .channel(`barcode-scans-${sessionCode}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'barcode_scans',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          console.log('New barcode scan detected:', payload.new);
+          const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_at: string};
+          setLiveScans(prev => [scan, ...prev]);
+
+          // TODO: Validate scan against expected shipments
+          // TODO: Show toast notification for successful/error scans
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [sessionCode]);
 
   // Auto-simulation effect
   useEffect(() => {
