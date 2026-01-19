@@ -1138,76 +1138,78 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       },
     });
 
-    // Branching edges from processing
-    if (isComplete) {
-      // To Review Queue (if flagged items exist)
-      if (discrepancies.length > 0) {
-        edges.push({
-          id: 'edge-processing-review',
-          source: 'processing',
-          target: 'review-queue',
-          style: {
-            stroke: '#f59e0b',
-            strokeWidth: 2.5,
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: '#f59e0b',
-          },
-        });
-      }
+    // Branching edges from processing (always visible, change color based on state)
+    const hasDiscrepancies = discrepancies.length > 0;
+    const hasCritical = discrepancies.some(d => d.severity === 'critical' || d.severity === 'high');
+    const hasComms = communications.length > 0;
 
-      // To Escalation (if critical items)
-      const hasCritical = discrepancies.some(d => d.severity === 'critical' || d.severity === 'high');
-      if (hasCritical) {
-        edges.push({
-          id: 'edge-processing-escalation',
-          source: 'processing',
-          target: 'escalation',
-          style: {
-            stroke: '#ef4444',
-            strokeWidth: 2.5,
-            strokeDasharray: '5,5',
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: '#ef4444',
-          },
-        });
-      }
+    // To Review Queue (always visible)
+    edges.push({
+      id: 'edge-processing-review',
+      source: 'processing',
+      target: 'review-queue',
+      animated: isComplete && hasDiscrepancies,
+      style: {
+        stroke: isComplete && hasDiscrepancies ? '#f59e0b' : '#e2e8f0',
+        strokeWidth: isComplete && hasDiscrepancies ? 2.5 : 2,
+        opacity: isComplete && hasDiscrepancies ? 1 : 0.3,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isComplete && hasDiscrepancies ? '#f59e0b' : '#e2e8f0',
+      },
+    });
 
-      // To Communications
-      if (communications.length > 0) {
-        edges.push({
-          id: 'edge-processing-communications',
-          source: 'processing',
-          target: 'communications',
-          style: {
-            stroke: '#3b82f6',
-            strokeWidth: 2,
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: '#3b82f6',
-          },
-        });
-      }
+    // To Escalation (always visible)
+    edges.push({
+      id: 'edge-processing-escalation',
+      source: 'processing',
+      target: 'escalation',
+      animated: isComplete && hasCritical,
+      style: {
+        stroke: isComplete && hasCritical ? '#ef4444' : '#e2e8f0',
+        strokeWidth: isComplete && hasCritical ? 2.5 : 2,
+        strokeDasharray: '5,5',
+        opacity: isComplete && hasCritical ? 1 : 0.3,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isComplete && hasCritical ? '#ef4444' : '#e2e8f0',
+      },
+    });
 
-      // To Output (always)
-      edges.push({
-        id: 'edge-processing-output',
-        source: 'processing',
-        target: 'output',
-        style: {
-          stroke: '#10b981',
-          strokeWidth: 2.5,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: '#10b981',
-        },
-      });
-    }
+    // To Communications (always visible)
+    edges.push({
+      id: 'edge-processing-communications',
+      source: 'processing',
+      target: 'communications',
+      animated: isComplete && hasComms,
+      style: {
+        stroke: isComplete && hasComms ? '#3b82f6' : '#e2e8f0',
+        strokeWidth: isComplete && hasComms ? 2 : 2,
+        opacity: isComplete && hasComms ? 1 : 0.3,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isComplete && hasComms ? '#3b82f6' : '#e2e8f0',
+      },
+    });
+
+    // To Output (always visible)
+    edges.push({
+      id: 'edge-processing-output',
+      source: 'processing',
+      target: 'output',
+      animated: isComplete,
+      style: {
+        stroke: isComplete ? '#10b981' : '#e2e8f0',
+        strokeWidth: isComplete ? 2.5 : 2,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isComplete ? '#10b981' : '#e2e8f0',
+      },
+    });
 
     return edges;
   }, [selectedUseCase, sourceStatuses, etlStatus, processingStatus, discrepancies, communications]);

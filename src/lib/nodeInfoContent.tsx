@@ -146,8 +146,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   processing: {
     id: 'processing',
-    title: 'The Reconciliation',
-    subtitle: 'Comparing Everything',
+    title: 'COMPARING EVERYTHING',
+    subtitle: 'The Reconciliation',
     imageOnLeft: true,
     description:
       'The system takes the order, the invoice, the shipment notification, the barcode scans, and the signed receipt — and compares them all. Where they match, great. Where they don\'t, it flags the issue.',
@@ -158,8 +158,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   intake: {
     id: 'intake',
-    title: 'Data Staging Area',
-    subtitle: 'Waiting for Everything to Arrive',
+    title: 'WAITING FOR EVERYTHING TO ARRIVE',
+    subtitle: 'Data Staging Area',
     imageOnLeft: false,
     description:
       'Think of this like an inbox for data. It shows which pieces have arrived (order data, emails, scans, receipts) and which are still pending. Once everything is ready, reconciliation starts automatically.',
