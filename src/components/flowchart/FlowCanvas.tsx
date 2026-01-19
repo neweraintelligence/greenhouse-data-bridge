@@ -731,6 +731,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             spreadsheet: data.spreadsheet,
             capturedImage: data.capturedImage,
             qrCodeUrl,
+            sessionCode, // For barcode scanner QR generation
           },
           className: isUnfocused ? 'node-unfocused' : isFocused ? 'node-focused' : !isRevealed ? 'node-unrevealed' : '',
         });

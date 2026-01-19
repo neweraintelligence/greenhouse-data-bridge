@@ -5,6 +5,7 @@ import { OutlookMiniApp, type EmailItem } from './mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp, type SpreadsheetData } from './mini-apps/ExcelMiniApp';
 import { PaperScanMiniApp, type ExtractedField } from './mini-apps/PaperScanMiniApp';
+import { QRCodeSVG } from 'qrcode.react';
 
 export type DisplayMode = 'collapsed' | 'preview' | 'maximized';
 
@@ -32,6 +33,8 @@ export interface SourceNodeData {
   onConfirm?: () => void;
   // QR code URL for paper sources
   qrCodeUrl?: string;
+  // Session code for generating scanner URLs
+  sessionCode?: string;
 }
 
 const iconMap = {
@@ -326,7 +329,23 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
             )}
 
             {data.type === 'barcode' && (
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {/* Scanner QR Code - always visible for demo */}
+                <div className="text-center p-3 bg-violet-50 rounded-xl border border-violet-200">
+                  <p className="text-xs font-medium text-gray-700 mb-2">Scan to Open Mobile Scanner</p>
+                  {data.sessionCode && (
+                    <div className="bg-white p-2 rounded-lg inline-block">
+                      <QRCodeSVG
+                        value={`${window.location.origin}/scan/${data.sessionCode}`}
+                        size={100}
+                        level="M"
+                        includeMargin={false}
+                      />
+                    </div>
+                  )}
+                  <p className="text-[10px] text-gray-500 mt-2">Point phone camera at QR code</p>
+                </div>
+
                 {data.status === 'loading' ? (
                   <div className="space-y-1.5">
                     {[1, 2, 3].map((i) => (
@@ -345,27 +364,23 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
                     <div className="space-y-1 max-h-[120px] overflow-y-auto">
                       {/* Demo barcode entries with SKUs */}
                       {[
-                        { code: 'SHP-2025-0001', time: '10:42 AM', type: 'Shipment', sku: 'SKU-3382' },
-                        { code: 'PLT-8847-A', time: '10:38 AM', type: 'Pallet', sku: 'SKU-1247' },
-                        { code: 'SHP-2025-0002', time: '10:35 AM', type: 'Shipment', sku: 'SKU-5891' },
-                        { code: 'BOX-44521', time: '10:31 AM', type: 'Box', sku: 'SKU-7733' },
+                        { code: 'OUT-0001', time: '10:15 AM', sku: 'PET-WAVE-606-PUR', qty: 42 },
+                        { code: 'OUT-0002', time: '09:42 AM', sku: 'GER-ZON-45-RED', qty: 24 },
+                        { code: 'OUT-0003', time: '14:20 AM', sku: 'PET-STVB-606-PUR', qty: 72 },
                       ].map((entry, i) => (
                         <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs">
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
                               <code className="font-mono text-violet-600 font-semibold text-[11px]">{entry.code}</code>
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600">
-                                {entry.type}
-                              </span>
                             </div>
                             <code className="font-mono text-gray-500 text-[10px]">{entry.sku}</code>
                           </div>
-                          <span className="text-gray-400 text-[10px]">{entry.time}</span>
+                          <span className="text-gray-400 text-[10px]">{entry.qty} units</span>
                         </div>
                       ))}
                     </div>
                     <div className="text-center pt-1">
-                      <span className="text-[10px] text-gray-400">4 scans logged</span>
+                      <span className="text-[10px] text-gray-400">Scans from seed data</span>
                     </div>
                   </>
                 )}
