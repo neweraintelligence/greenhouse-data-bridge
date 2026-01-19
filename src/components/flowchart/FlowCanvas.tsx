@@ -21,6 +21,7 @@ import { CommunicationsNode } from './nodes/CommunicationsNode';
 import { ExpandedNodeModal } from './ExpandedNodeModal';
 import { InfoOverlay, type NodeInfo } from './InfoOverlay';
 import { DiscrepancyListModal } from '../decisions/DiscrepancyListModal';
+import { DiscrepancyDecisionModal } from '../decisions/DiscrepancyDecisionModal';
 import { OutlookMiniApp } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp } from './nodes/mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp } from './nodes/mini-apps/ExcelMiniApp';
@@ -197,6 +198,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track discrepancy list modal
   const [showDiscrepancyList, setShowDiscrepancyList] = useState(false);
+  const [selectedDiscrepancy, setSelectedDiscrepancy] = useState<Discrepancy | null>(null);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -242,6 +244,39 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (sourceType === 'barcode') return;
     setExpandedNode({ id: sourceName, type: sourceType, label: sourceName });
   }, []);
+
+  // Handle discrepancy decision
+  const handleDiscrepancyDecision = useCallback(async (
+    decision: 'approved' | 'rejected' | 'escalated',
+    comment?: string
+  ) => {
+    if (!selectedDiscrepancy) return;
+
+    try {
+      // Save decision to Supabase
+      await supabase.from('review_decisions').insert({
+        session_code: sessionCode,
+        item_type: 'discrepancy',
+        item_id: selectedDiscrepancy.id,
+        decision,
+        decided_by: 'Demo User',
+        comment: comment || null,
+      });
+
+      // Remove from discrepancies list
+      setDiscrepancies(prev => prev.filter(d => d.id !== selectedDiscrepancy.id));
+
+      // Update stats
+      setProcessingStats(prev => ({
+        ...prev,
+        flagged: prev.flagged - 1,
+      }));
+
+      console.log('Decision saved:', decision, selectedDiscrepancy.id);
+    } catch (error) {
+      console.error('Error saving decision:', error);
+    }
+  }, [selectedDiscrepancy, sessionCode]);
 
   // Handle show info overlay
   const handleShowInfo = useCallback((
@@ -1172,10 +1207,19 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         <DiscrepancyListModal
           discrepancies={discrepancies}
           onClose={() => setShowDiscrepancyList(false)}
-          onSelectDiscrepancy={() => {
+          onSelectDiscrepancy={(disc) => {
+            setSelectedDiscrepancy(disc);
             setShowDiscrepancyList(false);
-            // TODO: Open detailed decision modal for selected discrepancy
           }}
+        />
+      )}
+
+      {/* Detailed Decision Modal */}
+      {selectedDiscrepancy && (
+        <DiscrepancyDecisionModal
+          discrepancy={selectedDiscrepancy}
+          onClose={() => setSelectedDiscrepancy(null)}
+          onDecision={handleDiscrepancyDecision}
         />
       )}
     </div>
