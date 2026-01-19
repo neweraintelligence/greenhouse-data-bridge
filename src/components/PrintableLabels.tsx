@@ -14,14 +14,16 @@ interface PrintableLabelsProps {
 }
 
 function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsProps) {
-  // Add one extra "unexpected" shipment for demo
+  // Add one subtly incorrect shipment for demo - same format, wrong variety (easy to miss!)
   const allLabels = [
     ...shipments.slice(0, 4), // First 4 expected shipments
+    // SUBTLE ERROR: This SKU is slightly different from expected (PINK vs PURPLE)
+    // Looks normal until system validates it
     {
-      shipment_id: 'EXTRA-001',
-      product_name: 'Basil (UNEXPECTED)',
-      sku: 'CTN-12OZ',
-      expected_qty: 200,
+      shipment_id: 'OUT-2025-0003',
+      product_name: 'Supertunia Vista Bubblegum - PURPLE', // Expected was PINK
+      sku: 'PET-STVB-606-PUR',
+      expected_qty: 72,
     },
   ];
 
@@ -42,8 +44,6 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
       {/* Labels grid */}
       <div className="grid grid-cols-2 gap-8">
         {allLabels.map((shipment, idx) => {
-          const isExtra = shipment.shipment_id === 'EXTRA-001';
-
           // QR code encodes shipment data as JSON
           const qrData = JSON.stringify({
             sessionCode,
@@ -57,9 +57,7 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
           return (
             <div
               key={idx}
-              className={`p-6 rounded-2xl border-4 ${
-                isExtra ? 'border-red-400 bg-red-50' : 'border-bmf-blue bg-blue-50'
-              }`}
+              className="p-6 rounded-2xl border-4 border-bmf-blue bg-blue-50"
             >
               <div className="flex items-start gap-4">
                 {/* QR Code */}
@@ -72,13 +70,8 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
                   />
                 </div>
 
-                {/* Label info */}
+                {/* Label info - all labels look identical and professional */}
                 <div className="flex-1">
-                  {isExtra && (
-                    <div className="mb-2 px-2 py-1 bg-red-200 text-red-800 text-xs font-bold rounded inline-block">
-                      ⚠️ EXTRA - NOT EXPECTED
-                    </div>
-                  )}
                   <h3 className="text-xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'var(--font-display)' }}>
                     {shipment.shipment_id}
                   </h3>
@@ -98,12 +91,6 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
                       </code>
                     </div>
                   </div>
-
-                  {isExtra && (
-                    <p className="text-xs text-red-600 mt-3 italic">
-                      Scan this to demo unexpected shipment detection
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -113,14 +100,20 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
 
       {/* Instructions */}
       <div className="mt-12 p-6 rounded-2xl bg-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Demo Instructions:</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Scanning Instructions:</h3>
         <ol className="space-y-2 text-sm text-gray-700" style={{ fontFamily: 'var(--font-body)' }}>
-          <li>1. Print this page or display on a separate screen/tablet</li>
-          <li>2. In the Barcode Log node, click the QR code to open scanner on your phone</li>
-          <li>3. Scan labels 1-4 to add expected shipments (green checkmarks)</li>
-          <li>4. Scan EXTRA-001 to trigger "unexpected shipment" error (red flag)</li>
-          <li>5. Watch the laptop screen update in real-time as you scan</li>
+          <li>1. Print this page for physical demo</li>
+          <li>2. In Barcode Log node on laptop, scan the session QR to open mobile scanner</li>
+          <li>3. Use phone camera to scan product labels</li>
+          <li>4. Each scan validates against expected shipments</li>
+          <li>5. Label #5 has a subtle SKU mismatch (PURPLE instead of PINK) - system will detect it</li>
+          <li>6. Watch laptop screen update in real-time as you scan</li>
         </ol>
+        <div className="mt-4 p-3 bg-amber-100 rounded-lg">
+          <p className="text-xs text-amber-800">
+            <strong>Note:</strong> All labels look identical and professional. The wrong-color variant (label #5) is subtle - only the reconciliation system will catch it by comparing SKUs.
+          </p>
+        </div>
       </div>
 
       {/* Print hint */}

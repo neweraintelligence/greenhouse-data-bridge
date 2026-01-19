@@ -43,14 +43,30 @@ export function PrintLabels() {
     fetchShipments();
   }, [sessionCode]);
 
-  // Helper to get product name from SKU
+  // Helper to get product name from SKU (realistic greenhouse products)
   const getProductName = (sku: string): string => {
     const productMap: Record<string, string> = {
-      'CTN-12OZ': 'Petunias',
-      'CTN-1LB': 'Tomatoes',
-      'BAG-2LB': 'Herbs',
+      // Outbound - Bedding Plants
+      'PET-WAVE-606-PUR': 'Wave Petunia Purple (606 pack)',
+      'PET-WAVE-606-PINK': 'Wave Petunia Pink (606 pack)',
+      'PET-STVB-606-PINK': 'Supertunia Vista Bubblegum - PINK (606 pack)',
+      'PET-STVB-606-PUR': 'Supertunia Vista Bubblegum - PURPLE (606 pack)', // Wrong color variant
+      'GER-ZON-45-RED': 'Zonal Geranium Red (4.5" pot)',
+      'GER-IVY-HB10-MIX': 'Ivy Geranium Mix (10" hanging basket)',
+      'CAL-SBMG-1801-GRAPE': 'Superbells Magic Grapefruit (1801 pack)',
+      'TOM-CEL-1204': 'Celebrity Tomato (1204 pack)',
+      'BAS-SWT-804': 'Sweet Basil (804 pack)',
+      'PET-WAVE-HB10-PUR': 'Wave Petunia Purple (10" hanging basket)',
+      'PER-ECHPW-1GAL': 'Echinacea PowWow (1-gallon)',
+
+      // Inbound - Supplies
+      'PLUG-288-PETWAVE': 'Petunia Wave Plugs (288-cell tray)',
+      'PLUG-288-TOMBF': 'Tomato Big Beef Plugs (288-cell tray)',
+      'SUNGRO-PROF-3CF': 'Sun Gro Professional Mix (3 cu ft bag)',
+      'JACK-201020-25LB': 'Jack\'s 20-10-20 Fertilizer (25 lb bag)',
+      'INS-606-225': '606 Insert Trays (2.25" deep)',
     };
-    return productMap[sku] || 'Mixed Produce';
+    return productMap[sku] || sku;
   };
 
   if (loading) {
