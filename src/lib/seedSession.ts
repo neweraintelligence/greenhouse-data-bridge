@@ -4,38 +4,6 @@ import { generateDeterministicScenario } from './ai/orderGenerator';
 // Training and incident data (still static for now)
 // Focus on shipping scenario for dynamic generation
 
-// Keeping old shipping data as backup reference (not used in seeding anymore)
-const expectedShipmentsDataBackup = [
-  // OUTBOUND: Bedding plants to garden centers
-  { ship_date: '2025-01-06', shipment_id: 'OUT-2025-0001', vendor: 'Home Depot Store #4521', destination: 'HD Distribution Center', expected_qty: 48, expected_sku: 'PET-WAVE-606-PUR', notes: 'Wave Petunia Purple, 606 packs, rush order' },
-  { ship_date: '2025-01-08', shipment_id: 'OUT-2025-0002', vendor: 'Green Thumb Garden Center', destination: 'GTGC Mainstreet', expected_qty: 24, expected_sku: 'GER-ZON-45-RED', notes: 'Geranium 4.5" pots' },
-  { ship_date: '2025-01-10', shipment_id: 'OUT-2025-0003', vendor: "Lowe's Store #8847", destination: 'Lowes Regional DC', expected_qty: 72, expected_sku: 'PET-STVB-606-PINK', notes: 'Supertunia Vista Bubblegum' },
-
-  // INBOUND: Plugs and supplies from vendors
-  { ship_date: '2025-01-12', shipment_id: 'IN-2025-0001', vendor: 'Ball Horticultural', destination: 'BMG Greenhouse 1', expected_qty: 20, expected_sku: 'PLUG-288-PETWAVE', notes: 'Petunia Wave plugs, 288-cell trays' },
-  { ship_date: '2025-01-14', shipment_id: 'IN-2025-0002', vendor: 'Sun Gro Horticulture', destination: 'BMG Supply Shed', expected_qty: 150, expected_sku: 'SUNGRO-PROF-3CF', notes: 'Professional growing mix, 3 cu ft bags' },
-
-  // OUTBOUND: More bedding plants
-  { ship_date: '2025-01-16', shipment_id: 'OUT-2025-0004', vendor: 'Menards Store #2214', destination: 'Menards DC', expected_qty: 36, expected_sku: 'CAL-SBMG-1801-GRAPE', notes: 'Calibrachoa Superbells, 1801 packs' },
-  { ship_date: '2025-01-18', shipment_id: 'OUT-2025-0005', vendor: 'Ace Hardware #5523', destination: 'Ace Hardware', expected_qty: 18, expected_sku: 'TOM-CEL-1204', notes: 'Celebrity Tomato, 1204 packs' },
-
-  // INBOUND: Fertilizer
-  { ship_date: '2025-01-20', shipment_id: 'IN-2025-0003', vendor: 'JR Peters (Jacks)', destination: 'BMG Fertilizer Storage', expected_qty: 80, expected_sku: 'JACK-201020-25LB', notes: '20-10-20 Peat-Lite formula, 1 pallet' },
-
-  // OUTBOUND: Herbs and vegetables
-  { ship_date: '2025-01-21', shipment_id: 'OUT-2025-0006', vendor: 'Whole Foods Market', destination: 'WFM Regional', expected_qty: 60, expected_sku: 'BAS-SWT-804', notes: 'Sweet Basil, 804 packs' },
-  { ship_date: '2025-01-22', shipment_id: 'OUT-2025-0007', vendor: 'Green Thumb Garden Center', destination: 'GTGC Mainstreet', expected_qty: 12, expected_sku: 'PET-WAVE-HB10-PUR', notes: 'Wave Petunia hanging baskets, 10"' },
-
-  // INBOUND: Containers
-  { ship_date: '2025-01-24', shipment_id: 'IN-2025-0004', vendor: 'HC Companies', destination: 'BMG Supply Shed', expected_qty: 500, expected_sku: 'INS-606-225', notes: '606 inserts, 2.25" deep, 5 cases' },
-  { ship_date: '2025-01-26', shipment_id: 'IN-2025-0005', vendor: 'Ball Horticultural', destination: 'BMG Greenhouse 2', expected_qty: 15, expected_sku: 'PLUG-288-TOMBF', notes: 'Tomato Big Beef plugs, 288-cell' },
-
-  // OUTBOUND: Spring rush orders
-  { ship_date: '2025-01-28', shipment_id: 'OUT-2025-0008', vendor: 'Home Depot Store #4521', destination: 'HD Distribution Center', expected_qty: 96, expected_sku: 'PET-WAVE-606-PUR', notes: 'Repeat order, Wave Petunia Purple' },
-  { ship_date: '2025-01-30', shipment_id: 'OUT-2025-0009', vendor: "Lowe's Store #8847", destination: 'Lowes Regional DC', expected_qty: 48, expected_sku: 'GER-IVY-HB10-MIX', notes: 'Ivy Geranium hanging baskets, mixed colors' },
-  { ship_date: '2025-02-01', shipment_id: 'OUT-2025-0010', vendor: 'Premium Landscapes Inc', destination: 'PLI Staging Yard', expected_qty: 144, expected_sku: 'PER-ECHPW-1GAL', notes: 'Echinacea PowWow, 1-gallon perennials' },
-];
-
 const trainingRosterData = [
   { employee_id: 'BM-1001', name: 'A. Chen', department: 'Packhouse', supervisor: 'M. Santos', hire_date: '2022-03-14' },
   { employee_id: 'BM-1002', name: 'R. Patel', department: 'Packhouse', supervisor: 'M. Santos', hire_date: '2023-06-02' },
@@ -70,54 +38,6 @@ const trainingAcknowledgementsData = [
   { employee_id: 'BM-1013', module: 'Safety & SOP', acknowledged_at: '2025-01-24', method: 'Outlook', notes: '' },
   { employee_id: 'BM-1014', module: 'Safety & SOP', acknowledged_at: '2025-01-24', method: 'In-person', notes: '' },
   { employee_id: 'BM-1015', module: 'Safety & SOP', acknowledged_at: null, method: null, notes: 'new hire' },
-];
-
-// Backup barcode data (not used - now generated dynamically)
-const barcodeScansDataBackup = [
-  // OUT-0001: Shortage - only 42 flats scanned instead of 48
-  { shipment_id: 'OUT-2025-0001', sku: 'PET-WAVE-606-PUR', qty_scanned: 42, scanned_by: 'Mike Chen', scanned_at: '2025-01-06T10:15:00Z' },
-  // OUT-0002: Perfect match
-  { shipment_id: 'OUT-2025-0002', sku: 'GER-ZON-45-RED', qty_scanned: 24, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-08T09:42:00Z' },
-  // OUT-0003: SUBTLE ISSUE - Received wrong color! Expected PINK, got PURPLE. SKU appears similar.
-  { shipment_id: 'OUT-2025-0003', sku: 'PET-STVB-606-PUR', qty_scanned: 72, scanned_by: 'Mike Chen', scanned_at: '2025-01-10T14:20:00Z' },
-  // IN-0001: Perfect match
-  { shipment_id: 'IN-2025-0001', sku: 'PLUG-288-PETWAVE', qty_scanned: 20, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-12T11:05:00Z' },
-  // IN-0002: Perfect match
-  { shipment_id: 'IN-2025-0002', sku: 'SUNGRO-PROF-3CF', qty_scanned: 150, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-14T13:30:00Z' },
-  // OUT-0004: Perfect match
-  { shipment_id: 'OUT-2025-0004', sku: 'CAL-SBMG-1801-GRAPE', qty_scanned: 36, scanned_by: 'Mike Chen', scanned_at: '2025-01-16T10:50:00Z' },
-  // OUT-0005: Shortage - 3 packs short
-  { shipment_id: 'OUT-2025-0005', sku: 'TOM-CEL-1204', qty_scanned: 15, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-18T15:15:00Z' },
-  // IN-0003: Perfect match
-  { shipment_id: 'IN-2025-0003', sku: 'JACK-201020-25LB', qty_scanned: 80, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-20T09:25:00Z' },
-  // OUT-0006: Perfect match
-  { shipment_id: 'OUT-2025-0006', sku: 'BAS-SWT-804', qty_scanned: 60, scanned_by: 'Mike Chen', scanned_at: '2025-01-21T14:40:00Z' },
-  // OUT-0007: Perfect match
-  { shipment_id: 'OUT-2025-0007', sku: 'PET-WAVE-HB10-PUR', qty_scanned: 12, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-22T11:20:00Z' },
-];
-
-// Backup received data (not used - now generated dynamically)
-const shipmentsReceivedDataBackup = [
-  // OUT-0001: Shortage - customer received 42 flats, 6 flats missing
-  { shipment_id: 'OUT-2025-0001', received_qty: 42, received_at: '2025-01-06T14:30:00Z', receiver_name: 'HD Receiving', condition: '6 flats missing from delivery', reconciled: false },
-  // OUT-0002: Perfect
-  { shipment_id: 'OUT-2025-0002', received_qty: 24, received_at: '2025-01-08T15:15:00Z', receiver_name: 'GTGC Receiving', condition: 'Good condition', reconciled: true },
-  // OUT-0003: Wrong color received - customer notes mismatch
-  { shipment_id: 'OUT-2025-0003', received_qty: 72, received_at: '2025-01-10T16:45:00Z', receiver_name: 'Lowes Receiving', condition: 'Received purple instead of pink - color variance', reconciled: false },
-  // IN-0001: Perfect
-  { shipment_id: 'IN-2025-0001', received_qty: 20, received_at: '2025-01-12T14:20:00Z', receiver_name: 'BMG Receiving', condition: 'Good condition, plugs healthy', reconciled: true },
-  // IN-0002: Perfect
-  { shipment_id: 'IN-2025-0002', received_qty: 150, received_at: '2025-01-14T16:00:00Z', receiver_name: 'BMG Receiving', condition: 'Good condition', reconciled: true },
-  // OUT-0004: Perfect
-  { shipment_id: 'OUT-2025-0004', received_qty: 36, received_at: '2025-01-16T13:30:00Z', receiver_name: 'Menards Receiving', condition: 'Good condition', reconciled: true },
-  // OUT-0005: Shortage - 3 packs short
-  { shipment_id: 'OUT-2025-0005', received_qty: 15, received_at: '2025-01-18T17:00:00Z', receiver_name: 'Ace Receiving', condition: '3 packs missing', reconciled: false },
-  // IN-0003: Perfect
-  { shipment_id: 'IN-2025-0003', received_qty: 80, received_at: '2025-01-20T12:15:00Z', receiver_name: 'BMG Receiving', condition: 'Good condition', reconciled: true },
-  // OUT-0006: Perfect
-  { shipment_id: 'OUT-2025-0006', received_qty: 60, received_at: '2025-01-21T16:30:00Z', receiver_name: 'WFM Receiving', condition: 'Good condition', reconciled: true },
-  // OUT-0007: Perfect
-  { shipment_id: 'OUT-2025-0007', received_qty: 12, received_at: '2025-01-22T13:50:00Z', receiver_name: 'GTGC Receiving', condition: 'Good condition', reconciled: true },
 ];
 
 const incidentsData = [

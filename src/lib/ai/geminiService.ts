@@ -249,3 +249,72 @@ export function validateExtraction(
     lowConfidenceFields,
   };
 }
+
+// Generate escalation email for critical discrepancies
+export async function generateEscalationEmail(discrepancy: {
+  shipment_id: string;
+  type: string;
+  severity: string;
+  expected: string | number;
+  actual: string | number;
+  difference?: string | number;
+  details: string;
+  recommendedAction: string;
+}): Promise<{ subject: string; body: string }> {
+  const client = getClient();
+
+  const prompt = `Draft a professional escalation email for a shipping discrepancy.
+
+Discrepancy Details:
+- Shipment ID: ${discrepancy.shipment_id}
+- Issue Type: ${discrepancy.type.replace(/_/g, ' ')}
+- Severity: ${discrepancy.severity}
+- Expected: ${discrepancy.expected}
+- Actual: ${discrepancy.actual}
+${discrepancy.difference ? `- Difference: ${discrepancy.difference}` : ''}
+
+Issue Description:
+${discrepancy.details}
+
+Recommended Action:
+${discrepancy.recommendedAction}
+
+Write an urgent but professional email to Operations Manager that:
+1. Clearly states the issue in the subject line (keep it concise)
+2. Opens with immediate impact statement
+3. Provides specific details in bullet format
+4. Explains potential business consequences
+5. Requests specific action with timeline
+6. Maintains professional tone while conveying urgency
+
+Context: Big Marble Farms is a commercial greenhouse. This is a real shipment discrepancy that needs immediate attention.
+
+Return JSON format:
+{
+  "subject": "concise subject line",
+  "body": "email body with proper formatting"
+}
+
+Only return valid JSON, no markdown formatting.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: prompt,
+    });
+
+    const text = response.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('Could not parse email response');
+  } catch (error) {
+    console.error('Error generating escalation email:', error);
+    // Return fallback
+    return {
+      subject: `URGENT: ${discrepancy.type.replace(/_/g, ' ')} on ${discrepancy.shipment_id}`,
+      body: `Dear Operations Team,\n\nWe have detected a ${discrepancy.severity} severity discrepancy on shipment ${discrepancy.shipment_id}.\n\n${discrepancy.details}\n\nExpected: ${discrepancy.expected}\nActual: ${discrepancy.actual}\n\nRecommended Action: ${discrepancy.recommendedAction}\n\nPlease address this issue immediately.\n\nBest regards,\nData Reconciliation System`,
+    };
+  }
+}
