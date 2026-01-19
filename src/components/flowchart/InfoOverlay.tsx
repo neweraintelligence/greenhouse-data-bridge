@@ -472,9 +472,6 @@ function InfoOverlayComponent({
                 src={imageUrl}
                 alt="Visual representation"
                 className="w-full h-full object-cover"
-                style={{
-                  filter: 'brightness(0.85) contrast(1.05) saturate(0.7) sepia(0.12) opacity(0.8)',
-                }}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-center text-gray-300">

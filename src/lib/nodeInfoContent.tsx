@@ -62,8 +62,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   excel: {
     id: 'excel',
-    title: 'The Original Order',
-    subtitle: 'The System of Record',
+    title: 'THE SYSTEM OF RECORD',
+    subtitle: 'The Original Order',
     imageOnLeft: false,
     description:
       'This is the baseline: the order as it exists in your ERP system. Everything downstream gets compared back to this. We treat this as the source of truth.',
@@ -72,8 +72,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     keyInsight: 'Reconciliation quality depends on order accuracy. Upstream optimization is the next frontier.',
     flowContext: {
       inbound: {
-        label: 'Purchase orders',
-        description: 'RECEIVING MODE: Orders you placed with vendors. Pulled from your purchasing system as the expected baseline.',
+        label: 'RECEIVING',
+        description: 'Orders you placed with vendors. Pulled from your purchasing system as the expected baseline.',
         painPoint: 'Upstream considerations: Was reorder point calculated correctly? Did someone manually enter quantities? Is inventory count accurate enough to trigger the right order size?',
         solution: 'For now: we use the PO as-is to verify vendor delivery. Upstream: automated reordering based on real-time inventory and demand forecasting.',
         keyInsight: 'Better order creation = better reconciliation outcomes.',
@@ -182,9 +182,9 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   etl: {
     id: 'etl',
-    title: 'Data Normalization',
-    subtitle: 'Making Data Comparable',
-    imageOnLeft: false,
+    title: 'MAKING DATA COMPARABLE',
+    subtitle: 'Data Normalization',
+    imageOnLeft: true,
     description:
       'Think of this as translation: converting different formats into one standard so AI can compare apples to apples. Vendors send data in their format, this converts it to yours.',
     painPoint: 'Vendor uses pounds, you track kilograms. BOL shows "1/15/25", database needs ISO format. Vendor SKU codes don\'t match your internal SKUs. Can\'t compare without manual conversion.',
@@ -194,8 +194,8 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 
   reviewQueue: {
     id: 'reviewQueue',
-    title: 'Review Queue',
-    subtitle: 'Human-in-the-Loop',
+    title: 'HUMAN-IN-THE-LOOP',
+    subtitle: 'Review Queue',
     imageOnLeft: true,
     description:
       'Items flagged during processing that need human judgment. Low confidence extractions, quantity mismatches, condition issues - anything AI can\'t auto-resolve goes here for your decision.',
