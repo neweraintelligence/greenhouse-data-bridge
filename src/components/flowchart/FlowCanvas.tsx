@@ -800,7 +800,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-200px)] min-h-[500px]">
+    <div className="relative w-full h-[calc(100vh-140px)] min-h-[600px]">
       {/* Control buttons - floating */}
       {selectedUseCase && (
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">

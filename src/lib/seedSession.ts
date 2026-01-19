@@ -55,6 +55,44 @@ const trainingAcknowledgementsData = [
   { employee_id: 'BM-1015', module: 'Safety & SOP', acknowledged_at: null, method: null, notes: 'new hire' },
 ];
 
+// Barcode scans - with deliberate discrepancies for demo
+const barcodeScansData = [
+  { shipment_id: 'SHP-2025-0001', sku: 'CTN-12OZ', qty_scanned: 950, scanned_by: 'Mike Chen', scanned_at: '2025-01-06T10:15:00Z' }, // 30 short!
+  { shipment_id: 'SHP-2025-0002', sku: 'CTN-1LB', qty_scanned: 1200, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-08T09:42:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0003', sku: 'CTN-12OZ', qty_scanned: 860, scanned_by: 'Mike Chen', scanned_at: '2025-01-10T14:20:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0004', sku: 'BAG-2LB', qty_scanned: 520, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-12T11:05:00Z' }, // 20 short!
+  { shipment_id: 'SHP-2025-0005', sku: 'CTN-1LB', qty_scanned: 720, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-14T13:30:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0006', sku: 'CTN-12OZ', qty_scanned: 1100, scanned_by: 'Mike Chen', scanned_at: '2025-01-16T10:50:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0007', sku: 'BAG-2LB', qty_scanned: 1320, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-18T15:15:00Z' }, // WRONG SKU! (expected CTN-12OZ)
+  { shipment_id: 'SHP-2025-0008', sku: 'BAG-2LB', qty_scanned: 640, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-20T09:25:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0009', sku: 'CTN-1LB', qty_scanned: 880, scanned_by: 'Mike Chen', scanned_at: '2025-01-21T14:40:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0010', sku: 'CTN-12OZ', qty_scanned: 760, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-22T11:20:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0011', sku: 'CTN-1LB', qty_scanned: 1240, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-24T10:30:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0012', sku: 'BAG-2LB', qty_scanned: 600, scanned_by: 'Mike Chen', scanned_at: '2025-01-26T13:45:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0013', sku: 'CTN-12OZ', qty_scanned: 980, scanned_by: 'Maria Rodriguez', scanned_at: '2025-01-28T09:55:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0014', sku: 'CTN-1LB', qty_scanned: 720, scanned_by: 'Sarah Johnson', scanned_at: '2025-01-30T15:10:00Z' }, // Perfect
+  { shipment_id: 'SHP-2025-0015', sku: 'CTN-12OZ', qty_scanned: 1050, scanned_by: 'Mike Chen', scanned_at: '2025-02-01T10:20:00Z' }, // Perfect
+];
+
+// Received shipments - matches scans, includes condition notes for issues
+const shipmentsReceivedData = [
+  { shipment_id: 'SHP-2025-0001', received_qty: 950, received_at: '2025-01-06T14:30:00Z', receiver_name: 'Receiving Team', condition: '20 units damaged, 10 missing', reconciled: false },
+  { shipment_id: 'SHP-2025-0002', received_qty: 1200, received_at: '2025-01-08T15:15:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0003', received_qty: 860, received_at: '2025-01-10T16:45:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0004', received_qty: 520, received_at: '2025-01-12T14:20:00Z', receiver_name: 'Receiving Team', condition: '2 pallets rejected - quality issue', reconciled: false },
+  { shipment_id: 'SHP-2025-0005', received_qty: 720, received_at: '2025-01-14T16:00:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0006', received_qty: 1100, received_at: '2025-01-16T13:30:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0007', received_qty: 1320, received_at: '2025-01-18T17:00:00Z', receiver_name: 'Receiving Team', condition: 'Wrong product received - flagged', reconciled: false },
+  { shipment_id: 'SHP-2025-0008', received_qty: 640, received_at: '2025-01-20T12:15:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0009', received_qty: 880, received_at: '2025-01-21T16:30:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0010', received_qty: 760, received_at: '2025-01-22T13:50:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0011', received_qty: 1240, received_at: '2025-01-24T14:10:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0012', received_qty: 600, received_at: '2025-01-26T15:30:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0013', received_qty: 980, received_at: '2025-01-28T12:40:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0014', received_qty: 720, received_at: '2025-01-30T17:05:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+  { shipment_id: 'SHP-2025-0015', received_qty: 1050, received_at: '2025-02-01T13:15:00Z', receiver_name: 'Receiving Team', condition: 'Good condition', reconciled: true },
+];
+
 const incidentsData = [
   {
     incident_id: 'INC-2025-0001',
@@ -190,5 +228,44 @@ export async function seedSession(sessionCode: string): Promise<void> {
     throw incidentsError;
   }
 
-  console.log(`Session ${sessionCode} seeded successfully`);
+  // Insert barcode scans
+  const scansToInsert = barcodeScansData.map((row) => ({
+    session_code: sessionCode,
+    shipment_id: row.shipment_id,
+    sku: row.sku,
+    qty_scanned: row.qty_scanned,
+    scanned_by: row.scanned_by,
+    scanned_at: row.scanned_at,
+  }));
+
+  const { error: scansError } = await supabase
+    .from('barcode_scans')
+    .insert(scansToInsert);
+
+  if (scansError) {
+    console.error('Error seeding barcode scans:', scansError);
+    throw scansError;
+  }
+
+  // Insert received shipments
+  const receivedToInsert = shipmentsReceivedData.map((row) => ({
+    session_code: sessionCode,
+    shipment_id: row.shipment_id,
+    received_qty: row.received_qty,
+    received_at: row.received_at,
+    receiver_name: row.receiver_name,
+    condition: row.condition,
+    reconciled: row.reconciled,
+  }));
+
+  const { error: receivedError } = await supabase
+    .from('shipments_received')
+    .insert(receivedToInsert);
+
+  if (receivedError) {
+    console.error('Error seeding received shipments:', receivedError);
+    throw receivedError;
+  }
+
+  console.log(`Session ${sessionCode} seeded successfully with all data including barcode scans and received shipments`);
 }
