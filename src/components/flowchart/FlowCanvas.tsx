@@ -45,6 +45,21 @@ import { reconcileCustomerOrders } from '../../lib/processing/reconcileCustomerO
 import { supabase } from '../../lib/supabase';
 import { debug } from '../../lib/debug';
 import type { Discrepancy } from '../../lib/processing/types';
+
+// Incident type for database records
+interface Incident {
+  id: string;
+  session_code: string;
+  incident_type: string;
+  severity: number;
+  location: string;
+  description: string;
+  reported_by: string;
+  status: string;
+  photo_url?: string;
+  ai_confidence?: number;
+  reported_at: string;
+}
 import { generateEscalationEmail } from '../../lib/ai/geminiService';
 import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
 import { ReportModal } from '../reports/ReportModal';
@@ -318,6 +333,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track live barcode scans (will be used when Barcode Log node displays live updates)
   const [, setLiveScans] = useState<Array<{shipment_id: string; sku: string; qty_scanned: number; scanned_at: string}>>([]);
 
+  // Track incidents (for incidents use case)
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
   const [reconciliationReport, setReconciliationReport] = useState<ReconciliationReport | null>(null);
@@ -578,7 +596,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   }, []);
 
   // Handle use case selection
-  const handleUseCaseSelect = useCallback((useCase: UseCase) => {
+  const handleUseCaseSelect = useCallback(async (useCase: UseCase) => {
     setSelectedUseCase(useCase);
     // Initialize source statuses for the selected use case
     setSourceStatuses(Object.fromEntries(useCase.sources.map((s) => [s.name, 'pending'])));
@@ -595,7 +613,28 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     setProcessingProgress(0);
     setFocusedNodeId(null);
     setPresentationActiveNode(null);
-  }, []);
+    setIncidents([]);
+
+    // Fetch incidents if this is the incidents use case
+    if (useCase.id === 'incidents' && sessionCode) {
+      try {
+        const { data, error } = await supabase
+          .from('incidents')
+          .select('*')
+          .eq('session_code', sessionCode)
+          .order('reported_at', { ascending: false });
+
+        if (error) {
+          debug.log('Error fetching incidents:', error);
+        } else if (data) {
+          debug.log('Fetched incidents:', data.length);
+          setIncidents(data);
+        }
+      } catch (err) {
+        debug.log('Error fetching incidents:', err);
+      }
+    }
+  }, [sessionCode]);
 
   // Build intake items from sources
   const buildIntakeItems = useCallback((): IntakeItem[] => {
@@ -1464,8 +1503,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           filter: `session_code=eq.${sessionCode}`,
         },
         (payload) => {
-          const incident = payload.new as {incident_type: string; severity: number; reported_by: string};
+          const incident = payload.new as Incident;
           showToast('success', `⚠️ Incident reported by ${incident.reported_by}: ${incident.incident_type} (Severity ${incident.severity})`);
+          // Add to incidents state for live display
+          setIncidents(prev => [incident, ...prev]);
         }
       )
       .subscribe();
@@ -1655,13 +1696,25 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       });
 
       // Review Queue node (NEW - branch from processing)
-      const reviewQueueItems = discrepancies.slice(0, 5).map(d => ({
-        id: d.id,
-        type: d.type,
-        severity: d.severity,
-        summary: `${d.shipment_id}: ${d.details}`,
-        confidence: d.confidence,
-      }));
+      // Use incidents data when in incidents use case, otherwise use discrepancies
+      const reviewQueueItems = selectedUseCase?.id === 'incidents'
+        ? incidents
+            .filter(i => i.severity <= 3 || (i.ai_confidence && i.ai_confidence < 75))
+            .slice(0, 5)
+            .map(i => ({
+              id: i.id,
+              type: i.incident_type,
+              severity: i.severity <= 2 ? 'low' : i.severity === 3 ? 'medium' : 'high',
+              summary: `${i.location}: ${i.incident_type}`,
+              confidence: i.ai_confidence || 80,
+            }))
+        : discrepancies.slice(0, 5).map(d => ({
+            id: d.id,
+            type: d.type,
+            severity: d.severity,
+            summary: `${d.shipment_id}: ${d.details}`,
+            confidence: d.confidence,
+          }));
 
       nodes.push({
         id: 'review-queue',
@@ -1677,16 +1730,28 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       });
 
       // Escalation node (NEW - branch from processing)
-      const criticalEscalations = discrepancies
-        .filter(d => d.severity === 'critical' || d.severity === 'high')
-        .map(d => ({
-          id: d.id,
-          source_type: 'discrepancy',
-          source_id: d.shipment_id,
-          severity: d.severity,
-          routed_to: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
-          status: 'pending',
-        }));
+      // Use incidents data when in incidents use case, otherwise use discrepancies
+      const criticalEscalations = selectedUseCase?.id === 'incidents'
+        ? incidents
+            .filter(i => i.severity >= 4)
+            .map(i => ({
+              id: i.id,
+              source_type: 'incident',
+              source_id: i.incident_type,
+              severity: i.severity >= 5 ? 'critical' : 'high',
+              routed_to: i.severity >= 5 ? 'Safety Team' : 'Maintenance Lead',
+              status: i.status || 'pending',
+            }))
+        : discrepancies
+            .filter(d => d.severity === 'critical' || d.severity === 'high')
+            .map(d => ({
+              id: d.id,
+              source_type: 'discrepancy',
+              source_id: d.shipment_id,
+              severity: d.severity,
+              routed_to: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
+              status: 'pending',
+            }));
 
       nodes.push({
         id: 'escalation',
@@ -1764,6 +1829,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     processingProgress,
     processingStats,
     discrepancies,
+    incidents,
     etlStatus,
     transformations,
     escalations,
@@ -2000,6 +2066,63 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
 
     if (infoNodeId === 'processing') {
+      // For incidents use case, show AI analysis results
+      if (selectedUseCase?.id === 'incidents') {
+        if (incidents.length > 0) {
+          const criticalCount = incidents.filter(i => i.severity >= 4).length;
+          const reviewCount = incidents.filter(i => i.severity <= 3).length;
+          const avgConfidence = incidents.reduce((sum, i) => sum + (i.ai_confidence || 80), 0) / incidents.length;
+
+          return (
+            <div className="space-y-2 p-3">
+              <p className="text-xs font-semibold text-indigo-700 mb-3">AI Vision Analysis Results</p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-center">
+                  <p className="text-xl font-bold text-purple-600">{incidents.length}</p>
+                  <p className="text-[10px] text-gray-600">Analyzed</p>
+                </div>
+                <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-center">
+                  <p className="text-xl font-bold text-red-600">{criticalCount}</p>
+                  <p className="text-[10px] text-gray-600">Critical</p>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-center">
+                  <p className="text-xl font-bold text-amber-600">{reviewCount}</p>
+                  <p className="text-[10px] text-gray-600">Review</p>
+                </div>
+              </div>
+              <div className="mt-2 p-2 rounded-lg bg-green-50 border border-green-200 text-center">
+                <p className="text-sm font-bold text-green-600">{Math.round(avgConfidence)}%</p>
+                <p className="text-[10px] text-gray-600">Avg AI Confidence</p>
+              </div>
+              {incidents.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Recent Classifications:</p>
+                  {incidents.slice(0, 3).map(i => (
+                    <div key={i.id} className="p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-xs mb-1">
+                      <p className="font-semibold text-gray-900">{i.incident_type}</p>
+                      <p className="text-gray-600">Severity {i.severity} • {i.ai_confidence || 80}% confident</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        } else {
+          return (
+            <div className="p-4">
+              <p className="text-sm text-gray-700 mb-3">AI Vision Analysis Engine</p>
+              <div className="space-y-2 text-xs text-gray-600">
+                <p>• Google Gemini Vision analyzes photos</p>
+                <p>• Detects incident type (pest, equipment, safety)</p>
+                <p>• Assigns severity 1-5</p>
+                <p>• Calculates confidence scores</p>
+                <p>• Routes per RACI matrix</p>
+              </div>
+            </div>
+          );
+        }
+      }
+      // For other use cases, show reconciliation results
       if (processingStatus === 'complete') {
         return (
           <div className="space-y-2 p-3">
@@ -2055,6 +2178,43 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
 
     if (infoNodeId === 'review-queue') {
+      // For incidents use case, show incidents needing review
+      if (selectedUseCase?.id === 'incidents') {
+        const reviewIncidents = incidents.filter(i => i.severity <= 3 || (i.ai_confidence && i.ai_confidence < 75));
+        if (reviewIncidents.length > 0) {
+          return (
+            <div className="space-y-2 p-3">
+              <p className="text-xs font-semibold text-amber-700 mb-3">Incidents Needing Review ({reviewIncidents.length})</p>
+              {reviewIncidents.slice(0, 4).map((i) => (
+                <div key={i.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs">
+                  <p className="font-semibold text-gray-900">{i.incident_type}</p>
+                  <p className="text-gray-700">{i.location} • Reported by {i.reported_by}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      i.severity >= 4 ? 'bg-red-100 text-red-700' :
+                      i.severity === 3 ? 'bg-orange-100 text-orange-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      Severity {i.severity}
+                    </span>
+                    {i.ai_confidence && i.ai_confidence < 75 && (
+                      <span className="text-amber-600 text-[10px]">Low confidence ({i.ai_confidence}%)</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        } else {
+          return (
+            <div className="p-4 text-center">
+              <p className="text-sm text-gray-500">No incidents need review</p>
+              <p className="text-xs text-gray-400 mt-1">Low severity or low confidence incidents will appear here</p>
+            </div>
+          );
+        }
+      }
+      // For other use cases, show discrepancies
       if (discrepancies.length > 0) {
         return (
           <div className="space-y-2 p-3">
@@ -2079,6 +2239,41 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
 
     if (infoNodeId === 'escalation') {
+      // For incidents use case, show high-severity incidents
+      if (selectedUseCase?.id === 'incidents') {
+        const criticalIncidents = incidents.filter(i => i.severity >= 4);
+        if (criticalIncidents.length > 0) {
+          return (
+            <div className="space-y-2 p-3">
+              <p className="text-xs font-semibold text-red-700 mb-3">Critical Incidents ({criticalIncidents.length})</p>
+              {criticalIncidents.slice(0, 4).map((i) => (
+                <div key={i.id} className="p-2 rounded-lg bg-red-50 border border-red-200 text-xs">
+                  <p className="font-semibold text-gray-900">{i.incident_type}</p>
+                  <p className="text-gray-700">{i.location} • {i.reported_by}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      i.severity >= 5 ? 'bg-red-200 text-red-800' : 'bg-red-100 text-red-700'
+                    }`}>
+                      Severity {i.severity}
+                    </span>
+                    <span className="text-red-700 text-[10px]">
+                      → {i.severity >= 5 ? 'Safety Team' : 'Maintenance Lead'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        } else {
+          return (
+            <div className="p-4 text-center">
+              <p className="text-sm text-gray-500">No critical incidents</p>
+              <p className="text-xs text-gray-400 mt-1">Severity 4-5 incidents will be escalated here</p>
+            </div>
+          );
+        }
+      }
+      // For other use cases, show escalations from discrepancies
       if (escalations.length > 0) {
         return (
           <div className="space-y-2 p-3">
@@ -2131,6 +2326,30 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
 
     if (infoNodeId === 'intake') {
+      // For incidents use case, show submitted incidents
+      if (selectedUseCase?.id === 'incidents' && incidents.length > 0) {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-purple-700 mb-3">Submitted Incidents ({incidents.length})</p>
+            {incidents.slice(0, 4).map((i) => (
+              <div key={i.id} className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-xs">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-gray-900">{i.incident_type}</p>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                    i.severity >= 5 ? 'bg-red-200 text-red-800' :
+                    i.severity === 4 ? 'bg-red-100 text-red-700' :
+                    i.severity === 3 ? 'bg-orange-100 text-orange-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
+                    {i.severity}
+                  </span>
+                </div>
+                <p className="text-gray-600 text-[10px] mt-1">{i.location} • {i.reported_by}</p>
+              </div>
+            ))}
+          </div>
+        );
+      }
       return (
         <div className="p-4">
           <p className="text-sm text-gray-700 mb-3">Data sources ready for processing</p>
