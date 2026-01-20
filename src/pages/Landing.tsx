@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Hash, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Hash, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateSessionCode, isValidSessionCode } from '../lib/sessionCodes';
 import { useSessionStore } from '../store/sessionStore';
 import { seedSession } from '../lib/seedSession';
+
+const DEMO_SESSION_CODE = 'DEMO26';
 
 export function Landing() {
   const [name, setName] = useState('');
@@ -14,6 +16,37 @@ export function Landing() {
 
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
+
+  const handleJoinDemo = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Check if DEMO26 session exists
+      const { data: existingSession, error: fetchError } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('code', DEMO_SESSION_CODE)
+        .single();
+
+      if (fetchError || !existingSession) {
+        throw new Error('Demo session not found. Please contact workshop organizer.');
+      }
+
+      // Update last_active_at
+      await supabase
+        .from('sessions')
+        .update({ last_active_at: new Date().toISOString() })
+        .eq('code', DEMO_SESSION_CODE);
+
+      setSession({ code: DEMO_SESSION_CODE, name: existingSession.name });
+      navigate('/flowchart');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +170,50 @@ export function Landing() {
               Enter your name to start or use a code to resume
             </p>
 
+            {/* Quick Demo Banner */}
+            <div className="mb-6 bg-gradient-to-r from-bmf-blue/10 to-purple-100 rounded-xl p-4 border border-bmf-blue/20">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-bmf-blue mt-0.5" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                    Workshop Attendee?
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Join the live demo session with pre-loaded data
+                  </p>
+                  <button
+                    onClick={handleJoinDemo}
+                    disabled={isLoading}
+                    className="w-full py-2.5 px-4 bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Join Demo Session</span>
+                        <span className="font-mono font-bold tracking-wider">({DEMO_SESSION_CODE})</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="relative py-3 mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-3 bg-white text-gray-400 text-sm">
+                  or create your own session
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name input */}
               <div>
@@ -156,23 +233,14 @@ export function Landing() {
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-3 bg-white text-gray-400 text-sm">
-                    or resume session
-                  </span>
-                </div>
-              </div>
-
               {/* Session code input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Session Code
+                  Session Code (Optional)
                 </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Have a different session code? Enter it here to resume
+                </p>
                 <div className="relative">
                   <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
