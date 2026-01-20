@@ -96,6 +96,26 @@ export function MobileScanner() {
               return;
             }
 
+            // Check if this shipment was already scanned
+            const { data: existingScan } = await supabase
+              .from('barcode_scans')
+              .select('scanned_by, scanned_at')
+              .eq('session_code', sessionCode)
+              .eq('shipment_id', data.shipmentId)
+              .single();
+
+            if (existingScan) {
+              const scannedTime = new Date(existingScan.scanned_at).toLocaleTimeString();
+              addScanResult(
+                data.shipmentId,
+                data.productName,
+                data.qty,
+                'error',
+                `⚠️ ALREADY SCANNED by ${existingScan.scanned_by} at ${scannedTime}`
+              );
+              return;
+            }
+
             // Insert scan to Supabase with participant attribution
             const scannerName = identity?.name
               ? `${identity.name}${identity.role ? ` (${identity.role})` : ''}`

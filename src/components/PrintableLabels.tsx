@@ -1,31 +1,24 @@
 import { memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { Check, CheckCheck } from 'lucide-react';
 
-interface Shipment {
+interface ShipmentWithStatus {
   shipment_id: string;
   product_name: string;
   sku: string;
   expected_qty: number;
+  isScanned: boolean;
+  isReceived: boolean;
 }
 
 interface PrintableLabelsProps {
   sessionCode: string;
-  shipments: Shipment[];
+  shipments: ShipmentWithStatus[];
 }
 
 function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsProps) {
-  // Add one subtly incorrect shipment for demo - same format, wrong variety (easy to miss!)
-  const allLabels = [
-    ...shipments.slice(0, 4), // First 4 expected shipments
-    // SUBTLE ERROR: This SKU is slightly different from expected (PINK vs PURPLE)
-    // Looks normal until system validates it
-    {
-      shipment_id: 'OUT-2025-0003',
-      product_name: 'Supertunia Vista Bubblegum - PURPLE', // Expected was PINK
-      sku: 'PET-STVB-606-PUR',
-      expected_qty: 72,
-    },
-  ];
+  // Use all shipments passed from parent (already includes status)
+  const allLabels = shipments;
 
   return (
     <div className="w-full p-8 bg-white">
@@ -54,11 +47,39 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
             timestamp: new Date().toISOString(),
           });
 
+          // Determine border/bg based on status (only visible on screen, not printed)
+          const borderClass = shipment.isReceived
+            ? 'border-emerald-500 bg-emerald-50 print:border-bmf-blue print:bg-blue-50'
+            : shipment.isScanned
+            ? 'border-amber-500 bg-amber-50 print:border-bmf-blue print:bg-blue-50'
+            : 'border-bmf-blue bg-blue-50';
+
           return (
             <div
               key={idx}
-              className="p-6 rounded-2xl border-4 border-bmf-blue bg-blue-50"
+              className={`p-6 rounded-2xl border-4 ${borderClass} relative`}
             >
+              {/* Status badge - screen only */}
+              {(shipment.isScanned || shipment.isReceived) && (
+                <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 print:hidden ${
+                  shipment.isReceived
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-amber-500 text-white'
+                }`}>
+                  {shipment.isReceived ? (
+                    <>
+                      <CheckCheck className="w-3 h-3" />
+                      Received
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-3 h-3" />
+                      Scanned
+                    </>
+                  )}
+                </div>
+              )}
+
               <div className="flex items-start gap-4">
                 {/* QR Code */}
                 <div className="bg-white p-3 rounded-xl shadow-md">
@@ -115,15 +136,28 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          {shipments.slice(0, 4).map((shipment) => {
+          {shipments.map((shipment) => {
             // Generate receipt signing URL
             const receiptUrl = `${window.location.origin}/sign-receipt/${sessionCode}/${shipment.shipment_id}`;
+
+            // Border styling based on status (screen only)
+            const borderClass = shipment.isReceived
+              ? 'border-gray-300 bg-gray-50 print:border-emerald-500 print:bg-emerald-50'
+              : 'border-emerald-500 bg-emerald-50';
 
             return (
               <div
                 key={shipment.shipment_id}
-                className="p-5 rounded-xl border-3 border-emerald-500 bg-emerald-50"
+                className={`p-5 rounded-xl border-3 ${borderClass} relative`}
               >
+                {/* Received badge - screen only */}
+                {shipment.isReceived && (
+                  <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 bg-emerald-500 text-white print:hidden">
+                    <CheckCheck className="w-3 h-3" />
+                    Signed
+                  </div>
+                )}
+
                 <div className="flex items-center gap-4">
                   {/* QR Code for Receipt */}
                   <div className="bg-white p-3 rounded-lg shadow-md flex-shrink-0">
@@ -141,8 +175,12 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
                       {shipment.shipment_id}
                     </h4>
                     <p className="text-sm text-gray-700 mb-2">{shipment.product_name}</p>
-                    <div className="px-2 py-1 bg-emerald-100 rounded text-xs text-emerald-800 font-semibold inline-block">
-                      Sign Receipt
+                    <div className={`px-2 py-1 rounded text-xs font-semibold inline-block ${
+                      shipment.isReceived
+                        ? 'bg-gray-200 text-gray-600 print:bg-emerald-100 print:text-emerald-800'
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {shipment.isReceived ? 'Already Signed' : 'Sign Receipt'}
                     </div>
                   </div>
                 </div>
@@ -153,7 +191,7 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
       </div>
 
       {/* Instructions */}
-      <div className="mt-12 p-6 rounded-2xl bg-gray-100">
+      <div className="mt-12 p-6 rounded-2xl bg-gray-100 print:hidden">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Workshop Demo Instructions:</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
@@ -162,9 +200,9 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
               <li>1. In Barcode Log node, scan session QR</li>
               <li>2. Opens mobile scanner on your phone</li>
               <li>3. Scan product labels (blue boxes above)</li>
-              <li>4. Label #5 has wrong color variant</li>
-              <li>5. System detects SKU mismatch</li>
-              <li>6. Watch laptop update in real-time</li>
+              <li>4. Labels turn amber when scanned</li>
+              <li>5. System validates each scan in real-time</li>
+              <li>6. Watch laptop dashboard update live</li>
             </ol>
           </div>
           <div>
@@ -175,13 +213,13 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
               <li>3. Opens signing form on phone</li>
               <li>4. Enter received quantity</li>
               <li>5. Sign with finger or type name</li>
-              <li>6. Submit - laptop shows notification</li>
+              <li>6. Labels turn green when signed</li>
             </ol>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-amber-100 rounded-lg">
-          <p className="text-xs text-amber-800">
-            <strong>Note:</strong> All labels look identical and professional. The wrong-color variant (label #5) is subtle - only the reconciliation system will catch it by comparing SKUs.
+        <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+          <p className="text-xs text-blue-800">
+            <strong>Live Status:</strong> Labels update in real-time as items are scanned and signed. Blue = pending, Amber = scanned, Green = received.
           </p>
         </div>
       </div>

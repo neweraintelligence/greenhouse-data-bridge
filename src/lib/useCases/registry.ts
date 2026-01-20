@@ -75,9 +75,8 @@ registerUseCase({
   icon: 'AlertTriangle',
   color: 'orange',
   sources: [
-    { type: 'outlook', name: 'Incident Reports', icon: 'Mail', description: 'Incoming incident reports via email or mobile submission' },
-    { type: 'paper', name: 'Incident Photos', icon: 'Camera', description: 'Photos of the issue uploaded via mobile device' },
-    { type: 'excel', name: 'Maintenance Calendar', icon: 'Calendar', description: 'Scheduled maintenance to check for duplicates', optional: true },
+    { type: 'paper', name: 'Incident Photo Gallery', icon: 'Camera', description: 'Pre-seeded CEA incident photos - participant selects one to report' },
+    { type: 'excel', name: 'Routing Configuration', icon: 'Settings', description: 'Severity thresholds and team routing rules' },
   ],
   outputTemplates: [
     { id: 'incident-summary', name: 'Incident Summary', fileType: 'pdf', description: 'Overview of reported incidents' },
