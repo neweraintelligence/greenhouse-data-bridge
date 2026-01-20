@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Hash, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { User, Hash, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateSessionCode, isValidSessionCode } from '../lib/sessionCodes';
 import { useSessionStore } from '../store/sessionStore';
@@ -122,26 +122,27 @@ export function Landing() {
   return (
     <div className="min-h-screen bg-stone-100 flex">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-bmf-blue items-center justify-center p-12">
-        <div className="max-w-md text-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-bmf-blue to-bmf-blue-dark items-center justify-center p-12">
+        <div className="max-w-lg">
           <img
             src="/bmf-logo.png"
             alt="Big Marble Farms"
-            className="h-20 w-auto mx-auto mb-8 brightness-0 invert"
+            className="h-16 w-auto mb-6 brightness-0 invert"
           />
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
             Greenhouse Data Bridge
           </h1>
-          <p className="text-blue-100 text-lg mb-8">
-            AI-powered pipeline automation for seamless data reconciliation
+          <p className="text-blue-50 text-lg leading-relaxed mb-8">
+            Transform complex data workflows into intelligent, automated pipelines. Seamless reconciliation powered by AI.
           </p>
-          <div className="flex items-center justify-center gap-3 text-blue-200 text-sm">
-            <span>Powered by</span>
+          <div className="flex items-center gap-3 text-blue-100">
+            <div className="h-px flex-1 bg-blue-300/30"></div>
             <img
               src="/nei-logo.png"
               alt="New Era Intelligence"
-              className="h-6 w-auto brightness-0 invert opacity-80"
+              className="h-5 w-auto brightness-0 invert opacity-70"
             />
+            <div className="h-px flex-1 bg-blue-300/30"></div>
           </div>
         </div>
       </div>
@@ -150,113 +151,98 @@ export function Landing() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="lg:hidden text-center mb-10">
             <img
               src="/bmf-logo.png"
               alt="Big Marble Farms"
-              className="h-12 w-auto mx-auto mb-4"
+              className="h-14 w-auto mx-auto mb-4"
             />
-            <h1 className="text-xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Greenhouse Data Bridge
             </h1>
+            <p className="text-gray-500 text-sm">
+              Intelligent workflow automation
+            </p>
           </div>
 
           {/* Form card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Welcome
-            </h2>
-            <p className="text-gray-500 mb-6">
-              Enter your name to start or use a code to resume
-            </p>
-
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             {/* Quick Demo Banner */}
-            <div className="mb-6 bg-gradient-to-r from-bmf-blue/10 to-purple-100 rounded-xl p-4 border border-bmf-blue/20">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-bmf-blue mt-0.5" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                    Workshop Attendee?
-                  </h3>
-                  <p className="text-xs text-gray-600 mb-3">
-                    Join the live demo session with pre-loaded data
-                  </p>
-                  <button
-                    onClick={handleJoinDemo}
-                    disabled={isLoading}
-                    className="w-full py-2.5 px-4 bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <span>Join Demo Session</span>
-                        <span className="font-mono font-bold tracking-wider">({DEMO_SESSION_CODE})</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </div>
+            <div className="bg-bmf-blue px-8 py-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Workshop Demo
+                </h3>
+                <p className="text-blue-100 text-sm mb-4">
+                  Access pre-configured demo session
+                </p>
+                <button
+                  onClick={handleJoinDemo}
+                  disabled={isLoading}
+                  className="w-full py-3 px-6 bg-white hover:bg-gray-50 text-bmf-blue font-semibold rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <span>Join Session</span>
+                      <span className="font-mono tracking-wider">{DEMO_SESSION_CODE}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="relative py-3 mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-3 bg-white text-gray-400 text-sm">
-                  or create your own session
-                </span>
-              </div>
-            </div>
+            {/* Main form */}
+            <div className="p-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                Create New Session
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                Start fresh or resume an existing session
+              </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Your Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
                     disabled={!!code}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 transition-shadow"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue disabled:bg-gray-50 disabled:text-gray-500 transition-all"
                   />
                 </div>
               </div>
 
               {/* Session code input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Session Code (Optional)
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Or Resume Session
                 </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Have a different session code? Enter it here to resume
-                </p>
                 <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="ABC123"
+                    placeholder="Enter session code"
                     maxLength={6}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue focus:border-transparent font-mono text-center text-lg tracking-widest transition-shadow"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue font-mono tracking-widest transition-all"
                   />
                 </div>
               </div>
 
               {/* Error message */}
               {error && (
-                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100">
+                <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm border border-red-200">
                   {error}
                 </div>
               )}
@@ -265,23 +251,24 @@ export function Landing() {
               <button
                 type="submit"
                 disabled={isLoading || (!name.trim() && !code.trim())}
-                className="w-full py-3 px-4 bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-6 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    <span>{code ? 'Resume Session' : 'Start Session'}</span>
+                    <span>{code ? 'Resume Session' : 'Start New Session'}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
               </button>
             </form>
+              </div>
           </div>
 
           {/* Footer */}
-          <p className="text-center text-gray-400 text-sm mt-6">
-            Big Marble Farms Workshop Demo
+          <p className="text-center text-gray-500 text-sm mt-8">
+            Powered by Big Marble Farms & New Era Intelligence
           </p>
         </div>
       </div>
