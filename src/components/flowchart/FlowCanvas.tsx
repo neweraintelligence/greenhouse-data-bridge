@@ -45,6 +45,7 @@ import type { Discrepancy } from '../../lib/processing/types';
 import { generateEscalationEmail } from '../../lib/ai/geminiService';
 import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
 import { ReportModal } from '../reports/ReportModal';
+import { ToastContainer } from '../Toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -213,6 +214,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track email viewer modal
   const [selectedEmail, setSelectedEmail] = useState<{id: string; recipient: string; subject: string; body?: string; sent_at: string} | null>(null);
+
+  // Track toasts for notifications
+  const [toasts, setToasts] = useState<Array<{id: string; type: 'success' | 'error' | 'info' | 'user-joined'; message: string}>>([]);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -749,12 +753,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [canProcess, etlStatus]);
 
-  // Subscribe to realtime barcode scans
+  // Helper to show toast
+  const showToast = useCallback((type: 'success' | 'error' | 'info' | 'user-joined', message: string) => {
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, type, message }]);
+  }, []);
+
+  const closeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  // Subscribe to realtime events for notifications
   useEffect(() => {
     if (!sessionCode) return;
 
     const channel = supabase
-      .channel(`barcode-scans-${sessionCode}`)
+      .channel(`session-${sessionCode}`)
       .on(
         'postgres_changes',
         {
@@ -765,11 +779,39 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         },
         (payload) => {
           console.log('New barcode scan detected:', payload.new);
-          const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_at: string};
+          const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_by: string};
           setLiveScans(prev => [scan, ...prev]);
 
-          // TODO: Validate scan against expected shipments
-          // TODO: Show toast notification for successful/error scans
+          // Show notification
+          showToast('success', `📦 ${scan.scanned_by} scanned ${scan.shipment_id}`);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'communications_log',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const comm = payload.new as {subject: string; recipient: string};
+          if (comm.subject.includes('joined') || comm.subject.includes('signed')) {
+            showToast('user-joined', comm.subject);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shipments_received',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const receipt = payload.new as {shipment_id: string; receiver_name: string};
+          showToast('success', `✓ ${receipt.receiver_name} signed receipt for ${receipt.shipment_id}`);
         }
       )
       .subscribe();
@@ -777,7 +819,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     return () => {
       channel.unsubscribe();
     };
-  }, [sessionCode]);
+  }, [sessionCode, showToast]);
 
   // Auto-simulation effect
   useEffect(() => {
@@ -1695,6 +1737,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           }}
         />
       )}
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onClose={closeToast} />
     </div>
   );
 }

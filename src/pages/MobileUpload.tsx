@@ -39,39 +39,62 @@ export function MobileUpload() {
     setError(null);
 
     try {
-      // Analyze receipt with Gemini Vision
-      const analysis = await analyzeDocument(capturedImage, 'bol');
+      // Determine document type and table routing from sourceId
+      const isShippingReceipt = sourceId?.toLowerCase().includes('delivery') || sourceId?.toLowerCase().includes('receipt');
+      const isTraining = sourceId?.toLowerCase().includes('training') || sourceId?.toLowerCase().includes('sign-off');
+      const isIncident = sourceId?.toLowerCase().includes('incident') || sourceId?.toLowerCase().includes('photo');
 
-      // Extract shipment ID from analysis
-      const shipmentIdField = analysis.fields.find(f => f.label.toLowerCase().includes('shipment'));
-      const qtyField = analysis.fields.find(f => f.label.toLowerCase().includes('quantity') || f.label.toLowerCase().includes('qty'));
-      const conditionField = analysis.fields.find(f => f.label.toLowerCase().includes('condition'));
+      const docType: 'bol' | 'training_form' | 'incident_report' = isTraining ? 'training_form' :
+                     isIncident ? 'incident_report' :
+                     'bol';
 
-      const shipmentId = shipmentIdField?.value || 'UNKNOWN';
-      const receivedQty = parseInt(qtyField?.value || '0', 10);
-      const condition = conditionField?.value || 'Scanned from mobile';
+      // Analyze with Gemini Vision
+      const analysis = await analyzeDocument(capturedImage, docType);
 
-      // Save to shipments_received table
-      const { error: insertError } = await supabase.from('shipments_received').insert({
-        session_code: sessionCode,
-        shipment_id: shipmentId,
-        received_qty: receivedQty,
-        received_at: new Date().toISOString(),
-        receiver_name: 'Mobile Upload',
-        condition: condition,
-        reconciled: false,
-      });
+      // Route to appropriate table based on source type
+      if (isShippingReceipt) {
+        // Extract shipment data
+        const shipmentIdField = analysis.fields.find(f => f.label.toLowerCase().includes('shipment'));
+        const qtyField = analysis.fields.find(f => f.label.toLowerCase().includes('quantity') || f.label.toLowerCase().includes('qty'));
+        const conditionField = analysis.fields.find(f => f.label.toLowerCase().includes('condition'));
+        const signatureField = analysis.fields.find(f => f.label.toLowerCase().includes('signature') || f.label.toLowerCase().includes('signed'));
 
-      if (insertError) throw insertError;
+        const shipmentId = shipmentIdField?.value || 'UNKNOWN';
+        const receivedQty = parseInt(qtyField?.value || '0', 10);
+        const condition = conditionField?.value || 'Scanned from mobile';
+        const receiverName = signatureField?.value || 'Mobile Upload';
 
-      // Also store image reference in documents_registry
+        // Save to shipments_received
+        await supabase.from('shipments_received').insert({
+          session_code: sessionCode,
+          shipment_id: shipmentId,
+          received_qty: receivedQty,
+          received_at: new Date().toISOString(),
+          receiver_name: receiverName,
+          condition: condition,
+          reconciled: false,
+        });
+      } else if (isTraining) {
+        // Training document - would go to training_acknowledgements
+        // For now, just log to documents_registry
+        console.log('Training document uploaded');
+      } else if (isIncident) {
+        // Incident photo - would link to incidents table
+        console.log('Incident photo uploaded');
+      }
+
+      // Always store in documents_registry
+      const avgConfidence = analysis.fields.length > 0
+        ? analysis.fields.reduce((sum, f) => sum + f.confidence, 0) / analysis.fields.length
+        : 0;
+
       await supabase.from('documents_registry').insert({
         session_code: sessionCode,
-        doc_type: 'receipt',
+        doc_type: docType,
         source: sourceId,
-        filename: `receipt-${shipmentId}.jpg`,
+        filename: `upload-${Date.now()}.jpg`,
         extracted_data: { fields: analysis.fields },
-        confidence: analysis.fields.reduce((sum, f) => sum + f.confidence, 0) / analysis.fields.length,
+        confidence: avgConfidence,
       });
 
       setUploadComplete(true);

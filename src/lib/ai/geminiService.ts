@@ -5,10 +5,11 @@ const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 let genAI: GoogleGenAI | null = null;
 
-function getClient(): GoogleGenAI {
+function getClient(): GoogleGenAI | null {
   if (!genAI) {
     if (!apiKey) {
-      throw new Error('VITE_GEMINI_API_KEY environment variable is not set');
+      console.warn('VITE_GEMINI_API_KEY not set - Gemini features will use fallbacks');
+      return null;
     }
     genAI = new GoogleGenAI({ apiKey });
   }
@@ -97,6 +98,21 @@ export async function analyzeDocument(
 ): Promise<DocumentAnalysisResult> {
   const client = getClient();
 
+  // Fallback if no API key
+  if (!client) {
+    return {
+      documentType,
+      confidence: 50,
+      fields: [
+        { label: 'Shipment ID', value: 'DEMO-001', confidence: 50 },
+        { label: 'Quantity', value: '42', confidence: 50 },
+        { label: 'Condition', value: 'Good condition', confidence: 50 },
+        { label: 'Signature', value: 'Present', confidence: 50 },
+      ],
+      warnings: ['Gemini API not configured - using demo data'],
+    };
+  }
+
   const typePrompts: Record<string, string> = {
     bol: `Analyze this Bill of Lading (BOL) document image and extract:
 - Carrier name
@@ -108,13 +124,31 @@ export async function analyzeDocument(
 - Signature present (yes/no)
 - Any special instructions or notes`,
 
-    training_form: `Analyze this training acknowledgement form and extract:
-- Employee name
-- Employee ID (if visible)
-- Training module/topic
-- Date signed
-- Signature present (yes/no)
-- Any notes or comments`,
+    training_form: `Analyze this training acknowledgement form and extract the following with HIGH ACCURACY:
+
+Employee Information:
+- Employee name (CRITICAL: Read handwritten name carefully, common names like John, Sarah, Mike, Maria, Chen, Patel, Rodriguez, Williams, Davis)
+- Employee ID (format: EMP-#### or BM-####)
+
+Training Details:
+- Training module/topic (e.g., "Safety & SOP", "Forklift Certification")
+- Date signed (any format - convert to YYYY-MM-DD if possible)
+
+Signature Analysis (CRITICAL):
+- Signature present: yes/no
+- If present, attempt to READ the signature and match to employee name
+- Signature legibility: clear/unclear/illegible
+- Compare signature name to printed employee name - do they match?
+- If signature is unclear or doesn't match, flag with LOW confidence (<70%)
+
+Additional:
+- Any notes, comments, or annotations
+- Form condition (clean, damaged, faded)
+
+IMPORTANT for handwritten signatures:
+- Common signature patterns: first initial + last name (e.g., "J. Doe")
+- Cursive vs print
+- If illegible, still note signature EXISTS but value is "Illegible" with confidence <50%`,
 
     incident_report: `Analyze this incident report document and extract:
 - Location/zone
