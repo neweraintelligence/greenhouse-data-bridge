@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, Check, X, AlertTriangle, Package } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -7,6 +7,8 @@ import { debug } from '../lib/debug';
 
 export function MobileScanner() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
+  const navigate = useNavigate();
+  const [identity, setIdentity] = useState<{ name: string; role: string } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scannedItems, setScannedItems] = useState<Array<{shipmentId: string; productName: string; qty: number; status: 'success' | 'error'; message: string}>>([]);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +16,16 @@ export function MobileScanner() {
   const [cameraReady, setCameraReady] = useState(false);
 
   useEffect(() => {
+    // Check for identity - require participant to identify themselves
+    const storedIdentity = sessionStorage.getItem('user_identity');
+    if (storedIdentity) {
+      setIdentity(JSON.parse(storedIdentity));
+    } else {
+      // Redirect to identity page
+      navigate(`/identity?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     // Initialize scanner
     const scanner = new Html5Qrcode('qr-reader');
     scannerRef.current = scanner;
@@ -23,7 +35,7 @@ export function MobileScanner() {
         scannerRef.current.stop();
       }
     };
-  }, []);
+  }, [navigate]);
 
   const startScanning = async () => {
     if (!scannerRef.current) return;
@@ -84,13 +96,17 @@ export function MobileScanner() {
               return;
             }
 
-            // Insert scan to Supabase
+            // Insert scan to Supabase with participant attribution
+            const scannerName = identity?.name
+              ? `${identity.name}${identity.role ? ` (${identity.role})` : ''}`
+              : 'Unknown Scanner';
+
             const { error: insertError } = await supabase.from('barcode_scans').insert({
               session_code: sessionCode,
               shipment_id: data.shipmentId,
               sku: data.sku,
               qty_scanned: data.qty,
-              scanned_by: 'Mobile Scanner',
+              scanned_by: scannerName,
             });
 
             if (insertError) {
@@ -165,6 +181,12 @@ export function MobileScanner() {
           <div>
             <h1 className="text-lg font-bold text-gray-900">Barcode Scanner</h1>
             <p className="text-sm text-gray-600">Session: <code className="font-mono">{sessionCode}</code></p>
+            {identity && (
+              <p className="text-sm text-gray-600">
+                Scanning as: <strong>{identity.name}</strong>
+                {identity.role && ` (${identity.role})`}
+              </p>
+            )}
           </div>
         </div>
       </div>

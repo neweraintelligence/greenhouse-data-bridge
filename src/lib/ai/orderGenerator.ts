@@ -121,20 +121,22 @@ export function generateRandomScenario(): GeneratedScenario {
     });
 
     // Generate matching scan (perfect or with planted error below)
+    // Mark as demo data so it's distinguishable from participant entries
     scans.push({
       shipment_id: shipmentId,
       sku: product.sku,
       qty_scanned: qty, // Will be modified if error planted
-      scanned_by: ['Mike Chen', 'Sarah Johnson', 'Maria Rodriguez'][Math.floor(Math.random() * 3)],
+      scanned_by: ['[Demo] Mike Chen', '[Demo] Sarah Johnson', '[Demo] Maria Rodriguez'][Math.floor(Math.random() * 3)],
       scanned_at: new Date(date.getTime() + 10 * 60 * 60 * 1000).toISOString(), // 10 hours after ship
     });
 
     // Generate matching received
+    // Mark as demo data so it's distinguishable from participant entries
     received.push({
       shipment_id: shipmentId,
       received_qty: qty,
       received_at: new Date(date.getTime() + 14 * 60 * 60 * 1000).toISOString(), // 14 hours after
-      receiver_name: customer.includes('Depot') || customer.includes('Lowe') ? customer.split(' ')[0] + ' Receiving' : 'Customer Receiving',
+      receiver_name: customer.includes('Depot') || customer.includes('Lowe') ? `[Demo] ${customer.split(' ')[0]} Receiving` : '[Demo] Customer Receiving',
       condition: 'Good condition',
       reconciled: true,
     });
@@ -164,11 +166,12 @@ export function generateRandomScenario(): GeneratedScenario {
       direction: 'inbound',
     });
 
+    // Mark as demo data so it's distinguishable from participant entries
     scans.push({
       shipment_id: shipmentId,
       sku: product.sku,
       qty_scanned: qty,
-      scanned_by: ['Mike Chen', 'Sarah Johnson', 'Maria Rodriguez'][Math.floor(Math.random() * 3)],
+      scanned_by: ['[Demo] Mike Chen', '[Demo] Sarah Johnson', '[Demo] Maria Rodriguez'][Math.floor(Math.random() * 3)],
       scanned_at: new Date(date.getTime() + 10 * 60 * 60 * 1000).toISOString(),
     });
 
@@ -176,7 +179,7 @@ export function generateRandomScenario(): GeneratedScenario {
       shipment_id: shipmentId,
       received_qty: qty,
       received_at: new Date(date.getTime() + 14 * 60 * 60 * 1000).toISOString(),
-      receiver_name: 'BMG Receiving',
+      receiver_name: '[Demo] BMG Receiving',
       condition: 'Good condition',
       reconciled: true,
     });

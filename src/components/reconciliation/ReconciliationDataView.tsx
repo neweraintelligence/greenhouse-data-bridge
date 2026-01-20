@@ -28,6 +28,7 @@ interface ReceivedShipment {
   condition: string;
   receiver_name: string;
   received_at: string;
+  reconciled: boolean;
 }
 
 interface MergedRecord {
@@ -41,10 +42,12 @@ interface MergedRecord {
   scanned_qty: number | null;
   scanned_sku: string | null;
   scanned_by: string | null;
+  scanned_at: string | null;
   // Received (from signature)
   received_qty: number | null;
   condition: string | null;
   receiver_name: string | null;
+  received_at: string | null;
   // Discrepancy flags
   hasQtyDiscrepancy: boolean;
   hasSkuDiscrepancy: boolean;
@@ -114,10 +117,12 @@ export function ReconciliationDataView({ sessionCode }: ReconciliationDataViewPr
           scanned_qty: scan?.qty_scanned ?? null,
           scanned_sku: scan?.sku ?? null,
           scanned_by: scan?.scanned_by ?? null,
+          scanned_at: scan?.scanned_at ?? null,
           // Received
           received_qty: recv?.received_qty ?? null,
           condition: recv?.condition ?? null,
           receiver_name: recv?.receiver_name ?? null,
+          received_at: recv?.received_at ?? null,
           // Flags
           hasQtyDiscrepancy: !!hasQtyDiscrepancy,
           hasSkuDiscrepancy: !!hasSkuDiscrepancy,
@@ -242,10 +247,10 @@ export function ReconciliationDataView({ sessionCode }: ReconciliationDataViewPr
                   <th className="px-3 py-2.5 text-center font-medium text-gray-700 border-l border-gray-200" colSpan={3}>
                     <span className="text-blue-600">Expected (PO/Excel)</span>
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-gray-700 border-l border-gray-200" colSpan={2}>
+                  <th className="px-3 py-2.5 text-center font-medium text-gray-700 border-l border-gray-200" colSpan={3}>
                     <span className="text-purple-600">Scanned (Barcode)</span>
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-gray-700 border-l border-gray-200" colSpan={2}>
+                  <th className="px-3 py-2.5 text-center font-medium text-gray-700 border-l border-gray-200" colSpan={3}>
                     <span className="text-emerald-600">Received (Signature)</span>
                   </th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-700 border-l border-gray-200" rowSpan={2}>Status</th>
@@ -256,8 +261,10 @@ export function ReconciliationDataView({ sessionCode }: ReconciliationDataViewPr
                   <th className="px-3 py-1.5 text-left font-medium text-gray-500">Vendor</th>
                   <th className="px-3 py-1.5 text-left font-medium text-gray-500 border-l border-gray-200">SKU</th>
                   <th className="px-3 py-1.5 text-right font-medium text-gray-500">Qty</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Scanned By</th>
                   <th className="px-3 py-1.5 text-right font-medium text-gray-500 border-l border-gray-200">Qty</th>
                   <th className="px-3 py-1.5 text-left font-medium text-gray-500">Condition</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Signed By</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -298,6 +305,11 @@ export function ReconciliationDataView({ sessionCode }: ReconciliationDataViewPr
                     }`}>
                       {record.scanned_qty ?? '—'}
                     </td>
+                    <td className={`px-3 py-2.5 text-xs ${
+                      record.scanned_by === null ? 'bg-gray-100 text-gray-400 italic' : 'text-gray-600'
+                    }`}>
+                      {record.scanned_by ?? '—'}
+                    </td>
 
                     {/* Received (Signature) */}
                     <td className={`px-3 py-2.5 text-right font-mono border-l border-gray-200 ${
@@ -311,6 +323,11 @@ export function ReconciliationDataView({ sessionCode }: ReconciliationDataViewPr
                       record.condition === null ? 'bg-gray-100 text-gray-400 italic' : 'text-gray-600'
                     }`}>
                       {record.condition ?? 'Not received'}
+                    </td>
+                    <td className={`px-3 py-2.5 text-xs ${
+                      record.receiver_name === null ? 'bg-gray-100 text-gray-400 italic' : 'text-gray-600'
+                    }`}>
+                      {record.receiver_name ?? '—'}
                     </td>
 
                     {/* Status */}

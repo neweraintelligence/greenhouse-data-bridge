@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckCircle2, XCircle, Loader2, Eye, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, XCircle, Loader2, Eye, ArrowRight, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ReconciliationQuizMobileProps {
@@ -8,94 +8,260 @@ interface ReconciliationQuizMobileProps {
   onComplete: () => void;
 }
 
-// Questions about the reconciled data - participants look at main screen to answer
-const QUIZ_QUESTIONS = [
-  {
-    id: 'q1',
-    question: "Look at Row 1 (PO-2024-4521). Is the vendor name consistent across all sources?",
-    hint: "Compare: Email, PO Document, Invoice, Receiving Log",
+interface MergedRecord {
+  shipment_id: string;
+  expected_qty: number | null;
+  expected_sku: string | null;
+  vendor: string | null;
+  scanned_qty: number | null;
+  scanned_sku: string | null;
+  scanned_by: string | null;
+  received_qty: number | null;
+  condition: string | null;
+  receiver_name: string | null;
+  hasQtyDiscrepancy: boolean;
+  hasSkuDiscrepancy: boolean;
+  hasConditionIssue: boolean;
+  isMissingData: boolean;
+}
+
+interface QuizQuestion {
+  id: string;
+  question: string;
+  hint: string;
+  options: { value: string; label: string }[];
+  correctAnswer: string;
+  explanation: string;
+}
+
+// Generate questions dynamically based on actual data
+function generateQuestionsFromData(mergedData: MergedRecord[]): QuizQuestion[] {
+  const questions: QuizQuestion[] = [];
+  let questionId = 1;
+
+  // Find records with differences between sources
+  const qtyDifferences = mergedData.filter(r => r.hasQtyDiscrepancy && !r.isMissingData);
+  const receivedRecords = mergedData.filter(r => r.received_qty !== null);
+  const notReceivedRecords = mergedData.filter(r => r.received_qty === null);
+
+  // Question 1: Simple "Was it received?" question
+  if (receivedRecords.length > 0) {
+    const record = receivedRecords[0];
+    questions.push({
+      id: `q${questionId++}`,
+      question: `Shipment ${record.shipment_id}: Was it received?`,
+      hint: `Check if there's a value in the Received Qty column`,
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+      correctAnswer: 'yes',
+      explanation: `Yes - received ${record.received_qty} units.`,
+    });
+  }
+
+  // Question 2: "Who scanned it?" question
+  if (receivedRecords.length > 0) {
+    const record = receivedRecords.find(r => r.scanned_by) || receivedRecords[0];
+    if (record.scanned_by) {
+      questions.push({
+        id: `q${questionId++}`,
+        question: `Shipment ${record.shipment_id}: Who scanned it?`,
+        hint: `Check the "Scanned By" column`,
+        options: [
+          { value: 'correct', label: record.scanned_by },
+          { value: 'wrong1', label: '[Demo] Alex Wong' },
+          { value: 'wrong2', label: 'Not scanned' },
+        ],
+        correctAnswer: 'correct',
+        explanation: `Scanned by: ${record.scanned_by}`,
+      });
+    }
+  }
+
+  // Question 3: "Who signed for it?" question
+  if (receivedRecords.length > 1) {
+    const record = receivedRecords.find(r => r.receiver_name) || receivedRecords[1];
+    if (record.receiver_name) {
+      questions.push({
+        id: `q${questionId++}`,
+        question: `Shipment ${record.shipment_id}: Who signed for it?`,
+        hint: `Check the "Signed By" column`,
+        options: [
+          { value: 'correct', label: record.receiver_name },
+          { value: 'wrong1', label: '[Demo] John Smith' },
+          { value: 'wrong2', label: 'Not signed' },
+        ],
+        correctAnswer: 'correct',
+        explanation: `Signed by: ${record.receiver_name}`,
+      });
+    }
+  }
+
+  // Question 4: Quantity match question
+  if (qtyDifferences.length > 0) {
+    const record = qtyDifferences[0];
+    questions.push({
+      id: `q${questionId++}`,
+      question: `Shipment ${record.shipment_id}: Do the quantities match?`,
+      hint: `Compare Expected Qty vs Scanned Qty vs Received Qty`,
+      options: [
+        { value: 'yes', label: 'Yes, all match' },
+        { value: 'no', label: 'No, there\'s a difference' },
+      ],
+      correctAnswer: 'no',
+      explanation: `Expected: ${record.expected_qty}, Scanned: ${record.scanned_qty}, Received: ${record.received_qty}`,
+    });
+  } else if (receivedRecords.length > 0) {
+    // If no qty differences, ask about a matching one
+    const record = receivedRecords[0];
+    questions.push({
+      id: `q${questionId++}`,
+      question: `Shipment ${record.shipment_id}: Do the quantities match?`,
+      hint: `Compare Expected Qty vs Scanned Qty vs Received Qty`,
+      options: [
+        { value: 'yes', label: 'Yes, all match' },
+        { value: 'no', label: 'No, there\'s a difference' },
+      ],
+      correctAnswer: 'yes',
+      explanation: `All quantities show ${record.expected_qty} - they match.`,
+    });
+  }
+
+  // Question 5: Count question - how many received?
+  const receivedCount = receivedRecords.length;
+  const totalCount = mergedData.length;
+  questions.push({
+    id: `q${questionId++}`,
+    question: `How many shipments have been received?`,
+    hint: `Count rows with a value in the Received Qty column`,
     options: [
-      { value: 'yes', label: 'Yes, all match' },
-      { value: 'no', label: 'No, there\'s a mismatch' },
+      { value: String(receivedCount), label: `${receivedCount} of ${totalCount}` },
+      { value: String(Math.max(0, receivedCount - 1)), label: `${Math.max(0, receivedCount - 1)} of ${totalCount}` },
+      { value: String(Math.min(totalCount, receivedCount + 1)), label: `${Math.min(totalCount, receivedCount + 1)} of ${totalCount}` },
     ],
-    correctAnswer: 'no', // Nature's Pride Farms vs Natures Pride Farm
-    explanation: "The invoice shows 'Natures Pride Farm' (missing apostrophe and 's') while other sources show 'Nature's Pride Farms'",
-  },
-  {
-    id: 'q2',
-    question: "Row 2 (PO-2024-4522): Does the received quantity match the ordered quantity?",
-    hint: "Compare: Order Qty vs Receiving Log",
-    options: [
-      { value: 'match', label: 'Quantities match' },
-      { value: 'short', label: 'Received LESS than ordered' },
-      { value: 'over', label: 'Received MORE than ordered' },
-    ],
-    correctAnswer: 'short', // Ordered 500, received 498
-    explanation: "Ordered 500 units but only 498 were received - a shortage of 2 units",
-  },
-  {
-    id: 'q3',
-    question: "Row 3 (PO-2024-4523): Is the product SKU consistent across documents?",
-    hint: "Compare: PO SKU vs Bill of Lading SKU",
-    options: [
-      { value: 'yes', label: 'Yes, SKUs match' },
-      { value: 'no', label: 'No, SKU format differs' },
-    ],
-    correctAnswer: 'no', // TOM-ORG-1KG vs TOM-ORGANIC-1KG
-    explanation: "PO shows 'TOM-ORG-1KG' but Bill of Lading shows 'TOM-ORGANIC-1KG' - same product, different format",
-  },
-  {
-    id: 'q4',
-    question: "Row 4 (SHP-0034): Was the shipment delivered on the expected date?",
-    hint: "Compare: Expected Delivery vs Actual Delivery",
-    options: [
-      { value: 'ontime', label: 'Yes, delivered on time' },
-      { value: 'early', label: 'Delivered early' },
-      { value: 'late', label: 'Delivered late' },
-    ],
-    correctAnswer: 'late', // Expected Jan 15, Actual Jan 16
-    explanation: "Expected delivery was Jan 15, but actual delivery was Jan 16 - one day late",
-  },
-  {
-    id: 'q5',
-    question: "Row 5 (SHP-0035): Does the delivery address match the ship-to address?",
-    hint: "Compare: Ship-To Address vs Delivery Confirmation",
-    options: [
-      { value: 'exact', label: 'Exact match' },
-      { value: 'same_different_format', label: 'Same location, different format' },
-      { value: 'different', label: 'Completely different addresses' },
-    ],
-    correctAnswer: 'same_different_format', // 123 Main St, Warehouse A vs 123 Main Street, WH-A
-    explanation: "'123 Main St, Warehouse A' vs '123 Main Street, WH-A' - same place, just abbreviated differently",
-  },
-  {
-    id: 'q6',
-    question: "Looking at ALL rows: How many records have discrepancies that need attention?",
-    hint: "Count rows with any mismatch across sources",
-    options: [
-      { value: '2', label: '2 records' },
-      { value: '3', label: '3 records' },
-      { value: '4', label: '4 records' },
-      { value: '5', label: 'All 5 records' },
-    ],
-    correctAnswer: '5', // All have some issue
-    explanation: "All 5 records have some form of discrepancy - vendor name, quantity, SKU format, date, or address format",
-  },
-];
+    correctAnswer: String(receivedCount),
+    explanation: `${receivedCount} out of ${totalCount} shipments show received quantities.`,
+  });
+
+  // Question 6: Not received question (if any exist)
+  if (notReceivedRecords.length > 0) {
+    const record = notReceivedRecords[0];
+    questions.push({
+      id: `q${questionId++}`,
+      question: `Shipment ${record.shipment_id}: Was it received?`,
+      hint: `Check if there's a value in the Received Qty column`,
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+      correctAnswer: 'no',
+      explanation: `No received quantity recorded yet.`,
+    });
+  }
+
+  return questions;
+}
 
 export function ReconciliationQuizMobile({ sessionCode, participantName, onComplete: _onComplete }: ReconciliationQuizMobileProps) {
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
 
-  const currentQuestion = QUIZ_QUESTIONS[currentQuestionIndex];
-  const progress = ((currentQuestionIndex) / QUIZ_QUESTIONS.length) * 100;
+  // Load real session data and generate questions
+  useEffect(() => {
+    const loadDataAndGenerateQuestions = async () => {
+      if (!sessionCode) {
+        setDataError('No session code provided');
+        setIsLoadingData(false);
+        return;
+      }
+
+      try {
+        // Fetch all 3 sources in parallel (same as ReconciliationDataView)
+        const [expectedRes, scannedRes, receivedRes] = await Promise.all([
+          supabase.from('shipments_expected').select('*').eq('session_code', sessionCode),
+          supabase.from('barcode_scans').select('*').eq('session_code', sessionCode),
+          supabase.from('shipments_received').select('*').eq('session_code', sessionCode),
+        ]);
+
+        const expected = expectedRes.data || [];
+        const scanned = scannedRes.data || [];
+        const received = receivedRes.data || [];
+
+        if (expected.length === 0) {
+          setDataError('No shipment data found for this session');
+          setIsLoadingData(false);
+          return;
+        }
+
+        // Create a map of all unique shipment IDs
+        const shipmentIds = new Set<string>();
+        expected.forEach((e: { shipment_id: string }) => shipmentIds.add(e.shipment_id));
+        scanned.forEach((s: { shipment_id: string }) => shipmentIds.add(s.shipment_id));
+        received.forEach((r: { shipment_id: string }) => shipmentIds.add(r.shipment_id));
+
+        // Merge the data
+        const merged: MergedRecord[] = Array.from(shipmentIds).map(shipmentId => {
+          const exp = expected.find((e: { shipment_id: string }) => e.shipment_id === shipmentId);
+          const scan = scanned.find((s: { shipment_id: string }) => s.shipment_id === shipmentId);
+          const recv = received.find((r: { shipment_id: string }) => r.shipment_id === shipmentId);
+
+          const hasQtyDiscrepancy =
+            (exp && scan && exp.expected_qty !== scan.qty_scanned) ||
+            (scan && recv && scan.qty_scanned !== recv.received_qty) ||
+            (exp && recv && exp.expected_qty !== recv.received_qty);
+
+          const hasSkuDiscrepancy = (exp && scan && exp.expected_sku !== scan.sku);
+          const hasConditionIssue = recv?.condition && recv.condition !== 'Good condition';
+          const isMissingData = !exp || !scan || !recv;
+
+          return {
+            shipment_id: shipmentId,
+            expected_qty: exp?.expected_qty ?? null,
+            expected_sku: exp?.expected_sku ?? null,
+            vendor: exp?.vendor ?? null,
+            scanned_qty: scan?.qty_scanned ?? null,
+            scanned_sku: scan?.sku ?? null,
+            scanned_by: scan?.scanned_by ?? null,
+            received_qty: recv?.received_qty ?? null,
+            condition: recv?.condition ?? null,
+            receiver_name: recv?.receiver_name ?? null,
+            hasQtyDiscrepancy: !!hasQtyDiscrepancy,
+            hasSkuDiscrepancy: !!hasSkuDiscrepancy,
+            hasConditionIssue: !!hasConditionIssue,
+            isMissingData,
+          };
+        });
+
+        // Sort by shipment ID
+        merged.sort((a, b) => a.shipment_id.localeCompare(b.shipment_id));
+
+        // Generate questions from actual data
+        const generatedQuestions = generateQuestionsFromData(merged);
+        setQuestions(generatedQuestions);
+      } catch (err) {
+        console.error('Error loading reconciliation data for quiz:', err);
+        setDataError('Failed to load session data');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadDataAndGenerateQuestions();
+  }, [sessionCode]);
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = questions.length > 0 ? ((currentQuestionIndex) / questions.length) * 100 : 0;
 
   const handleSubmitAnswer = async () => {
-    if (!selectedAnswer || hasAnswered) return;
+    if (!selectedAnswer || hasAnswered || !currentQuestion) return;
 
     setIsSubmitting(true);
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
@@ -121,7 +287,7 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
+    if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setHasAnswered(false);
@@ -130,8 +296,31 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
     }
   };
 
+  // Loading state
+  if (isLoadingData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <Loader2 className="w-8 h-8 text-bmf-blue animate-spin" />
+        <p className="text-gray-600">Loading session data...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (dataError || questions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4 text-center">
+        <AlertTriangle className="w-12 h-12 text-amber-500" />
+        <div>
+          <p className="font-medium text-gray-800">Unable to load quiz</p>
+          <p className="text-sm text-gray-500 mt-1">{dataError || 'No data available for this session'}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isComplete) {
-    const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100);
+    const percentage = Math.round((score / questions.length) * 100);
     return (
       <div className="space-y-6 text-center">
         <div className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center ${
@@ -147,7 +336,7 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
           <p className="text-gray-600">
-            You scored <span className="font-bold text-bmf-blue">{score}</span> out of {QUIZ_QUESTIONS.length}
+            You scored <span className="font-bold text-bmf-blue">{score}</span> out of {questions.length}
           </p>
         </div>
 
@@ -171,7 +360,7 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
         </div>
 
         <p className="text-xs text-gray-400">
-          AI would catch all 5 discrepancies in under 0.1 seconds
+          AI would catch all discrepancies in under 0.1 seconds
         </p>
       </div>
     );
@@ -181,7 +370,7 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
     <div className="space-y-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-500">Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}</span>
+        <span className="text-gray-500">Question {currentQuestionIndex + 1} of {questions.length}</span>
         <span className="font-medium text-bmf-blue">{score} correct</span>
       </div>
       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -279,7 +468,7 @@ export function ReconciliationQuizMobile({ sessionCode, participantName, onCompl
           onClick={handleNextQuestion}
           className="w-full py-3 px-4 rounded-xl bg-gray-800 text-white font-semibold hover:bg-gray-900 transition-colors flex items-center justify-center gap-2"
         >
-          {currentQuestionIndex < QUIZ_QUESTIONS.length - 1 ? (
+          {currentQuestionIndex < questions.length - 1 ? (
             <>
               Next Question
               <ArrowRight className="w-5 h-5" />
