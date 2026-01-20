@@ -324,16 +324,16 @@ function InfoOverlayComponent({
         <div className={`w-2/3 pr-12 pt-32 pb-16 flex flex-col justify-center overflow-y-auto ${
           info.imageOnLeft ? 'pr-24 pl-12' : 'pl-24'
         }`}>
-          {/* Subtitle with mode badge - only show badge if flowContext exists */}
-          <div className="flex items-center gap-3 mb-6">
+          {/* Subtitle with mode badge - compact */}
+          <div className="flex items-center gap-2 mb-4">
             <p
-              className="text-base tracking-[0.2em] uppercase text-gray-500"
+              className="text-sm tracking-[0.15em] uppercase text-gray-500"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               {info.subtitle}
             </p>
             {hasDirectionalContent && activeDirection !== 'both' && (
-              <span className={`text-xs px-2 py-1 rounded-full ${
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
                 activeDirection === 'inbound'
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-blue-100 text-blue-700'
@@ -343,59 +343,59 @@ function InfoOverlayComponent({
             )}
           </div>
 
-          {/* Title - larger */}
+          {/* Title - fit screen */}
           <h1
-            className="text-6xl font-semibold text-gray-900 tracking-tight mb-10 leading-[1.05]"
+            className="text-5xl font-semibold text-gray-900 tracking-tight mb-6 leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {info.title}
           </h1>
 
-          {/* Description - larger */}
+          {/* Description - fit screen */}
           <p
-            className="text-2xl text-gray-700 leading-relaxed mb-12"
+            className="text-lg text-gray-700 leading-relaxed mb-8"
             style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
           >
             {getActiveContent('description')}
           </p>
 
-          {/* Pain point - larger */}
-          <div className="mb-10">
+          {/* Pain point - fit screen */}
+          <div className="mb-6">
             <p
-              className="text-sm tracking-[0.15em] uppercase text-amber-600 mb-4"
+              className="text-xs tracking-[0.12em] uppercase text-amber-600 mb-2"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Problem
             </p>
             <p
-              className="text-2xl text-gray-800 leading-snug font-light"
+              className="text-xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('painPoint')}"
             </p>
           </div>
 
-          {/* Solution - larger */}
-          <div className="mb-10">
+          {/* Solution - fit screen */}
+          <div className="mb-6">
             <p
-              className="text-sm tracking-[0.15em] uppercase text-emerald-600 mb-4"
+              className="text-xs tracking-[0.12em] uppercase text-emerald-600 mb-2"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Solution
             </p>
             <p
-              className="text-2xl text-gray-800 leading-snug font-light"
+              className="text-xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('solution')}"
             </p>
           </div>
 
-          {/* Key insight - larger */}
+          {/* Key insight - fit screen */}
           {getActiveContent('keyInsight') && (
-            <div className="border-l-2 border-gray-300 pl-6 mb-10">
+            <div className="border-l-2 border-gray-300 pl-4 mb-6">
               <p
-                className="text-xl text-gray-600 italic"
+                className="text-base text-gray-600 italic"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
               >
                 {getActiveContent('keyInsight')}
