@@ -371,7 +371,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
       // Generate new shipment ID (increment from last)
       const existingRows = currentData.spreadsheet.rows;
-      const lastShipmentId = existingRows.length > 0 ? existingRows[existingRows.length - 1][1] : 'OUT-2025-0000';
+      const lastShipmentId = existingRows.length > 0 ? String(existingRows[existingRows.length - 1][1]) : 'OUT-2025-0000';
       const match = lastShipmentId.match(/(\d+)$/);
       const nextNumber = match ? parseInt(match[1], 10) + 1 : 1;
       const newShipmentId = `OUT-2025-${String(nextNumber).padStart(4, '0')}`;
