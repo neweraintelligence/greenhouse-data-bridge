@@ -41,6 +41,7 @@ import { GlassButton } from '../design-system';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { reconcileShipments } from '../../lib/processing/compareShipments';
 import { supabase } from '../../lib/supabase';
+import { debug } from '../../lib/debug';
 import type { Discrepancy } from '../../lib/processing/types';
 import { generateEscalationEmail } from '../../lib/ai/geminiService';
 import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
@@ -289,9 +290,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         flagged: prev.flagged - 1,
       }));
 
-      console.log('Decision saved:', decision, selectedDiscrepancy.id);
+      debug.log('Decision saved:', decision, selectedDiscrepancy.id);
     } catch (error) {
-      console.error('Error saving decision:', error);
+      debug.criticalError('Decision save failed', error);
     }
   }, [selectedDiscrepancy, sessionCode]);
 
@@ -315,7 +316,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       const shipmentId = row[1];
 
       // Build update object based on field
-      const updates: any = {};
+      const updates: Partial<{expected_qty: number; expected_sku: string; vendor: string; ship_date: string}> = {};
       if (fieldName === 'Qty') {
         updates.expected_qty = Number(newValue);
       } else if (fieldName === 'SKU') {
@@ -336,7 +337,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
         if (error) throw error;
 
-        console.log('Excel cell updated in database:', shipmentId, updates);
+        debug.log('Excel cell updated in database:', shipmentId, updates);
 
         // Update local state
         const updatedRows = [...currentData.spreadsheet.rows];
@@ -356,7 +357,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         }));
       }
     } catch (error) {
-      console.error('Error saving Excel edit:', error);
+      debug.criticalError('Excel edit save failed', error);
     }
   }, [selectedUseCase, sourceData, sessionCode]);
 
@@ -497,7 +498,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         setSourceData((prev) => ({ ...prev, [sourceName]: newData }));
         setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
       } catch (error) {
-        console.error('Error fetching source data:', error);
+        debug.criticalError('Source data fetch failed', error);
         setSourceStatuses((prev) => ({ ...prev, [sourceName]: 'complete' }));
       }
     }, 2500 + Math.random() * 1000);
@@ -593,7 +594,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
                   sent_at: new Date().toISOString(),
                 };
               } catch (error) {
-                console.error('Error generating escalation email:', error);
+                debug.error('Error generating escalation email:', error);
                 return {
                   id: `comm-esc-${d.id}`,
                   comm_type: 'email',
@@ -640,7 +641,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             const report = await generateReconciliationReport(result);
             setReconciliationReport(report);
           } catch (error) {
-            console.error('Error generating report:', error);
+            debug.error('Error generating report:', error);
           }
 
           setProcessingStatus('complete');
@@ -670,7 +671,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         }, 3000);
       }
     } catch (error) {
-      console.error('Processing error:', error);
+      debug.criticalError('Processing failed', error);
       clearInterval(interval);
       setProcessingStatus('idle');
     }
@@ -801,7 +802,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           filter: `session_code=eq.${sessionCode}`,
         },
         (payload) => {
-          console.log('New barcode scan detected:', payload.new);
+          debug.log('New barcode scan detected:', payload.new);
           const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_at: string; scanned_by: string};
           setLiveScans(prev => [scan, ...prev]);
 
@@ -1064,7 +1065,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         data: {
           label: 'Escalation Router',
           items: criticalEscalations,
-          onViewEscalations: () => console.log('View escalations'),
+          onViewEscalations: () => debug.log('View escalations'),
           onShowInfo: () => handleShowInfo('escalation', 'escalation', 'Escalation Router', -1, undefined, undefined),
         },
         className: presentationActiveNode === 'escalation' ? 'node-presentation-active' : '',
@@ -1105,7 +1106,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               setShowReportModal(true);
             }
           },
-          onDownload: (file: OutputFile) => console.log('Download:', file),
+          onDownload: (file: OutputFile) => debug.log('Download:', file),
         },
         className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : outputIsPresentationActive ? 'node-presentation-active' : '',
       });
@@ -1299,7 +1300,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Build node preview content for info overlay
   const getNodePreviewContent = (): React.ReactNode => {
     if (!infoNodeId || !selectedUseCase) {
-      console.log('No infoNodeId or selectedUseCase');
+      debug.log('No infoNodeId or selectedUseCase');
       return null;
     }
 
@@ -1510,16 +1511,16 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     // Find the source that matches
     const source = selectedUseCase.sources.find(s => `source-${s.name}` === infoNodeId);
     if (!source) {
-      console.log('No source found for infoNodeId:', infoNodeId);
+      debug.log('No source found for infoNodeId:', infoNodeId);
       return null;
     }
 
     const data = sourceData[source.name] || {};
-    console.log('Building preview for:', source.type, 'with data:', data, 'use case:', selectedUseCase.id);
+    debug.log('Building preview for:', source.type, 'with data:', data, 'use case:', selectedUseCase.id);
 
     // Barcode always has preview (hardcoded data) - check first
     if (source.type === 'barcode') {
-      console.log('Rendering barcode preview - always available');
+      debug.log('Rendering barcode preview - always available');
       return (
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-2">

@@ -50,23 +50,27 @@ export interface GeneratedOrder {
   direction: 'inbound' | 'outbound';
 }
 
+export interface GeneratedScan {
+  shipment_id: string;
+  sku: string;
+  qty_scanned: number;
+  scanned_by: string;
+  scanned_at: string;
+}
+
+export interface GeneratedReceived {
+  shipment_id: string;
+  received_qty: number;
+  received_at: string;
+  receiver_name: string;
+  condition: string;
+  reconciled: boolean;
+}
+
 export interface GeneratedScenario {
   orders: GeneratedOrder[];
-  scans: Array<{
-    shipment_id: string;
-    sku: string;
-    qty_scanned: number;
-    scanned_by: string;
-    scanned_at: string;
-  }>;
-  received: Array<{
-    shipment_id: string;
-    received_qty: number;
-    received_at: string;
-    receiver_name: string;
-    condition: string;
-    reconciled: boolean;
-  }>;
+  scans: GeneratedScan[];
+  received: GeneratedReceived[];
   plantedError: {
     shipment_id: string;
     type: 'qty_shortage' | 'sku_mismatch';
@@ -80,8 +84,8 @@ export function generateRandomScenario(): GeneratedScenario {
 
   const numOrders = 5 + Math.floor(Math.random() * 4); // 5-8 orders
   const orders: GeneratedOrder[] = [];
-  const scans: any[] = [];
-  const received: any[] = [];
+  const scans: GeneratedScan[] = [];
+  const received: GeneratedReceived[] = [];
 
   // Mix of outbound and inbound (60% outbound, 40% inbound)
   const numOutbound = Math.ceil(numOrders * 0.6);

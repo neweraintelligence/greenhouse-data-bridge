@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, Check, X, AlertTriangle, Package } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { debug } from '../lib/debug';
 
 export function MobileScanner() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -104,13 +105,13 @@ export function MobileScanner() {
             }, 500);
 
           } catch (err) {
-            console.error('Error processing scan:', err);
+            debug.error('Error processing scan:', err);
             addScanResult('Unknown', 'Invalid QR Code', 0, 'error', 'Could not parse QR code');
           }
         },
         (errorMessage) => {
           // Scanning error - usually camera not found or permission denied
-          console.log('Scan error:', errorMessage);
+          debug.log('Scan error:', errorMessage);
         }
       );
 
@@ -118,7 +119,7 @@ export function MobileScanner() {
       setCameraReady(true);
       setError(null);
     } catch (err) {
-      console.error('Failed to start scanner:', err);
+      debug.criticalError('Scanner start failed', err);
       setError('Camera access denied or not available');
       setCameraReady(false);
     }

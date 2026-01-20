@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { debug } from '../lib/debug';
 
 export function ReceiptSigningForm() {
   const { sessionCode, shipmentId } = useParams<{ sessionCode: string; shipmentId: string }>();
@@ -54,7 +55,7 @@ export function ReceiptSigningForm() {
         setShipmentDetails(data);
         setReceivedQty(String(data.expected_qty)); // Pre-fill with expected
       } catch (err) {
-        console.error('Error fetching shipment:', err);
+        debug.criticalError('Shipment fetch failed', err);
         setError('Failed to load shipment details');
       } finally {
         setLoading(false);
@@ -154,7 +155,7 @@ export function ReceiptSigningForm() {
         window.close(); // Try to close tab if possible
       }, 2000);
     } catch (err) {
-      console.error('Submit error:', err);
+      debug.criticalError('Receipt submission failed', err);
       setError('Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);

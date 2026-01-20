@@ -7,22 +7,25 @@ import { MobileScanner } from './pages/MobileScanner';
 import { PrintLabels } from './pages/PrintLabels';
 import { QuickIdentity } from './pages/QuickIdentity';
 import { ReceiptSigningForm } from './pages/ReceiptSigningForm';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/flowchart" element={<Flowchart />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/upload/:sessionCode/:sourceId" element={<MobileUpload />} />
-        <Route path="/scan/:sessionCode" element={<MobileScanner />} />
-        <Route path="/print-labels/:sessionCode" element={<PrintLabels />} />
-        <Route path="/identity" element={<QuickIdentity />} />
-        <Route path="/sign-receipt/:sessionCode/:shipmentId" element={<ReceiptSigningForm />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/flowchart" element={<Flowchart />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload/:sessionCode/:sourceId" element={<MobileUpload />} />
+          <Route path="/scan/:sessionCode" element={<MobileScanner />} />
+          <Route path="/print-labels/:sessionCode" element={<PrintLabels />} />
+          <Route path="/identity" element={<QuickIdentity />} />
+          <Route path="/sign-receipt/:sessionCode/:shipmentId" element={<ReceiptSigningForm />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 
