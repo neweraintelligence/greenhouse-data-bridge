@@ -1258,9 +1258,23 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           </div>
         );
       } else {
+        // Show transformation rules that will be applied
         return (
-          <div className="p-4 text-center">
-            <p className="text-sm text-gray-500">Waiting for sources to complete...</p>
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-purple-700 mb-3">Normalization Rules</p>
+            {[
+              { rule: 'Unit Conversion', example: 'lbs → kg, gallons → liters' },
+              { rule: 'Date Standardization', example: '1/15/25 → 2025-01-15' },
+              { rule: 'SKU Mapping', example: 'Vendor codes → Internal SKUs' },
+              { rule: 'Name Normalization', example: 'JOHN DOE → John Doe' },
+              { rule: 'Location Parsing', example: 'Zone 3, Row 12 → Z3-R12' },
+            ].map((r, i) => (
+              <div key={i} className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-xs">
+                <p className="font-medium text-purple-900">{r.rule}</p>
+                <code className="text-gray-600 text-[10px]">{r.example}</code>
+              </div>
+            ))}
+            <p className="text-xs text-gray-500 mt-2 text-center italic">Runs automatically when sources complete</p>
           </div>
         );
       }
