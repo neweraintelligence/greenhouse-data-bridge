@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,49 +13,82 @@ import {
 } from 'lucide-react';
 import { useSessionStore } from '../store/sessionStore';
 import { GlassPanel, GlassButton } from '../components/design-system';
+import { supabase } from '../lib/supabase';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { session } = useSessionStore();
 
+  const [decisions, setDecisions] = useState<number>(0);
+  const [escalations, setEscalations] = useState<number>(0);
+  const [communications, setCommunications] = useState<number>(0);
+
   useEffect(() => {
     if (!session) {
       navigate('/');
+      return;
     }
+
+    // Query real data from Supabase
+    const fetchDashboardData = async () => {
+      const [decisionsRes, escalationsRes, commsRes] = await Promise.all([
+        supabase.from('review_decisions').select('*', { count: 'exact', head: true }).eq('session_code', session.code),
+        supabase.from('escalations').select('*', { count: 'exact', head: true }).eq('session_code', session.code),
+        supabase.from('communications_log').select('*', { count: 'exact', head: true }).eq('session_code', session.code),
+      ]);
+
+      setDecisions(decisionsRes.count || 0);
+      setEscalations(escalationsRes.count || 0);
+      setCommunications(commsRes.count || 0);
+    };
+
+    fetchDashboardData();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel(`dashboard-${session.code}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_decisions', filter: `session_code=eq.${session.code}` }, fetchDashboardData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'escalations', filter: `session_code=eq.${session.code}` }, fetchDashboardData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'communications_log', filter: `session_code=eq.${session.code}` }, fetchDashboardData)
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, [session, navigate]);
 
   if (!session) return null;
 
-  // Demo KPI data with realistic values
+  // Real KPI data from Supabase
   const kpis = [
     {
-      label: 'Items Processed',
-      value: '24',
-      change: '+12%',
+      label: 'Decisions Made',
+      value: String(decisions),
+      change: decisions > 0 ? `${decisions} total` : 'None yet',
       icon: FileText,
       gradient: 'from-bmf-blue to-bmf-blue-dark',
       glow: 'shadow-[0_4px_20px_rgba(37,150,190,0.3)]',
     },
     {
-      label: 'Needs Review',
-      value: '3',
-      change: '-2',
-      icon: Clock,
-      gradient: 'from-amber-500 to-orange-500',
-      glow: 'shadow-[0_4px_20px_rgba(245,158,11,0.3)]',
-    },
-    {
-      label: 'Active Flags',
-      value: '1',
-      change: 'New',
+      label: 'Escalations',
+      value: String(escalations),
+      change: escalations > 0 ? 'Active' : 'None',
       icon: AlertTriangle,
       gradient: 'from-red-500 to-rose-600',
       glow: 'shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
     },
     {
-      label: 'Resolved Today',
-      value: '18',
-      change: '+8',
+      label: 'Communications Sent',
+      value: String(communications),
+      change: communications > 0 ? 'Recent' : 'None',
+      icon: Activity,
+      gradient: 'from-blue-500 to-cyan-600',
+      glow: 'shadow-[0_4px_20px_rgba(59,130,246,0.3)]',
+    },
+    {
+      label: 'System Status',
+      value: 'Active',
+      change: 'Online',
       icon: CheckCircle,
       gradient: 'from-emerald-500 to-emerald-600',
       glow: 'shadow-[0_4px_20px_rgba(16,185,129,0.3)]',
