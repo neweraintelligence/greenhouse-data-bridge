@@ -10,10 +10,10 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
     etl: '/demo_pack/use_case_images/13_data_normalization_realistic.png', // Reuse for ETL visualization
     processing: '/demo_pack/use_case_images/17_reconciliation_realistic.png',
     reviewQueue: '/demo_pack/use_case_images/14_review_queue_realistic.png', // Reuse for review queue
-    escalation: '/demo_pack/use_case_images/22_escalation_router_flow.png', // Reuse for escalation
-    communications: '/demo_pack/use_case_images/23_communications_layer_flow.png', // Reuse for communications
-    intake: '/demo_pack/use_case_images/16_data_staging_area.png',
-    output: '/demo_pack/use_case_images/24_results_dashboard_flow.png',
+    escalation: '/demo_pack/use_case_images/22_escalation_router_realistic.png', // Reuse for escalation
+    communications: '/demo_pack/use_case_images/23_communications_layer_realistic.png', // Reuse for communications
+    intake: '/demo_pack/use_case_images/16_data_staging_realistic.png',
+    output: '/demo_pack/use_case_images/24_results_dashboard_realistic.png',
   },
   training: {
     excel: '/demo_pack/use_case_images/09_training_roster_grid.png',
