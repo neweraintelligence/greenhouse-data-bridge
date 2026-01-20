@@ -1346,6 +1346,45 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           showToast('success', `✓ ${receipt.receiver_name} signed receipt for ${receipt.shipment_id}`);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shipments_expected',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const shipment = payload.new as {shipment_id: string; vendor: string; expected_qty: number};
+          showToast('success', `📦 New shipment added: ${shipment.shipment_id} (${shipment.expected_qty} units from ${shipment.vendor})`);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'training_roster',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const training = payload.new as {employee_name: string; training_type: string};
+          showToast('success', `📚 Training scheduled: ${training.employee_name} - ${training.training_type}`);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'incidents',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const incident = payload.new as {incident_type: string; severity: number; reported_by: string};
+          showToast('success', `⚠️ Incident reported by ${incident.reported_by}: ${incident.incident_type} (Severity ${incident.severity})`);
+        }
+      )
       .subscribe();
 
     return () => {

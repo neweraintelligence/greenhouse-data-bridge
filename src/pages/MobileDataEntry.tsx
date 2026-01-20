@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
+import { Toast } from '../components/ui/Toast';
 
 type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues';
 
@@ -18,6 +19,7 @@ export function MobileDataEntry() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitComplete, setSubmitComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Form state for shipments
   const [shipmentData, setShipmentData] = useState({
@@ -66,9 +68,17 @@ export function MobileDataEntry() {
       if (insertError) throw insertError;
 
       setHasJoined(true);
+      setToast({
+        message: `Welcome, ${participantName}! You've successfully joined.`,
+        type: 'success'
+      });
     } catch (err) {
       console.error('Join error:', err);
       setError('Failed to join. Please try again.');
+      setToast({
+        message: 'Failed to join. Please try again.',
+        type: 'error'
+      });
     } finally {
       setIsJoining(false);
     }
@@ -94,9 +104,17 @@ export function MobileDataEntry() {
       if (insertError) throw insertError;
 
       setSubmitComplete(true);
+      setToast({
+        message: '✓ Shipment data submitted successfully!',
+        type: 'success'
+      });
     } catch (err) {
       console.error('Submission error:', err);
       setError(err instanceof Error ? err.message : 'Failed to add shipment. Please try again.');
+      setToast({
+        message: 'Failed to submit shipment. Please try again.',
+        type: 'error'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -121,9 +139,17 @@ export function MobileDataEntry() {
       if (insertError) throw insertError;
 
       setSubmitComplete(true);
+      setToast({
+        message: '✓ Training record submitted successfully!',
+        type: 'success'
+      });
     } catch (err) {
       console.error('Submission error:', err);
       setError(err instanceof Error ? err.message : 'Failed to add training record. Please try again.');
+      setToast({
+        message: 'Failed to submit training record. Please try again.',
+        type: 'error'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -581,6 +607,15 @@ export function MobileDataEntry() {
           <p>Your entry will appear live on the main screen</p>
         </div>
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
