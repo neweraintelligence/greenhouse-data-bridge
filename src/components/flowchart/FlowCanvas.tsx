@@ -336,6 +336,28 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track incidents (for incidents use case)
   const [incidents, setIncidents] = useState<Incident[]>([]);
 
+  // Track review decisions (from mobile human-in-the-loop)
+  const [reviewDecisions, setReviewDecisions] = useState<Array<{
+    id: string;
+    item_type: string;
+    decision: string;
+    decided_by: string;
+    comment: string | null;
+    created_at: string;
+  }>>([]);
+
+  // Track review queue items (discrepancies shown on mobile)
+  const [reviewQueueItems, setReviewQueueItems] = useState<Array<{
+    id: string;
+    field_name: string;
+    source_a_label: string;
+    source_a_value: string;
+    source_b_label: string;
+    source_b_value: string;
+    severity: string;
+    status: string;
+  }>>([]);
+
   // Track outputs
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
   const [reconciliationReport, setReconciliationReport] = useState<ReconciliationReport | null>(null);
@@ -632,6 +654,35 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         }
       } catch (err) {
         debug.log('Error fetching incidents:', err);
+      }
+    }
+
+    // Fetch review queue items and decisions for human-in-the-loop (all use cases)
+    if (sessionCode) {
+      try {
+        // Fetch review queue items
+        const { data: queueItems } = await supabase
+          .from('review_queue_items')
+          .select('*')
+          .eq('session_code', sessionCode)
+          .order('created_at', { ascending: false });
+
+        if (queueItems) {
+          setReviewQueueItems(queueItems);
+        }
+
+        // Fetch review decisions
+        const { data: decisions } = await supabase
+          .from('review_decisions')
+          .select('*')
+          .eq('session_code', sessionCode)
+          .order('created_at', { ascending: false });
+
+        if (decisions) {
+          setReviewDecisions(decisions);
+        }
+      } catch (err) {
+        debug.log('Error fetching review data:', err);
       }
     }
   }, [sessionCode]);
@@ -1509,6 +1560,28 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           setIncidents(prev => [incident, ...prev]);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'review_decisions',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const decision = payload.new as {
+            id: string;
+            item_type: string;
+            decision: string;
+            decided_by: string;
+            comment: string | null;
+            created_at: string;
+          };
+          showToast('success', `✓ ${decision.decided_by} ${decision.decision === 'accept' ? 'approved' : 'rejected'} a ${decision.item_type} item`);
+          // Add to review decisions state for live display
+          setReviewDecisions(prev => [decision, ...prev]);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -2214,25 +2287,69 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           );
         }
       }
-      // For other use cases, show discrepancies
-      if (discrepancies.length > 0) {
+      // For shipping/other use cases, show review queue items and decisions
+      const pendingItems = reviewQueueItems.filter(item => item.status === 'pending');
+      const hasContent = pendingItems.length > 0 || reviewDecisions.length > 0;
+
+      if (hasContent) {
         return (
-          <div className="space-y-2 p-3">
-            <p className="text-xs font-semibold text-amber-700 mb-3">Items Needing Review ({discrepancies.length})</p>
-            {discrepancies.slice(0, 4).map((d) => (
-              <div key={d.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs">
-                <p className="font-semibold text-gray-900">{d.shipment_id}</p>
-                <p className="text-gray-700">{d.details}</p>
-                <p className="text-amber-700 text-[10px] mt-1">→ {d.recommendedAction}</p>
+          <div className="space-y-3 p-3">
+            {/* Pending items awaiting review */}
+            {pendingItems.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-amber-700 mb-2">Pending Review ({pendingItems.length})</p>
+                {pendingItems.slice(0, 2).map((item) => (
+                  <div key={item.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs mb-2">
+                    <p className="font-semibold text-gray-900">{item.field_name}</p>
+                    <p className="text-gray-700">{item.source_a_label}: {item.source_a_value}</p>
+                    <p className="text-gray-700">{item.source_b_label}: {item.source_b_value}</p>
+                    <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      item.severity === 'high' ? 'bg-red-100 text-red-700' :
+                      item.severity === 'medium' ? 'bg-amber-100 text-amber-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {item.severity} priority
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+
+            {/* Recent decisions made by participants */}
+            {reviewDecisions.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-green-700 mb-2">Recent Decisions ({reviewDecisions.length})</p>
+                {reviewDecisions.slice(0, 3).map((decision) => (
+                  <div key={decision.id} className={`p-2 rounded-lg text-xs mb-2 ${
+                    decision.decision === 'accept' ? 'bg-green-50 border border-green-200' :
+                    decision.decision === 'reject' ? 'bg-red-50 border border-red-200' :
+                    'bg-gray-50 border border-gray-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-gray-900">{decision.decided_by}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                        decision.decision === 'accept' ? 'bg-green-200 text-green-800' :
+                        decision.decision === 'reject' ? 'bg-red-200 text-red-800' :
+                        'bg-gray-200 text-gray-800'
+                      }`}>
+                        {decision.decision}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-[10px] mt-1">{decision.item_type}</p>
+                    {decision.comment && (
+                      <p className="text-gray-500 text-[10px] italic mt-1">"{decision.comment}"</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       } else {
         return (
           <div className="p-4 text-center">
             <p className="text-sm text-gray-500">No items flagged for review</p>
-            <p className="text-xs text-gray-400 mt-1">Items will appear here after processing</p>
+            <p className="text-xs text-gray-400 mt-1">Scan the QR code to participate</p>
           </div>
         );
       }
