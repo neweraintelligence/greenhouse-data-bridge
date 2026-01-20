@@ -3,11 +3,7 @@ services:
     name: greenhouse-data-bridge
     runtime: node
     buildCommand: npm install && npm run build
-    startCommand: npx serve -s dist -l $PORT
+    startCommand: node server.cjs
     envVars:
       - key: NODE_VERSION
         value: 18
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
