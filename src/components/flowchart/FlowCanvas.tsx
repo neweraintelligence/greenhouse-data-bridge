@@ -51,6 +51,7 @@ import { generateReconciliationReport, type ReconciliationReport } from '../../l
 import { ReportModal } from '../reports/ReportModal';
 import { ToastContainer } from '../Toast';
 import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
+import { ParticipantActivityLog } from './ParticipantActivityLog';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -2504,6 +2505,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
       {/* Toast notifications */}
       <ToastContainer toasts={toasts} onClose={closeToast} />
+
+      {/* Participant activity log */}
+      {selectedUseCase && (
+        <ParticipantActivityLog sessionCode={sessionCode} />
+      )}
     </div>
   );
 }

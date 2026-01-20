@@ -2,6 +2,18 @@ import { memo, useEffect, useState, useRef } from 'react';
 import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
+// Helper function to map node labels to Supabase source table names
+function getSourceTypeFromNode(nodeLabel: string): string {
+  const label = nodeLabel.toLowerCase();
+  if (label.includes('shipment') || label.includes('expected')) return 'shipments_expected';
+  if (label.includes('training') || label.includes('roster')) return 'training_roster';
+  if (label.includes('incident')) return 'incidents';
+  if (label.includes('customer') || label.includes('order')) return 'customer_orders';
+  if (label.includes('quality')) return 'quality_issues';
+  // Default fallback
+  return 'shipments_expected';
+}
+
 // Match the header colors from all node types
 const headerColors = {
   outlook: {
@@ -340,7 +352,7 @@ function InfoOverlayComponent({
             <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
               <div className="flex flex-col items-center gap-2">
                 <QRCodeSVG
-                  value={`${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(nodeLabel)}`}
+                  value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
                   size={180}
                   level="M"
                   includeMargin
