@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Minimize2, Maximize2, UserPlus, Plus, X } from 'lucide-react';
+import { Users, UserPlus, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Participant {
@@ -23,10 +23,9 @@ interface ParticipantActivityLogProps {
 }
 
 export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogProps) {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     // Fetch existing participants
@@ -84,9 +83,6 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
             timestamp: newParticipant.joined_at,
           };
           setActivities((prev) => [newActivity, ...prev].slice(0, 20)); // Keep last 20
-
-          // Show toast notification
-          showToast(newActivity.message);
         }
       )
       .subscribe();
@@ -96,146 +92,136 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
     };
   }, [sessionCode]);
 
-  const showToast = (message: string) => {
-    // Simple toast notification (you can enhance this with a proper toast library)
-    console.log('🔔', message);
-  };
-
   const uniqueParticipants = Array.from(
     new Set(participants.map((p) => p.participant_name))
   );
 
-  if (!isVisible) {
-    return (
-      <button
-        onClick={() => setIsVisible(true)}
-        className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-bmf-blue text-white shadow-lg hover:bg-bmf-blue-dark transition-all flex items-center gap-2"
-      >
-        <Users className="w-5 h-5" />
-        {uniqueParticipants.length > 0 && (
-          <span className="text-sm font-medium">{uniqueParticipants.length}</span>
-        )}
-      </button>
-    );
-  }
-
   return (
-    <div
-      className={`fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 transition-all ${
-        isMinimized ? 'w-64' : 'w-80'
-      }`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-bmf-blue to-bmf-blue-dark rounded-t-2xl">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-white" />
-          <span className="text-sm font-semibold text-white">Participants</span>
-          <span className="px-2 py-0.5 text-xs font-medium bg-white/20 text-white rounded-full">
-            {uniqueParticipants.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-            title={isMinimized ? 'Expand' : 'Minimize'}
-          >
-            {isMinimized ? (
-              <Maximize2 className="w-4 h-4 text-white" />
-            ) : (
-              <Minimize2 className="w-4 h-4 text-white" />
-            )}
-          </button>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-            title="Hide"
-          >
-            <X className="w-4 h-4 text-white" />
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      {!isMinimized && (
-        <div className="max-h-96 overflow-y-auto">
-          {/* Active Participants */}
-          <div className="p-4 border-b border-gray-100">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
-              Active Now
-            </h3>
-            {uniqueParticipants.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">
-                No participants yet
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {uniqueParticipants.slice(0, 5).map((name, idx) => {
-                  const latestActivity = participants.find(
-                    (p) => p.participant_name === name
-                  );
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      <span className="font-medium text-gray-800">{name}</span>
-                      <span className="text-xs text-gray-400">
-                        in {latestActivity?.node_name}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+    <>
+      {/* Minimized bubble button - top left */}
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="fixed top-6 left-6 z-50 group"
+        >
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-gray-200/50 hover:bg-white/90 hover:shadow-xl transition-all">
+            <Users className="w-5 h-5 text-bmf-blue" />
+            {uniqueParticipants.length > 0 && (
+              <>
+                <span className="text-sm font-semibold text-gray-800">{uniqueParticipants.length}</span>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              </>
             )}
           </div>
-
-          {/* Recent Activity */}
-          <div className="p-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
-              Recent Activity
-            </h3>
-            {activities.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">
-                No activity yet
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {activities.slice(0, 10).map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-start gap-2 text-sm"
-                  >
-                    <div className="mt-0.5">
-                      {activity.type === 'join' ? (
-                        <UserPlus className="w-4 h-4 text-bmf-blue" />
-                      ) : (
-                        <Plus className="w-4 h-4 text-green-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-gray-700">
-                        <span className="font-medium">
-                          {activity.participant_name}
-                        </span>{' '}
-                        {activity.type === 'join' ? 'joined' : 'added data to'}{' '}
-                        <span className="text-bmf-blue">
-                          {activity.node_name}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {formatTimestamp(activity.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        </button>
       )}
-    </div>
+
+      {/* Expanded overlay */}
+      {isExpanded && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setIsExpanded(false)}
+          />
+
+          {/* Activity panel */}
+          <div className="fixed top-6 left-6 z-50 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 animate-in slide-in-from-left duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-bmf-blue/10">
+                  <Users className="w-5 h-5 text-bmf-blue" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">Activity</h3>
+                  <p className="text-xs text-gray-500">{uniqueParticipants.length} active</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Close"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="max-h-[500px] overflow-y-auto">
+              {/* Active Participants */}
+              {uniqueParticipants.length > 0 && (
+                <div className="px-5 py-4 border-b border-gray-200/50">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Active Now
+                  </h4>
+                  <div className="space-y-2">
+                    {uniqueParticipants.slice(0, 5).map((name, idx) => {
+                      const latestActivity = participants.find(
+                        (p) => p.participant_name === name
+                      );
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {latestActivity?.node_name}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Activity */}
+              <div className="px-5 py-4">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Recent Activity
+                </h4>
+                {activities.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-6">
+                    No activity yet
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {activities.slice(0, 10).map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="mt-0.5 p-1.5 rounded-lg bg-bmf-blue/10">
+                          <UserPlus className="w-3.5 h-3.5 text-bmf-blue" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-700 leading-snug">
+                            <span className="font-medium text-gray-900">
+                              {activity.participant_name}
+                            </span>
+                            {' '}joined{' '}
+                            <span className="text-bmf-blue font-medium">
+                              {activity.node_name}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {formatTimestamp(activity.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
