@@ -1,4 +1,4 @@
-import { X, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, Maximize2, ZoomIn, ZoomOut, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { OutlookMiniApp, type EmailItem } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './nodes/mini-apps/OneDriveMiniApp';
@@ -23,6 +23,7 @@ interface ExpandedNodeModalProps {
   onConfirm?: () => void;
   // For editable spreadsheet
   onSpreadsheetUpdate?: (data: SpreadsheetData) => void;
+  onAddRow?: () => void;
 }
 
 export function ExpandedNodeModal({
@@ -40,6 +41,7 @@ export function ExpandedNodeModal({
   onImageClear,
   onConfirm,
   onSpreadsheetUpdate,
+  onAddRow,
 }: ExpandedNodeModalProps) {
   const [zoom, setZoom] = useState(1);
   const [editableSpreadsheet, setEditableSpreadsheet] = useState<SpreadsheetData | undefined>(spreadsheet);
@@ -62,7 +64,7 @@ export function ExpandedNodeModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -99,7 +101,7 @@ export function ExpandedNodeModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-auto max-h-[calc(85vh-80px)]">
+        <div className="p-6 overflow-auto max-h-[calc(90vh-80px)]">
           {nodeType === 'outlook' && (
             <div className="space-y-4">
               <p className="text-sm text-gray-500 mb-4">Click on an email to view details and select it for processing.</p>
@@ -130,6 +132,7 @@ export function ExpandedNodeModal({
               <EditableSpreadsheet
                 data={editableSpreadsheet}
                 onCellEdit={handleCellEdit}
+                onAddRow={onAddRow}
               />
             </div>
           )}
@@ -157,9 +160,10 @@ export function ExpandedNodeModal({
 interface EditableSpreadsheetProps {
   data: SpreadsheetData;
   onCellEdit: (rowIndex: number, colIndex: number, value: string | number) => void;
+  onAddRow?: () => void;
 }
 
-function EditableSpreadsheet({ data, onCellEdit }: EditableSpreadsheetProps) {
+function EditableSpreadsheet({ data, onCellEdit, onAddRow }: EditableSpreadsheetProps) {
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState('');
 
@@ -233,8 +237,20 @@ function EditableSpreadsheet({ data, onCellEdit }: EditableSpreadsheetProps) {
           </tbody>
         </table>
       </div>
-      <div className="bg-gray-50 px-4 py-2 text-xs text-gray-500">
-        Click any cell to edit. Press Enter to save or Escape to cancel.
+      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+        <span className="text-xs text-gray-500">
+          Click any cell to edit. Press Enter to save or Escape to cancel.
+        </span>
+        {onAddRow && (
+          <GlassButton
+            variant="primary"
+            size="sm"
+            onClick={onAddRow}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            Add Row
+          </GlassButton>
+        )}
       </div>
     </div>
   );

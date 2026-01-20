@@ -361,6 +361,65 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [selectedUseCase, sourceData, sessionCode]);
 
+  // Handle adding a new row to Excel sheet
+  const handleAddRow = useCallback(async () => {
+    if (!selectedUseCase || selectedUseCase.id !== 'shipping') return;
+
+    try {
+      const currentData = sourceData['Expected Shipments'];
+      if (!currentData?.spreadsheet) return;
+
+      // Generate new shipment ID (increment from last)
+      const existingRows = currentData.spreadsheet.rows;
+      const lastShipmentId = existingRows.length > 0 ? existingRows[existingRows.length - 1][1] : 'OUT-2025-0000';
+      const match = lastShipmentId.match(/(\d+)$/);
+      const nextNumber = match ? parseInt(match[1], 10) + 1 : 1;
+      const newShipmentId = `OUT-2025-${String(nextNumber).padStart(4, '0')}`;
+
+      // Create new row with defaults
+      const today = new Date().toISOString().split('T')[0];
+      const newRow = [
+        existingRows.length + 1, // Row number
+        newShipmentId,
+        'CTN-12OZ', // Default SKU
+        100, // Default qty
+        'New Customer', // Default vendor
+        today,
+      ];
+
+      // Insert to Supabase
+      const { error } = await supabase.from('shipments_expected').insert({
+        session_code: sessionCode,
+        shipment_id: newShipmentId,
+        expected_sku: 'CTN-12OZ',
+        expected_qty: 100,
+        vendor: 'New Customer',
+        ship_date: today,
+        direction: 'outbound',
+        notes: 'Added manually',
+      });
+
+      if (error) throw error;
+
+      debug.log('New row added to database:', newShipmentId);
+
+      // Update local state
+      setSourceData(prev => ({
+        ...prev,
+        'Expected Shipments': {
+          ...currentData,
+          spreadsheet: {
+            headers: currentData.spreadsheet?.headers || [],
+            rows: [...existingRows, newRow],
+            sheetName: currentData.spreadsheet?.sheetName,
+          },
+        },
+      }));
+    } catch (error) {
+      debug.criticalError('Add row failed', error);
+    }
+  }, [selectedUseCase, sourceData, sessionCode]);
+
   // Handle show info overlay
   const handleShowInfo = useCallback((
     nodeType: string,
@@ -1667,6 +1726,18 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           files={getExpandedSourceData().files}
           spreadsheet={getExpandedSourceData().spreadsheet}
           capturedImage={getExpandedSourceData().capturedImage}
+          onSpreadsheetUpdate={(data) => {
+            // Update local state when spreadsheet changes
+            const currentData = sourceData['Expected Shipments'];
+            setSourceData(prev => ({
+              ...prev,
+              'Expected Shipments': {
+                ...currentData,
+                spreadsheet: data,
+              },
+            }));
+          }}
+          onAddRow={selectedUseCase?.id === 'shipping' ? handleAddRow : undefined}
         />
       )}
 
