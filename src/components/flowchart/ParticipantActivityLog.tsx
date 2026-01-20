@@ -106,18 +106,18 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-[10005] pointer-events-none">
-      {/* Live indicator - always visible with dark pill background */}
+    <div className="fixed bottom-6 left-6 z-[10005] pointer-events-none flex flex-col-reverse">
+      {/* Updates indicator - at the bottom with green light */}
       {isLive && (
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mt-2">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-            <span className="text-[10px] font-semibold tracking-wider text-white/90 uppercase">Live</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+            <span className="text-[10px] font-semibold tracking-wider text-white/90 uppercase">Updates</span>
           </div>
         </div>
       )}
 
-      {/* Activity stream - dark pills for readability on any background */}
+      {/* Activity stream - messages appear above the indicator */}
       <div className="space-y-2">
         {activities.map((activity) => (
           <div
