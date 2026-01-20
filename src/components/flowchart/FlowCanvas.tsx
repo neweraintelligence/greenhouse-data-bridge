@@ -552,17 +552,27 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           setProcessingStats(stats);
           setDiscrepancies(result.discrepancies);
 
-          // Generate escalations for critical/high severity discrepancies
-          const newEscalations = result.discrepancies
+          // Generate and PERSIST escalations for critical/high severity discrepancies
+          const escalationInserts = result.discrepancies
             .filter(d => d.severity === 'critical' || d.severity === 'high')
             .map(d => ({
-              id: `esc-${d.id}`,
+              session_code: sessionCode,
               source_type: 'discrepancy',
               source_id: d.shipment_id,
               severity: d.severity,
               routed_to: d.severity === 'critical' ? 'Operations Manager' : 'Warehouse Supervisor',
               status: 'pending',
             }));
+
+          if (escalationInserts.length > 0) {
+            await supabase.from('escalations').insert(escalationInserts);
+          }
+
+          // Update local state (will also be populated from Supabase query)
+          const newEscalations = escalationInserts.map((e, i) => ({
+            id: `esc-${Date.now()}-${i}`,
+            ...e,
+          }));
           setEscalations(newEscalations);
 
           // Generate communications for notifications with Gemini
@@ -608,6 +618,19 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               body: `Processing completed with ${result.totalProcessed} shipments. ${result.totalFlagged} discrepancies flagged for human review.`,
               sent_at: new Date().toISOString(),
             });
+          }
+
+          // Persist communications to Supabase
+          if (newCommunications.length > 0) {
+            const commsToInsert = newCommunications.map(c => ({
+              session_code: sessionCode,
+              comm_type: c.comm_type,
+              recipient: c.recipient,
+              subject: c.subject,
+              body: c.body || null,
+            }));
+
+            await supabase.from('communications_log').insert(commsToInsert);
           }
 
           setCommunications(newCommunications);
