@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Camera, Image, AlertCircle, Loader2, Check, X, AlertTriangle, MapPin, Clock, User, FileText, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Camera, Image, AlertCircle, Loader2, Check, AlertTriangle, MapPin, Clock, User, FileText, ChevronRight, ChevronLeft } from 'lucide-react';
 import { listIncidentPhotos, uploadIncidentPhoto, type IncidentPhoto } from '../../lib/storage/incidentPhotos';
 import { analyzeIncidentPhoto, type IncidentAnalysisResult } from '../../lib/ai/incidentAnalyzer';
 import { supabase } from '../../lib/supabase';
@@ -343,7 +343,7 @@ export function IncidentPhotoReporter({
               Or select from gallery
             </p>
             <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">
-              {photos.map((photo, index) => (
+              {photos.map((photo) => (
                 <button
                   key={photo.name}
                   onClick={() => handleSelectPhoto(photo.publicUrl)}
