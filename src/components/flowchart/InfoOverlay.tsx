@@ -1,8 +1,7 @@
 import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, ClipboardCheck, Database } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, Database } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
-import { ReviewDecisionsPanel } from '../review/ReviewDecisionsPanel';
 import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
 
 // Helper function to map node labels to Supabase source table names
@@ -189,17 +188,11 @@ function InfoOverlayComponent({
   // Track leaderboard visibility
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  // Track review decisions panel visibility
-  const [showReviewDecisions, setShowReviewDecisions] = useState(false);
-
   // Track reconciliation data view visibility
   const [showReconciliationData, setShowReconciliationData] = useState(false);
 
   // Check if this is a billing challenge slide
   const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'billing_challenge';
-
-  // Check if this is a review queue slide
-  const isReviewSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'review_queue';
 
   // Check if this is a reconciliation quiz slide (processing node = Data Engine)
   // Also check nodeType directly for robustness
@@ -376,24 +369,6 @@ function InfoOverlayComponent({
             >
               <Database className="w-4 h-4" />
               <span className="text-sm">View Data</span>
-            </button>
-          )}
-
-          {/* Review Decisions button - only for review queue slides */}
-          {isReviewSlide && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowReviewDecisions(!showReviewDecisions);
-              }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
-                showReviewDecisions
-                  ? 'bg-indigo-500 hover:bg-indigo-600 text-white'
-                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
-              }`}
-            >
-              <ClipboardCheck className="w-4 h-4" />
-              <span className="text-sm">Decisions</span>
             </button>
           )}
 
@@ -711,21 +686,6 @@ function InfoOverlayComponent({
           }}
         >
           <ChallengeLeaderboard sessionCode={sessionCode} />
-        </div>
-      )}
-
-      {/* Review Decisions panel - slides in from right when shown */}
-      {showReviewDecisions && isReviewSlide && sessionCode && (
-        <div
-          className="absolute top-24 right-8 z-[10002] w-[420px] animate-in slide-in-from-right duration-300"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            opacity: isPeeking ? 0 : 1,
-          }}
-        >
-          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-4">
-            <ReviewDecisionsPanel sessionCode={sessionCode} />
-          </div>
         </div>
       )}
 
