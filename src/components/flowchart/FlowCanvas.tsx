@@ -1013,9 +1013,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         data: {
           label: 'Communications',
           communications: communications,
+          onEmailClick: (email) => setSelectedEmail(email),
           onViewCommunications: () => {
             if (communications.length > 0) {
-              setSelectedEmail(communications[0]); // Open first email
+              setSelectedEmail(communications[0]);
             }
           },
           onShowInfo: () => handleShowInfo('communications', 'communications', 'Communications', -1, undefined, undefined),

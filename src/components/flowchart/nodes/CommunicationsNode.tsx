@@ -15,6 +15,7 @@ export interface CommunicationsNodeData {
   label: string;
   communications: Communication[];
   onViewCommunications?: () => void;
+  onEmailClick?: (email: Communication) => void;
   onShowInfo?: () => void;
 }
 
@@ -87,7 +88,7 @@ function CommunicationsNodeComponent({ data }: CommunicationsNodeProps) {
                   <div
                     key={comm.id}
                     className="p-2 rounded-lg bg-blue-50 border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
-                    onClick={data.onViewCommunications}
+                    onClick={() => data.onEmailClick?.(comm)}
                   >
                     <div className="flex items-start gap-2">
                       <div className="p-1 rounded bg-blue-200">
