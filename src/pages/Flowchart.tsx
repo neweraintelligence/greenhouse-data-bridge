@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Presentation, Printer } from 'lucide-react';
+import { LogOut, LayoutDashboard, Presentation, Printer, Copy, Check } from 'lucide-react';
 import { useSessionStore } from '../store/sessionStore';
 import { FlowCanvas } from '../components/flowchart/FlowCanvas';
 
@@ -8,6 +8,7 @@ export function Flowchart() {
   const navigate = useNavigate();
   const { session, clearSession } = useSessionStore();
   const [startPresentation, setStartPresentation] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!session) {
@@ -18,6 +19,13 @@ export function Flowchart() {
   const handleLogout = () => {
     clearSession();
     navigate('/');
+  };
+
+  const handleCopySessionCode = async () => {
+    if (!session) return;
+    await navigator.clipboard.writeText(session.code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (!session) return null;
@@ -38,9 +46,24 @@ export function Flowchart() {
               <h1 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
                 Greenhouse Data Bridge
               </h1>
-              <p className="text-xs text-gray-500" style={{ fontFamily: 'var(--font-body)' }}>
-                {session.name} · {session.code}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-gray-500" style={{ fontFamily: 'var(--font-body)' }}>
+                  {session.name}
+                </p>
+                <span className="text-xs text-gray-300">·</span>
+                <button
+                  onClick={handleCopySessionCode}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bmf-blue/10 hover:bg-bmf-blue/20 transition-colors group"
+                  title="Copy session code"
+                >
+                  <span className="text-sm font-mono font-bold text-bmf-blue">{session.code}</span>
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-bmf-blue opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
