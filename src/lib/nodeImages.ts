@@ -2,14 +2,14 @@
 
 export const nodeImageMap: Record<string, Record<string, string>> = {
   shipping: {
-    excel: '/demo_pack/use_case_images/15_system_of_record_flow.png',
-    outlook: '/demo_pack/use_case_images/19_shipment_alerts_flow.png',
-    onedrive: '/demo_pack/use_case_images/20_digital_invoices_flow.png',
-    barcode: '/demo_pack/use_case_images/21_barcode_scans_flow.png',
-    paper: '/demo_pack/use_case_images/18_signed_receipt_flow.png',
-    etl: '/demo_pack/use_case_images/13_data_normalization_flow.png', // Reuse for ETL visualization
-    processing: '/demo_pack/use_case_images/17_reconciliation_flow.png',
-    reviewQueue: '/demo_pack/use_case_images/14_review_queue_flow.png', // Reuse for review queue
+    excel: '/demo_pack/use_case_images/15_system_of_record_realistic.png',
+    outlook: '/demo_pack/use_case_images/19_shipment_alerts_realistic.png',
+    onedrive: '/demo_pack/use_case_images/20_digital_invoices_realistic.png',
+    barcode: '/demo_pack/use_case_images/21_barcode_scans_realistic.png',
+    paper: '/demo_pack/use_case_images/18_signed_receipt_realistic.png',
+    etl: '/demo_pack/use_case_images/13_data_normalization_realistic.png', // Reuse for ETL visualization
+    processing: '/demo_pack/use_case_images/17_reconciliation_realistic.png',
+    reviewQueue: '/demo_pack/use_case_images/14_review_queue_realistic.png', // Reuse for review queue
     escalation: '/demo_pack/use_case_images/22_escalation_router_flow.png', // Reuse for escalation
     communications: '/demo_pack/use_case_images/23_communications_layer_flow.png', // Reuse for communications
     intake: '/demo_pack/use_case_images/16_data_staging_area.png',
