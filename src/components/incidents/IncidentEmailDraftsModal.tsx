@@ -63,7 +63,8 @@ function IncidentEmailDraftsModalComponent({
   };
 
   const pendingDrafts = drafts.filter(d => d.status === 'draft');
-  const sentDrafts = drafts.filter(d => d.status === 'sent');
+  // sentDrafts available if needed for display
+  // const sentDrafts = drafts.filter(d => d.status === 'sent');
 
   return (
     <div

@@ -71,14 +71,13 @@ registerUseCase({
 registerUseCase({
   id: 'incidents',
   name: 'Incident / Maintenance Intake',
-  description: 'Process incident reports and route to appropriate teams',
+  description: 'AI-powered incident detection with severity-based routing',
   icon: 'AlertTriangle',
   color: 'orange',
   sources: [
-    { type: 'outlook', name: 'Incident Email', icon: 'Mail', description: 'Structured incident report email' },
-    { type: 'paper', name: 'Photo Attachment', icon: 'Camera', description: 'Photo evidence of incident', optional: true },
-    { type: 'excel', name: 'Maintenance Schedule', icon: 'Calendar', description: 'Scheduled maintenance tasks' },
-    { type: 'outlook', name: 'Follow-up Email', icon: 'Reply', description: 'Additional info for incomplete reports', optional: true },
+    { type: 'camera', name: 'Incident Photos', icon: 'Camera', description: 'Pre-seeded incident photos for AI analysis' },
+    { type: 'ai', name: 'Gemini Vision Analysis', icon: 'Sparkles', description: 'AI analyzes photos, detects incident type & severity' },
+    { type: 'excel', name: 'Severity Config', icon: 'Settings', description: 'Configurable severity thresholds and routing rules', optional: true },
   ],
   outputTemplates: [
     { id: 'incident-summary', name: 'Incident Summary', fileType: 'pdf', description: 'Overview of reported incidents' },

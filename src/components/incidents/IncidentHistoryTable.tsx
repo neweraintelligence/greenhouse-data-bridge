@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, XCircle, ArrowUpRight, Filter, Search, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, XCircle, ArrowUpRight, Search, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Incident {

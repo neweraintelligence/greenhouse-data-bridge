@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, HelpCircle, Loader2, Bot, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Loader2, Bot, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface IncidentReviewQueueMobileProps {
