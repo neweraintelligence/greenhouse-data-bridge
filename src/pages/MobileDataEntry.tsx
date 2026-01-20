@@ -99,6 +99,7 @@ export function MobileDataEntry() {
         expected_sku: shipmentData.expected_sku.toUpperCase(),
         ship_date: shipmentData.ship_date,
         notes: shipmentData.notes || null,
+        submitted_by: participantName,
       });
 
       if (insertError) throw insertError;
@@ -129,11 +130,9 @@ export function MobileDataEntry() {
       const { error: insertError } = await supabase.from('training_roster').insert({
         session_code: sessionCode,
         employee_id: trainingData.employee_id.toUpperCase(),
-        employee_name: trainingData.employee_name,
+        name: trainingData.employee_name,
         department: trainingData.department,
-        training_type: trainingData.training_type,
-        scheduled_date: trainingData.scheduled_date,
-        status: 'Scheduled',
+        submitted_by: participantName,
       });
 
       if (insertError) throw insertError;

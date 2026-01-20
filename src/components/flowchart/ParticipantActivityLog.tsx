@@ -35,8 +35,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'shipments_expected', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Shipment added:', payload.new);
-          const s = payload.new as { shipment_id: string };
-          addActivity(`Shipment ${s.shipment_id} added`);
+          const s = payload.new as { shipment_id: string; submitted_by?: string };
+          const who = s.submitted_by || 'Someone';
+          addActivity(`${who} added shipment ${s.shipment_id}`);
         }
       )
       .on(
@@ -44,8 +45,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'training_roster', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Training entry:', payload.new);
-          const t = payload.new as { name: string };
-          addActivity(`${t.name} added to training`);
+          const t = payload.new as { name: string; submitted_by?: string };
+          const who = t.submitted_by || 'Someone';
+          addActivity(`${who} added ${t.name} to training`);
         }
       )
       .on(
@@ -53,8 +55,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'incidents', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Incident reported:', payload.new);
-          const i = payload.new as { incident_type: string };
-          addActivity(`Incident: ${i.incident_type}`);
+          const i = payload.new as { incident_type: string; reported_by?: string; submitted_by?: string };
+          const who = i.submitted_by || i.reported_by || 'Someone';
+          addActivity(`${who} reported ${i.incident_type || 'incident'}`);
         }
       )
       .on(
@@ -62,8 +65,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'barcode_scans', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Barcode scanned:', payload.new);
-          const b = payload.new as { shipment_id: string };
-          addActivity(`Scanned ${b.shipment_id}`);
+          const b = payload.new as { shipment_id: string; scanned_by?: string };
+          const who = b.scanned_by || 'Someone';
+          addActivity(`${who} scanned ${b.shipment_id}`);
         }
       )
       .on(
@@ -71,8 +75,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'customer_orders', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Customer order:', payload.new);
-          const o = payload.new as { customer_name?: string; po_number?: string };
-          addActivity(`Order ${o.po_number || 'received'} from ${o.customer_name || 'customer'}`);
+          const o = payload.new as { customer_name?: string; po_number?: string; submitted_by?: string };
+          const who = o.submitted_by || 'Someone';
+          addActivity(`${who} added order ${o.po_number || ''}`);
         }
       )
       .on(
@@ -80,8 +85,9 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'quality_issues', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Quality issue:', payload.new);
-          const q = payload.new as { issue_type?: string; product_name?: string };
-          addActivity(`Quality: ${q.issue_type || 'issue'} on ${q.product_name || 'product'}`);
+          const q = payload.new as { issue_type?: string; submitted_by?: string };
+          const who = q.submitted_by || 'Someone';
+          addActivity(`${who} flagged ${q.issue_type || 'quality issue'}`);
         }
       )
       .subscribe((status) => {
@@ -110,36 +116,82 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
       {/* Updates indicator - at the bottom with green light */}
       {isLive && (
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-            <span className="text-[10px] font-semibold tracking-wider text-white/90 uppercase">Updates</span>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+            <span className="text-[9px] font-medium tracking-wider text-white/70 uppercase">Updates</span>
           </div>
         </div>
       )}
 
       {/* Activity stream - messages appear above the indicator */}
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {activities.map((activity) => (
           <div
             key={activity.id}
-            className="px-4 py-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 shadow-lg shadow-black/20 animate-in fade-in slide-in-from-left-8 duration-500"
-            style={{
-              animation: 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), fadeOut 0.5s ease-in 5.5s forwards',
-            }}
+            className="activity-pill"
           >
-            <span className="text-base text-white font-semibold drop-shadow-sm">{activity.message}</span>
+            <span className="activity-text">{activity.message}</span>
+            <div className="shimmer" />
           </div>
         ))}
       </div>
 
       <style>{`
-        @keyframes popIn {
-          0% { opacity: 0; transform: translateX(-20px) scale(0.95); }
-          100% { opacity: 1; transform: translateX(0) scale(1); }
+        .activity-pill {
+          position: relative;
+          display: inline-block;
+          padding: 6px 14px;
+          border-radius: 20px;
+          background: linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(20,20,20,0.85) 100%);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.1);
+          overflow: hidden;
+          animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.4s ease-out 5.6s forwards;
         }
+
+        .activity-text {
+          position: relative;
+          z-index: 1;
+          font-size: 13px;
+          font-weight: 500;
+          color: white;
+          letter-spacing: 0.01em;
+        }
+
+        .shimmer {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255,255,255,0.08) 50%,
+            transparent 100%
+          );
+          animation: shimmer 1.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+          0% {
+            opacity: 0;
+            transform: translateX(-16px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes shimmer {
+          0% { left: -100%; }
+          100% { left: 200%; }
+        }
+
         @keyframes fadeOut {
-          from { opacity: 1; transform: scale(1); }
-          to { opacity: 0; transform: scale(0.95); }
+          0% { opacity: 1; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
