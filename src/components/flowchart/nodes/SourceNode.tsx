@@ -35,8 +35,6 @@ export interface SourceNodeData {
   onConfirm?: () => void;
   // QR code URL for paper sources
   qrCodeUrl?: string;
-  // Session code for generating scanner URLs
-  sessionCode?: string;
 }
 
 const iconMap = {

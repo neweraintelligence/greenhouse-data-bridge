@@ -1,6 +1,5 @@
 import { X, Maximize2, ZoomIn, ZoomOut, Plus, QrCode } from 'lucide-react';
 import { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { OutlookMiniApp, type EmailItem } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './nodes/mini-apps/OneDriveMiniApp';
 import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';

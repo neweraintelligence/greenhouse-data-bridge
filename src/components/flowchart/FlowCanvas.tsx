@@ -1779,6 +1779,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           // Trigger full modal (same as clicking node in flowchart mode)
           if (infoNodeType && infoNodeLabel) {
             setExpandedNode({
+              id: infoNodeLabel,
               type: infoNodeType as 'outlook' | 'onedrive' | 'excel' | 'paper',
               label: infoNodeLabel,
             });
