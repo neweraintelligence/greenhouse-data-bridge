@@ -378,7 +378,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   }, []);
 
   // Handle expand node
-  const handleExpandNode = useCallback((sourceName: string, sourceType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode') => {
+  const handleExpandNode = useCallback((sourceName: string, sourceType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai') => {
     // Only expand for supported types
     if (sourceType === 'barcode') return;
     setExpandedNode({ id: sourceName, type: sourceType, label: sourceName });
