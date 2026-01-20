@@ -691,6 +691,7 @@ function InfoOverlayComponent({
           </div>
         </div>
       )}
+
     </div>
   );
 }

@@ -1295,7 +1295,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  // Subscribe to realtime events for notifications
+  // Subscribe to realtime events for notifications AND live preview updates
   useEffect(() => {
     if (!sessionCode) return;
 
@@ -1355,8 +1355,43 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           filter: `session_code=eq.${sessionCode}`,
         },
         (payload) => {
-          const shipment = payload.new as {shipment_id: string; vendor: string; expected_qty: number};
+          const shipment = payload.new as {
+            ship_date: string;
+            shipment_id: string;
+            vendor: string;
+            destination: string;
+            expected_qty: number;
+            expected_sku: string;
+            notes: string | null;
+          };
           showToast('success', `📦 New shipment added: ${shipment.shipment_id} (${shipment.expected_qty} units from ${shipment.vendor})`);
+
+          // Update live preview spreadsheet data
+          setSourceData(prev => {
+            const existing = prev['Expected Shipments'];
+            if (existing?.spreadsheet) {
+              const newRow = [
+                shipment.ship_date,
+                shipment.shipment_id,
+                shipment.vendor,
+                shipment.destination,
+                shipment.expected_qty,
+                shipment.expected_sku,
+                shipment.notes || '',
+              ];
+              return {
+                ...prev,
+                'Expected Shipments': {
+                  ...existing,
+                  spreadsheet: {
+                    ...existing.spreadsheet,
+                    rows: [...existing.spreadsheet.rows, newRow],
+                  },
+                },
+              };
+            }
+            return prev;
+          });
         }
       )
       .on(
@@ -1368,8 +1403,39 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           filter: `session_code=eq.${sessionCode}`,
         },
         (payload) => {
-          const training = payload.new as {employee_name: string; training_type: string};
-          showToast('success', `📚 Training scheduled: ${training.employee_name} - ${training.training_type}`);
+          const training = payload.new as {
+            employee_id: string;
+            employee_name: string;
+            department: string;
+            training_type?: string;
+            scheduled_date?: string;
+          };
+          showToast('success', `📚 Training scheduled: ${training.employee_name} - ${training.training_type || 'Safety & SOP'}`);
+
+          // Update live preview spreadsheet data
+          setSourceData(prev => {
+            const existing = prev['Training Roster'];
+            if (existing?.spreadsheet) {
+              const newRow = [
+                training.employee_id,
+                training.employee_name,
+                training.department,
+                '', // supervisor - may not be in payload
+                '', // hire_date - may not be in payload
+              ];
+              return {
+                ...prev,
+                'Training Roster': {
+                  ...existing,
+                  spreadsheet: {
+                    ...existing.spreadsheet,
+                    rows: [...existing.spreadsheet.rows, newRow],
+                  },
+                },
+              };
+            }
+            return prev;
+          });
         }
       )
       .on(
@@ -1838,7 +1904,30 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Get source data for expanded modal
   const getExpandedSourceData = () => {
     if (!expandedNode) return {};
-    return sourceData[expandedNode.id] || {};
+
+    const data = sourceData[expandedNode.id] || {};
+
+    // Provide fallback demo data if source data hasn't been fetched
+    if (expandedNode.type === 'excel' && !data.spreadsheet) {
+      // Generate appropriate spreadsheet based on source name
+      if (expandedNode.label === 'Training Roster') {
+        return { ...data, spreadsheet: generateTrainingRoster() };
+      } else if (expandedNode.label === 'Acknowledgements') {
+        return { ...data, spreadsheet: generateTrainingAcknowledgements() };
+      } else {
+        return { ...data, spreadsheet: generateDemoSpreadsheet() };
+      }
+    }
+
+    if (expandedNode.type === 'outlook' && !data.emails) {
+      return { ...data, emails: generateDemoEmails() };
+    }
+
+    if (expandedNode.type === 'onedrive' && !data.files) {
+      return { ...data, files: generateDemoFiles() };
+    }
+
+    return data;
   };
 
   // Check if any positions have been overridden

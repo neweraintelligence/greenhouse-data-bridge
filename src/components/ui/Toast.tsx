@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Check, AlertCircle, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ToastProps {
   message: string;
@@ -8,31 +7,38 @@ interface ToastProps {
   duration?: number;
 }
 
-export function Toast({ message, type = 'success', onClose, duration = 3000 }: ToastProps) {
+export function Toast({ message, onClose, duration = 4000 }: ToastProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+
   useEffect(() => {
-    const timer = setTimeout(onClose, duration);
-    return () => clearTimeout(timer);
+    // Trigger entrance animation
+    requestAnimationFrame(() => setIsVisible(true));
+
+    // Start fade out before removal
+    const fadeTimer = setTimeout(() => {
+      setIsLeaving(true);
+    }, duration - 400);
+
+    // Remove after fade completes
+    const removeTimer = setTimeout(onClose, duration);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
   }, [duration, onClose]);
 
-  const bgColor = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
-  }[type];
-
-  const Icon = type === 'success' ? Check : type === 'error' ? AlertCircle : AlertCircle;
-
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top duration-300">
-      <div className={`${bgColor} text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md backdrop-blur-xl`}>
-        <Icon className="w-5 h-5 shrink-0" />
-        <span className="flex-1 font-medium text-sm">{message}</span>
-        <button
-          onClick={onClose}
-          className="hover:bg-white/20 rounded-full p-1 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
+    <div
+      className={`
+        fixed bottom-8 left-1/2 -translate-x-1/2 z-[100]
+        transition-all duration-400 ease-out
+        ${isVisible && !isLeaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+      `}
+    >
+      <div className="bg-neutral-900 text-white px-5 py-3 rounded-xl shadow-xl">
+        <span className="text-sm font-medium tracking-wide">{message}</span>
       </div>
     </div>
   );
