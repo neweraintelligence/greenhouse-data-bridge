@@ -1,5 +1,5 @@
 export interface SourceConfig {
-  type: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode';
+  type: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai';
   name: string;
   icon: string;
   description?: string;
