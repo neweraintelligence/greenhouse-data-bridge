@@ -44,8 +44,8 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
         { event: 'INSERT', schema: 'public', table: 'training_roster', filter: `session_code=eq.${sessionCode}` },
         (payload) => {
           console.log('[ActivityLog] Training entry:', payload.new);
-          const t = payload.new as { employee_name: string };
-          addActivity(`${t.employee_name} added to training`);
+          const t = payload.new as { name: string };
+          addActivity(`${t.name} added to training`);
         }
       )
       .on(
