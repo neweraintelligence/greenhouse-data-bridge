@@ -42,7 +42,6 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 import { reconcileShipments } from '../../lib/processing/compareShipments';
 import { reconcileQuality } from '../../lib/processing/reconcileQuality';
 import { reconcileCustomerOrders } from '../../lib/processing/reconcileCustomerOrders';
-import { reconcileExpenses } from '../../lib/processing/reconcileExpenses';
 import { supabase } from '../../lib/supabase';
 import { debug } from '../../lib/debug';
 import type { Discrepancy } from '../../lib/processing/types';
@@ -272,56 +271,6 @@ function generateCustomerOrderEmails(): EmailItem[] {
       preview: 'Attached is our standard weekly order. Please confirm availability...',
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
       hasAttachment: true,
-      unread: false,
-    },
-  ];
-}
-
-// Expense use case demo data generators
-function generateExpenseTracker(): SpreadsheetData {
-  return {
-    sheetName: 'Expense Tracker',
-    headers: ['Date', 'Expense ID', 'Employee', 'Category', 'Merchant', 'Amount', 'Status'],
-    rows: [
-      ['2025-01-13', 'EXP-2025-0001', 'M. Santos', 'meals', 'Tim Hortons', '$42.50', 'Pending'],
-      ['2025-01-14', 'EXP-2025-0002', 'L. Martinez', 'travel', 'WestJet', '$285.00', 'Flagged'],
-      ['2025-01-15', 'EXP-2025-0003', 'N. Brooks', 'supplies', 'Staples', '$87.25', 'Pending'],
-      ['2025-01-16', 'EXP-2025-0004', 'P. Singh', 'fuel', 'Shell', '$65.00', 'Flagged'],
-      ['2025-01-17', 'EXP-2025-0005', 'G. Hall', 'training', 'Udemy', '$149.99', 'Pending'],
-    ],
-  };
-}
-
-function generateExpenseEmails(): EmailItem[] {
-  return [
-    {
-      id: '1',
-      from: 'M. Santos',
-      fromEmail: 'm.santos@bigmarblefarms.com',
-      subject: 'Expense Report - Team Lunch Jan 13',
-      preview: 'Please find attached my expense report and receipt for the team lunch...',
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-      hasAttachment: true,
-      unread: true,
-    },
-    {
-      id: '2',
-      from: 'L. Martinez',
-      fromEmail: 'l.martinez@bigmarblefarms.com',
-      subject: 'Travel Expense - Calgary Conference',
-      preview: 'Submitting my travel expenses for the industry conference...',
-      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      hasAttachment: true,
-      unread: true,
-    },
-    {
-      id: '3',
-      from: 'P. Singh',
-      fromEmail: 'p.singh@bigmarblefarms.com',
-      subject: 'Fuel Receipt - Delivery Vehicle',
-      preview: 'Weekly fuel expense for maintenance vehicle...',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      hasAttachment: false,
       unread: false,
     },
   ];
@@ -783,31 +732,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
                 newData.spreadsheet = generateCustomerOrderList();
               }
             }
-          } else if (selectedUseCase?.id === 'expenses') {
-            // Fetch expense data from Supabase
-            const { data } = await supabase
-              .from('expense_submissions')
-              .select('submission_date, expense_id, employee_name, category, merchant, amount, status')
-              .eq('session_code', sessionCode)
-              .order('submission_date');
-
-            if (data && data.length > 0) {
-              newData.spreadsheet = {
-                sheetName: 'Expense Tracker',
-                headers: ['Date', 'Expense ID', 'Employee', 'Category', 'Merchant', 'Amount', 'Status'],
-                rows: data.map(e => [
-                  e.submission_date,
-                  e.expense_id,
-                  e.employee_name,
-                  e.category,
-                  e.merchant,
-                  `$${e.amount.toFixed(2)}`,
-                  e.status,
-                ]),
-              };
-            } else {
-              newData.spreadsheet = generateExpenseTracker();
-            }
           } else {
             newData.spreadsheet = generateDemoSpreadsheet();
           }
@@ -855,28 +779,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               }));
             } else {
               newData.emails = generateCustomerOrderEmails();
-            }
-          } else if (selectedUseCase?.id === 'expenses') {
-            // Generate expense submission emails
-            const { data: expenseData } = await supabase
-              .from('expense_submissions')
-              .select('*')
-              .eq('session_code', sessionCode)
-              .limit(5);
-
-            if (expenseData && expenseData.length > 0) {
-              newData.emails = expenseData.slice(0, 3).map((e, i) => ({
-                id: String(i + 1),
-                from: e.employee_name,
-                fromEmail: `${e.employee_name.toLowerCase().replace(/\s+/g, '.')}@bigmarblefarms.com`,
-                subject: `Expense Report - ${e.description || e.category} ${e.submission_date}`,
-                preview: `Submitting my ${e.category} expense of $${e.amount.toFixed(2)} at ${e.merchant}...`,
-                timestamp: new Date(Date.now() - i * 6 * 60 * 60 * 1000).toISOString(),
-                hasAttachment: e.receipt_attached,
-                unread: i < 2,
-              }));
-            } else {
-              newData.emails = generateExpenseEmails();
             }
           } else {
             // Generate email from actual order data (shipping)
@@ -1240,101 +1142,6 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               sent_at: new Date().toISOString(),
             });
           }
-
-          if (newCommunications.length > 0) {
-            const commsToInsert = newCommunications.map(c => ({
-              session_code: sessionCode,
-              comm_type: c.comm_type,
-              recipient: c.recipient,
-              subject: c.subject,
-              body: c.body || null,
-            }));
-            await supabase.from('communications_log').insert(commsToInsert);
-          }
-
-          setCommunications(newCommunications);
-          setProcessingStatus('complete');
-          setFocusedNodeId('output');
-          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
-          onProcessComplete?.(stats);
-        }, 3000);
-      } else if (selectedUseCase.id === 'expenses') {
-        // Expense reconciliation
-        const [expensesRes, limitsRes, issuesRes] = await Promise.all([
-          supabase.from('expense_submissions').select('*').eq('session_code', sessionCode),
-          supabase.from('expense_policy_limits').select('*').eq('session_code', sessionCode),
-          supabase.from('expense_issues').select('*').eq('session_code', sessionCode),
-        ]);
-
-        // Run expense reconciliation
-        const result = reconcileExpenses(
-          expensesRes.data || [],
-          limitsRes.data || [],
-          issuesRes.data || []
-        );
-
-        // Complete after delay with REAL stats
-        setTimeout(async () => {
-          clearInterval(interval);
-          setProcessingProgress(100);
-
-          const stats = {
-            processed: result.totalProcessed,
-            flagged: result.totalFlagged,
-            errors: 0,
-          };
-          setProcessingStats(stats);
-          setDiscrepancies(result.discrepancies);
-
-          // Generate escalations for high severity expense issues
-          const escalationInserts = result.discrepancies
-            .filter(d => d.severity === 'high')
-            .map(d => ({
-              session_code: sessionCode,
-              source_type: 'expense_issue',
-              source_id: d.shipment_id,
-              severity: d.severity,
-              routed_to: 'Finance Manager',
-              status: 'pending',
-            }));
-
-          if (escalationInserts.length > 0) {
-            await supabase.from('escalations').insert(escalationInserts);
-          }
-
-          const newEscalations = escalationInserts.map((e, i) => ({
-            id: `esc-${Date.now()}-${i}`,
-            ...e,
-          }));
-          setEscalations(newEscalations);
-
-          // Generate communications
-          const newCommunications = [];
-
-          // Expense issue alerts
-          for (const d of result.discrepancies.filter(d => d.severity === 'high' || d.severity === 'medium')) {
-            newCommunications.push({
-              id: `comm-expense-${d.id}`,
-              comm_type: 'email',
-              recipient: d.severity === 'high' ? 'Finance Manager' : 'Department Supervisor',
-              subject: `EXPENSE ${d.severity === 'high' ? 'ALERT' : 'NOTICE'}: ${d.shipment_id} - ${d.type.replace(/_/g, ' ')}`,
-              body: `${d.details}\n\nRecommended Action: ${d.recommendedAction}`,
-              sent_at: new Date().toISOString(),
-            });
-          }
-
-          // Summary
-          const totalApproved = result.clean.length;
-          const totalAmount = (expensesRes.data || []).reduce((sum, e) => sum + Number(e.amount), 0);
-
-          newCommunications.push({
-            id: 'comm-expense-summary',
-            comm_type: 'alert',
-            recipient: 'Finance Team',
-            subject: `Expense Processing Complete: ${result.totalProcessed} submissions, $${totalAmount.toFixed(2)} total`,
-            body: `Processed ${result.totalProcessed} expense submissions totaling $${totalAmount.toFixed(2)}. ${totalApproved} approved for reimbursement, ${result.totalFlagged} flagged for review.`,
-            sent_at: new Date().toISOString(),
-          });
 
           if (newCommunications.length > 0) {
             const commsToInsert = newCommunications.map(c => ({

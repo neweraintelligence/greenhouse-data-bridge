@@ -99,31 +99,6 @@ registerUseCase({
 // ============================================
 
 registerUseCase({
-  id: 'expenses',
-  name: 'Expense Report Processing',
-  description: 'Validate employee expense submissions against policies, OCR receipts, and prepare reimbursements',
-  icon: 'Receipt',
-  color: 'purple',
-  sources: [
-    { type: 'outlook', name: 'Expense Submission Email', icon: 'Mail', description: 'Employee expense submission with details' },
-    { type: 'paper', name: 'Receipt Images', icon: 'Camera', description: 'Scanned or photographed receipts' },
-    { type: 'excel', name: 'Expense Tracker', icon: 'Table', description: 'Running expense log/tracker' },
-    { type: 'onedrive', name: 'Expense Policy', icon: 'FileText', description: 'Company expense policy document', optional: true },
-  ],
-  outputTemplates: [
-    { id: 'expense-summary', name: 'Expense Summary Report', fileType: 'pdf', description: 'Summary of processed expenses with approvals' },
-    { id: 'policy-violations', name: 'Policy Violations', fileType: 'pdf', description: 'Expenses flagged for policy violations' },
-    { id: 'reimbursement-export', name: 'Reimbursement Export', fileType: 'csv', description: 'Approved expenses ready for payroll' },
-  ],
-  dashboardQueries: [
-    { id: 'pending-approval', name: 'Pending Approval', description: 'Expenses awaiting manager review' },
-    { id: 'policy-flags', name: 'Policy Violations', description: 'Submissions flagged for policy issues' },
-    { id: 'spending-by-category', name: 'Spending by Category', description: 'Expense breakdown by category' },
-    { id: 'monthly-trend', name: 'Monthly Spending Trend', description: 'Expense trends over time' },
-  ],
-});
-
-registerUseCase({
   id: 'customer-orders',
   name: 'Customer PO Intake',
   description: 'Process inbound customer purchase orders, validate pricing, and check inventory availability',

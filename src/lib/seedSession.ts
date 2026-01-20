@@ -2,7 +2,6 @@ import { supabase } from './supabase';
 import { generateDeterministicScenario } from './ai/orderGenerator';
 import { generateDeterministicQualityScenario } from './ai/qualityGenerator';
 import { generateDeterministicCustomerOrderScenario } from './ai/customerOrderGenerator';
-import { generateDeterministicExpenseScenario } from './ai/expenseGenerator';
 
 // Training and incident data (still static for now)
 // Focus on shipping scenario for dynamic generation
@@ -410,75 +409,5 @@ export async function seedSession(sessionCode: string): Promise<void> {
     throw inventoryError;
   }
 
-  // ============================================
-  // EXPENSE DATA
-  // ============================================
-  const expenseScenario = generateDeterministicExpenseScenario();
-  console.log('Generated expense scenario with planted errors:', expenseScenario.plantedErrors.map(e => e.type));
-
-  // Insert expense submissions
-  const expensesToInsert = expenseScenario.expenses.map((row) => ({
-    session_code: sessionCode,
-    expense_id: row.expense_id,
-    employee_id: row.employee_id,
-    employee_name: row.employee_name,
-    department: row.department,
-    approver: row.approver,
-    submission_date: row.submission_date,
-    category: row.category,
-    merchant: row.merchant,
-    description: row.description,
-    amount: row.amount,
-    receipt_attached: row.receipt_attached,
-    status: row.status,
-  }));
-
-  const { error: expensesError } = await supabase
-    .from('expense_submissions')
-    .insert(expensesToInsert);
-
-  if (expensesError) {
-    console.error('Error seeding expenses:', expensesError);
-    throw expensesError;
-  }
-
-  // Insert expense issues
-  if (expenseScenario.plantedErrors.length > 0) {
-    const expenseIssuesToInsert = expenseScenario.plantedErrors.map((row) => ({
-      session_code: sessionCode,
-      expense_id: row.expense_id,
-      issue_type: row.type,
-      severity: row.severity,
-      details: row.description,
-      recommended_action: row.recommendedAction,
-    }));
-
-    const { error: expenseIssuesError } = await supabase
-      .from('expense_issues')
-      .insert(expenseIssuesToInsert);
-
-    if (expenseIssuesError) {
-      console.error('Error seeding expense issues:', expenseIssuesError);
-      throw expenseIssuesError;
-    }
-  }
-
-  // Insert policy limits
-  const limitsToInsert = expenseScenario.policyLimits.map((row) => ({
-    session_code: sessionCode,
-    category: row.category,
-    limit_amount: row.limit,
-    description: row.description,
-  }));
-
-  const { error: limitsError } = await supabase
-    .from('expense_policy_limits')
-    .insert(limitsToInsert);
-
-  if (limitsError) {
-    console.error('Error seeding policy limits:', limitsError);
-    throw limitsError;
-  }
-
-  console.log(`Session ${sessionCode} seeded successfully with all data including shipping, quality/compliance, customer orders, and expenses`);
+  console.log(`Session ${sessionCode} seeded successfully with all data including shipping, quality/compliance, and customer orders`);
 }

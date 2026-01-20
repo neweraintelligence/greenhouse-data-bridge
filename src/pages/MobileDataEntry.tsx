@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Calendar, Package, User, FileText, AlertTriangle } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues';
