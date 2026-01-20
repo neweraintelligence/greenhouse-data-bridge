@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PrintableLabels } from '../components/PrintableLabels';
 import { supabase } from '../lib/supabase';
+import { debug } from '../lib/debug';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export function PrintLabels() {
@@ -33,7 +34,7 @@ export function PrintLabels() {
 
         setShipments(mapped);
       } catch (err) {
-        console.error('Error fetching shipments:', err);
+        debug.criticalError('Shipments fetch failed for labels', err);
         setError('Failed to load shipments');
       } finally {
         setLoading(false);

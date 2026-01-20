@@ -98,17 +98,87 @@ function PrintableLabelsComponent({ sessionCode, shipments }: PrintableLabelsPro
         })}
       </div>
 
+      {/* PAGE BREAK FOR PRINTING */}
+      <div className="print:break-before-page mt-16 mb-8">
+        <hr className="border-t-2 border-gray-300 my-8" />
+      </div>
+
+      {/* Receipt Signing QR Codes */}
+      <div className="mb-8">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+            Receipt Signing QR Codes
+          </h2>
+          <p className="text-gray-600 text-sm">
+            Scan these with your phone to sign delivery receipts
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          {shipments.slice(0, 4).map((shipment) => {
+            // Generate receipt signing URL
+            const receiptUrl = `${window.location.origin}/sign-receipt/${sessionCode}/${shipment.shipment_id}`;
+
+            return (
+              <div
+                key={shipment.shipment_id}
+                className="p-5 rounded-xl border-3 border-emerald-500 bg-emerald-50"
+              >
+                <div className="flex items-center gap-4">
+                  {/* QR Code for Receipt */}
+                  <div className="bg-white p-3 rounded-lg shadow-md flex-shrink-0">
+                    <QRCodeSVG
+                      value={receiptUrl}
+                      size={100}
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
+
+                  {/* Shipment Info */}
+                  <div className="flex-1">
+                    <h4 className="text-lg font-bold text-gray-900 mb-1">
+                      {shipment.shipment_id}
+                    </h4>
+                    <p className="text-sm text-gray-700 mb-2">{shipment.product_name}</p>
+                    <div className="px-2 py-1 bg-emerald-100 rounded text-xs text-emerald-800 font-semibold inline-block">
+                      Sign Receipt
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Instructions */}
       <div className="mt-12 p-6 rounded-2xl bg-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Scanning Instructions:</h3>
-        <ol className="space-y-2 text-sm text-gray-700" style={{ fontFamily: 'var(--font-body)' }}>
-          <li>1. Print this page for physical demo</li>
-          <li>2. In Barcode Log node on laptop, scan the session QR to open mobile scanner</li>
-          <li>3. Use phone camera to scan product labels</li>
-          <li>4. Each scan validates against expected shipments</li>
-          <li>5. Label #5 has a subtle SKU mismatch (PURPLE instead of PINK) - system will detect it</li>
-          <li>6. Watch laptop screen update in real-time as you scan</li>
-        </ol>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Workshop Demo Instructions:</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">📦 Product Barcode Scanning:</h4>
+            <ol className="space-y-1.5 text-sm text-gray-700" style={{ fontFamily: 'var(--font-body)' }}>
+              <li>1. In Barcode Log node, scan session QR</li>
+              <li>2. Opens mobile scanner on your phone</li>
+              <li>3. Scan product labels (blue boxes above)</li>
+              <li>4. Label #5 has wrong color variant</li>
+              <li>5. System detects SKU mismatch</li>
+              <li>6. Watch laptop update in real-time</li>
+            </ol>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">✍️ Receipt Signing:</h4>
+            <ol className="space-y-1.5 text-sm text-gray-700" style={{ fontFamily: 'var(--font-body)' }}>
+              <li>1. After products are scanned</li>
+              <li>2. Scan a receipt QR code (green boxes)</li>
+              <li>3. Opens signing form on phone</li>
+              <li>4. Enter received quantity</li>
+              <li>5. Sign with finger or type name</li>
+              <li>6. Submit - laptop shows notification</li>
+            </ol>
+          </div>
+        </div>
         <div className="mt-4 p-3 bg-amber-100 rounded-lg">
           <p className="text-xs text-amber-800">
             <strong>Note:</strong> All labels look identical and professional. The wrong-color variant (label #5) is subtle - only the reconciliation system will catch it by comparing SKUs.
