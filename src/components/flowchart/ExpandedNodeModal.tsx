@@ -7,7 +7,7 @@ import { PaperScanMiniApp, type ExtractedField } from './nodes/mini-apps/PaperSc
 import { GlassButton } from '../design-system';
 
 interface ExpandedNodeModalProps {
-  nodeType: 'outlook' | 'onedrive' | 'excel' | 'paper';
+  nodeType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai';
   label: string;
   onClose: () => void;
   // Mini-app data
