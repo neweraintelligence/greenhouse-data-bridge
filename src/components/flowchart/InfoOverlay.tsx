@@ -1,6 +1,7 @@
 import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
 
 // Helper function to map node labels to Supabase source table names
 function getSourceTypeFromNode(nodeLabel: string): string {
@@ -186,6 +187,12 @@ function InfoOverlayComponent({
   // Track QR code hover
   const [showJoinQR, setShowJoinQR] = useState(false);
 
+  // Track leaderboard visibility
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+
+  // Check if this is a billing challenge slide
+  const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'billing_challenge';
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -335,39 +342,57 @@ function InfoOverlayComponent({
       {/* Join button - top right (show QR code on hover) */}
       {sessionCode && nodeLabel && (
         <div
-          className="absolute top-8 right-8 z-[10000] transition-all duration-700 ease-out"
+          className="absolute top-8 right-8 z-[10000] flex items-center gap-3 transition-all duration-700 ease-out"
           style={{
             opacity: isPeeking ? 0 : 1,
             transform: isPeeking ? 'scale(0.8)' : 'scale(1)',
           }}
-          onMouseEnter={() => setShowJoinQR(true)}
-          onMouseLeave={() => setShowJoinQR(false)}
         >
-          <button
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span className="text-sm">Join</span>
-          </button>
+          {/* Leaderboard button - only for billing challenges */}
+          {isBillingSlide && (
+            <button
+              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
+                showLeaderboard
+                  ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+              }`}
+            >
+              <Trophy className="w-4 h-4" />
+              <span className="text-sm">Leaderboard</span>
+            </button>
+          )}
 
-          {/* QR Code Tooltip */}
-          {showJoinQR && (
-            <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
-              <div className="flex flex-col items-center gap-2">
-                <QRCodeSVG
-                  value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
-                  size={180}
-                  level="M"
-                  includeMargin
-                  className="rounded-lg"
-                />
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
-                  <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
+          <div
+            onMouseEnter={() => setShowJoinQR(true)}
+            onMouseLeave={() => setShowJoinQR(false)}
+          >
+            <button
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span className="text-sm">Join</span>
+            </button>
+
+            {/* QR Code Tooltip */}
+            {showJoinQR && (
+              <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+                <div className="flex flex-col items-center gap-2">
+                  <QRCodeSVG
+                    value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
+                    size={180}
+                    level="M"
+                    includeMargin
+                    className="rounded-lg"
+                  />
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
+                    <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
@@ -602,30 +627,9 @@ function InfoOverlayComponent({
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-50" />
 
                   {/* Content */}
-                  <div className="relative flex flex-col items-center gap-3">
-                    {/* Door icon - stepping into metaphor */}
-                    <div className="relative">
-                      <svg
-                        className="w-12 h-12 text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        {/* Door frame */}
-                        <rect x="6" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                        {/* Door handle */}
-                        <circle cx="15" cy="12" r="0.8" fill="currentColor" />
-                        {/* Door opening line */}
-                        <path d="M12 3 L12 21" stroke="currentColor" strokeWidth="1" opacity="0.3" />
-                        {/* Person stepping in */}
-                        <g transform="translate(9, 10)" className="group-hover:translate-x-1 transition-transform duration-300">
-                          <circle cx="0" cy="-3" r="1.2" fill="currentColor" opacity="0.9" />
-                          <path d="M0,-1.5 L0,2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
-                          <path d="M-1.5,0.5 L1.5,0.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
-                        </g>
-                      </svg>
-                    </div>
+                  <div className="relative flex flex-col items-center gap-2">
+                    {/* Door icon from lucide-react */}
+                    <DoorOpen className="w-8 h-8 text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
 
                     {/* Text */}
                     <span className="text-white text-sm font-medium tracking-wide drop-shadow-md">
@@ -641,6 +645,19 @@ function InfoOverlayComponent({
           </div>
         </div>
       </div>
+
+      {/* Leaderboard panel - slides in from right when shown */}
+      {showLeaderboard && isBillingSlide && sessionCode && (
+        <div
+          className="absolute top-24 right-8 z-[10002] w-[500px] animate-in slide-in-from-right duration-300"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            opacity: isPeeking ? 0 : 1,
+          }}
+        >
+          <ChallengeLeaderboard sessionCode={sessionCode} />
+        </div>
+      )}
 
       {/* Draggable preview card - appears on top when shown (completely hide when peeking) */}
       {showNodePreview && nodePreviewContent && (
