@@ -317,70 +317,83 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 // INCIDENTS / MAINTENANCE USE CASE
 // ============================================================================
 export const incidentsNodeInfo: Record<string, NodeInfo> = {
-  outlook: {
-    id: 'outlook',
-    title: 'INCIDENT REPORTS',
-    subtitle: 'Someone Reported a Problem',
-    description:
-      'When an employee sees something wrong — a leak, broken equipment, safety hazard — they send an email describing what happened, where, and how severe. This creates the incident case.',
-    painPoint: 'Today: incident emails get lost in busy inboxes. "Did anyone follow up on that leak in Area 3?" Nobody knows.',
-    solution: 'Every incident email captured, logged, and tracked. Case stays open until someone resolves it.',
-    keyInsight: 'Nothing gets lost. Accountability built in. Follow-up is guaranteed.',
-  },
-
   paper: {
     id: 'paper',
-    title: 'PHOTOS OF THE ISSUE',
-    subtitle: 'See What Actually Happened',
+    title: 'INCIDENT PHOTO GALLERY',
+    subtitle: 'What Does the Problem Look Like?',
     description:
-      'Pictures of the problem: the spill, the broken valve, the damaged pallet. Employee takes a photo with their phone and uploads it immediately.',
-    painPoint: 'Today: "Can you describe what the damage looks like?" Words don\'t capture it. Photos exist but aren\'t linked to the report.',
-    solution: 'Photos attached directly to the incident record. Everyone can see exactly what happened.',
-    keyInsight: 'Visual proof for insurance claims, investigations, and training materials.',
+      'Pre-seeded photos of common CEA issues: powdery mildew, aphid infestations, equipment failures, irrigation leaks, safety hazards. Participant selects a photo to report — simulating finding an issue in the greenhouse.',
+    painPoint: 'Today: someone sees a problem, takes a blurry photo, sends it via text with no context. "What am I looking at? Where is this?"',
+    solution: 'Standardized photo capture with location tagging. AI analyzes the image to classify the issue automatically.',
+    keyInsight: 'The photo becomes the incident record. AI reads the image, not just the person describing it.',
   },
 
   excel: {
     id: 'excel',
-    title: 'MAINTENANCE CALENDAR',
-    subtitle: 'What\'s Already Scheduled',
+    title: 'ROUTING CONFIGURATION',
+    subtitle: 'Who Handles What?',
     description:
-      'Your schedule of planned maintenance work: what\'s being fixed, where, and when. The system checks new incidents against this to avoid duplicate work orders.',
-    painPoint: 'Today: someone reports an issue in Area 3. But maintenance is already scheduled for Area 3 next week. Now you have a duplicate work order.',
-    solution: 'System automatically checks: "Is this location already on the schedule?" Avoids redundant work.',
-    keyInsight: 'Also identifies hot zones: if the same location keeps having issues, something bigger is wrong.',
+      'Severity thresholds and team routing rules. Severity 5 (critical) goes to Safety Team immediately. Severity 4 (urgent) routes to Maintenance. Severity 3 or ambiguous cases go to Review Queue. Minor issues just get logged.',
+    painPoint: 'Today: every incident goes to one person who manually decides who should handle it. Bottleneck and inconsistent triage.',
+    solution: 'Rules-based routing. Configure once: "If severity >= 4 AND type = equipment, route to Maintenance Team."',
+    keyInsight: 'You control the rules. Change thresholds anytime. Add new teams. No code changes needed.',
   },
 
   processing: {
     id: 'processing',
-    title: 'AUTOMATIC ROUTING',
-    subtitle: 'Getting Issues to the Right Team',
+    title: 'AI VISION ANALYSIS',
+    subtitle: 'Gemini Reads the Photo',
     description:
-      'The system reads the incident, checks the severity, links any photos, and automatically routes it to the right team. Safety issues go to the safety team. Equipment problems go to maintenance.',
-    painPoint: 'Today: someone manually reads every incident email and decides who should handle it. It\'s a bottleneck.',
-    solution: 'Routing happens instantly. Work orders created automatically. No manual forwarding of emails.',
-    keyInsight: 'Triage happens the moment the incident is reported — not hours later when someone checks email.',
+      'Google Gemini Vision analyzes the incident photo. It detects: What type of issue is this? (pest, equipment, safety, contamination). How severe is it? (1-5 scale). How confident is the AI? Routes based on severity + confidence.',
+    painPoint: 'Today: someone has to manually look at every photo, classify it, assess severity, and decide routing. Takes time and varies by person.',
+    solution: 'AI does initial triage in seconds. High-confidence cases route automatically. Low-confidence cases go to human review.',
+    keyInsight: 'AI handles 80% of cases instantly. Humans focus on the 20% that actually need judgment.',
   },
 
   intake: {
     id: 'intake',
     title: 'INCIDENT QUEUE',
-    subtitle: 'Everything in One Place',
+    subtitle: 'Waiting for AI Analysis',
     description:
-      'All incident reports flow here before they\'re routed. Shows what\'s waiting for triage and what\'s already been assigned.',
+      'Photos arrive here before AI processes them. In production, this happens in seconds. For the demo, you can see the queue filling as participants submit reports.',
     painPoint: 'Today: incidents come via email, phone calls, text messages, walk-ups. No single place to see them all.',
     solution: 'Everything funnels to one queue. Consistent capture regardless of how it was reported.',
-    keyInsight: 'Nothing sits unprocessed. Every incident has a status.',
+    keyInsight: 'Real-time visibility. Watch reports come in during the workshop as people scan QR codes.',
   },
 
   output: {
     id: 'output',
     title: 'INCIDENT DASHBOARD',
-    subtitle: 'What\'s Open, What\'s Resolved',
+    subtitle: 'What Got Routed Where?',
     description:
-      'Live view of all incidents: how many are open, how many are in progress, how many were resolved. Response times measured. SLA violations flagged.',
+      'Live view of all incidents after AI processing: which went to Safety Team, which to Maintenance, which are in Review Queue. See AI confidence scores and routing decisions.',
     painPoint: 'Today: executive asks "How many open incidents do we have?" You have to check multiple systems and compile the answer.',
-    solution: 'One dashboard. 12 open, 5 in progress, 23 resolved this month. Click any incident for full details.',
-    keyInsight: 'Hot zone analysis: which locations have the most issues? Where should you invest resources?',
+    solution: 'One dashboard. See exactly what the AI detected, how confident it was, and where it routed each issue.',
+    keyInsight: 'Transparency in AI decisions. Every routing choice is explainable and auditable.',
+  },
+
+  // Review queue for low-confidence or ambiguous cases
+  reviewQueue: {
+    id: 'reviewQueue',
+    title: 'HUMAN REVIEW QUEUE',
+    subtitle: 'AI Needs a Second Opinion',
+    description:
+      'Cases where AI confidence is below 75%, or the classification is ambiguous. Human reviewer sees the photo, AI suggestion, and confidence score. They can confirm, override, or escalate.',
+    painPoint: 'Today: either trust AI blindly (risky) or review everything manually (defeats the purpose).',
+    solution: 'AI handles clear cases. Humans review edge cases. Best of both worlds.',
+    keyInsight: 'The AI learns from corrections. Over time, fewer cases need human review.',
+  },
+
+  // Escalation paths
+  escalation: {
+    id: 'escalation',
+    title: 'ESCALATION PATHS',
+    subtitle: 'Critical Issues Get Immediate Attention',
+    description:
+      'Severity 5 issues bypass normal routing. Safety Team gets notified immediately. Email drafted automatically with photo, location, and AI analysis. No waiting for someone to check a queue.',
+    painPoint: 'Today: critical incident sits in someone\'s inbox until they happen to check it. Hours of delay on urgent issues.',
+    solution: 'Instant notification for critical issues. Email + push notification + escalation log.',
+    keyInsight: 'SLA timers start the moment the incident is reported, not when someone notices it.',
   },
 };
 
