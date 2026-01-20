@@ -1652,7 +1652,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         position: getPosition('review-queue', { x: xSpacing * 5, y: 60 }),
         data: {
           label: 'Review Queue',
-          items: reviewQueueItems,
+          incidents: reviewQueueItems,
           onViewQueue: () => setShowDiscrepancyList(true),
           onShowInfo: () => handleShowInfo('reviewQueue', 'review-queue', 'Review Queue', -1, undefined, undefined),
         },

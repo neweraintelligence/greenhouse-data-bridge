@@ -1,236 +1,256 @@
 # AI Image Generation Prompts for Incident Photos
-## Controlled Environment Agriculture (CEA) Greenhouse Setting
+## Big Marble Farms - Controlled Environment Agriculture (CEA) Greenhouse
 
-Use these prompts with AI image generators (Midjourney, DALL-E, Stable Diffusion) to create realistic incident photos for Big Marble Farms.
-
----
-
-## Location 1: Conveyor Belt Z3-R12
-
-### Photo 1: Conveyor Jam (REAL - Severity 4)
-**Prompt:**
-```
-Photo of an industrial conveyor belt system in a modern greenhouse with visible jam. Plastic growing trays stacked and jammed at the belt junction. Overhead LED grow lights visible. Clean industrial environment. Realistic photography, slightly concerned perspective. Safety hazard visible.
-```
-**Expected Classification:** Equipment Malfunction, Severity 4, Route to Escalation
-
-### Photo 2: Wet Floor Hazard (REAL - Severity 3)
-**Prompt:**
-```
-Puddle of water on clean epoxy floor next to a conveyor belt in a greenhouse facility. Irrigation system drip visible. Yellow caution cone visible in background. Natural daylight through greenhouse panels. Realistic industrial photography. Moderate safety concern.
-```
-**Expected Classification:** Safety Hazard, Severity 3, Route to Review
-
-### Photo 3: Loose Belt Guard (REAL - Severity 4)
-**Prompt:**
-```
-Close-up photo of industrial conveyor belt with loose safety guard panel hanging open, exposing moving parts. Modern greenhouse setting with plants in background. Maintenance issue visible. Realistic photography, safety equipment compromised.
-```
-**Expected Classification:** Equipment/Safety, Severity 4, Route to Escalation
-
-### Photo 4: Dropped Pen Near Conveyor (FALSE POSITIVE)
-**Prompt:**
-```
-Ballpoint pen lying on clean epoxy floor near a conveyor belt system in a bright greenhouse. Pen appears recently dropped. Clean modern facility. No actual hazard present. Realistic photography, mundane object out of place.
-```
-**Expected Classification:** False Positive, Dismiss
-
-### Photo 5: Normal Operating Conveyor (FALSE POSITIVE)
-**Prompt:**
-```
-Clean industrial conveyor belt system running smoothly in a modern greenhouse. Plants on trays moving along belt. Everything functioning normally. Bright LED grow lights overhead. Professional facility photography. No issues visible.
-```
-**Expected Classification:** False Positive, Dismiss
-
-### Photo 6: Oil Leak (REAL - Severity 3)
-**Prompt:**
-```
-Small dark oil stain on floor beneath conveyor belt motor housing in greenhouse facility. Drip pattern visible. Clean industrial environment otherwise. Maintenance concern. Realistic photography showing mechanical fluid leak.
-```
-**Expected Classification:** Maintenance Issue, Severity 3, Route to Review
-
-### Photo 7: Frayed Electrical Cord (REAL - Severity 5)
-**Prompt:**
-```
-Exposed frayed electrical wire near conveyor belt control panel in greenhouse. Insulation damaged, copper visible. Serious electrical hazard. Modern industrial setting. Realistic photography, critical safety issue.
-```
-**Expected Classification:** Critical Safety, Severity 5, Route to Escalation
+Use these prompts with AI image generators to create **10 realistic incident photos** specific to Big Marble Farms' greenhouse and pack house operations.
 
 ---
 
-## Location 2: HVAC Unit Z2-R08
+## Photo 1: Powdery Mildew on Cucumber Plants (REAL - Severity 4)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/powdery-mildew.jpg`
 
-### Photo 1: Ice Buildup (REAL - Severity 4)
 **Prompt:**
 ```
-Industrial HVAC unit in greenhouse with excessive ice formation on coils and exterior housing. Frost covering significant portion. Temperature control system malfunction. Modern facility. Realistic photography showing equipment failure.
+Close-up photo of cucumber plants in a commercial greenhouse showing white powdery mildew infection on leaves. Plants growing on vertical trellising systems with drip irrigation visible. Purple and pink LED grow lights overhead. Modern CEA facility with white walls. Professional agricultural photography. Disease outbreak visible, requires immediate attention.
+```
+**Expected Classification:** Crop Disease, Severity 4, Route to Escalation
+**Why:** Crop disease can spread rapidly and affect entire zones. Critical for revenue.
+
+---
+
+## Photo 2: Irrigation Drip Line Leak (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/irrigation-leak.jpg`
+
+**Prompt:**
+```
+Photo of irrigation drip line with visible leak dripping onto growing bench in commercial greenhouse. Water pooling around plant root zones. Cucumbers or tomatoes in growing containers on white benches. Purple LED grow lights visible above. Clean modern CEA environment. Agricultural equipment malfunction. Realistic photography.
+```
+**Expected Classification:** Equipment Maintenance, Severity 3, Route to Review
+**Why:** Can cause overwatering and root rot. Needs repair but not immediate crisis.
+
+---
+
+## Photo 3: Failed LED Grow Light Section (REAL - Severity 4)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/led-failure.jpg`
+
+**Prompt:**
+```
+Section of LED grow light fixture completely dark/off while adjacent sections are lit with purple-pink light. Plants below showing signs of insufficient light. Commercial greenhouse with rows of benches. Modern CEA controlled environment. Equipment failure visible. Professional photography showing clear contrast between lit and unlit areas.
 ```
 **Expected Classification:** Equipment Failure, Severity 4, Route to Escalation
-
-### Photo 2: Temperature Display Error (REAL - Severity 3)
-**Prompt:**
-```
-Digital thermostat display showing error code "E-03" in greenhouse climate control system. Clean modern panel. Green plants visible in background. System malfunction indicator. Realistic photography.
-```
-**Expected Classification:** System Error, Severity 3, Route to Review
-
-### Photo 3: Mold Near Vent (REAL - Severity 4)
-**Prompt:**
-```
-Black mold growth visible on ceiling around HVAC air vent in greenhouse facility. Moisture damage pattern. White ceiling tiles. Health hazard. Realistic photography showing environmental concern.
-```
-**Expected Classification:** Health/Environmental, Severity 4, Route to Escalation
-
-### Photo 4: Normal Condensation (FALSE POSITIVE - Ambiguous)
-**Prompt:**
-```
-Water condensation on HVAC pipe in greenhouse. Normal moisture droplets on cold surface. Modern facility. Could be mistaken for leak. Realistic photography, ambiguous concern.
-```
-**Expected Classification:** Ambiguous (could be mistaken for leak), Route to Review
-
-### Photo 5: Blocked Air Intake (REAL - Severity 3)
-**Prompt:**
-```
-HVAC unit air intake partially blocked by cardboard box and supplies in greenhouse. Restricted airflow. Clean modern facility. Operational inefficiency. Realistic photography showing maintenance issue.
-```
-**Expected Classification:** Operational Issue, Severity 3, Route to Review
-
-### Photo 6: Clean Filter Check (FALSE POSITIVE)
-**Prompt:**
-```
-Open HVAC filter panel showing clean, recently replaced air filter in greenhouse system. Maintenance in progress. Everything normal. Professional facility. Realistic photography of routine maintenance.
-```
-**Expected Classification:** False Positive (routine maintenance), Dismiss
-
-### Photo 7: Unusual Vibration Source (REAL - Severity 2)
-**Prompt:**
-```
-HVAC unit with visible loose mounting bracket causing minor vibration. Small maintenance concern in greenhouse climate system. Not critical but should be addressed. Realistic industrial photography.
-```
-**Expected Classification:** Minor Maintenance, Severity 2, Log Only
+**Why:** Affects crop yield directly. Expensive equipment requiring immediate attention.
 
 ---
 
-## Location 3: Packing Station A4
+## Photo 4: Maintenance Tag Overdue on Climate Control (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/maintenance-tag-overdue.jpg`
 
-### Photo 1: Spilled Sanitizer (REAL - Severity 2)
 **Prompt:**
 ```
-Small puddle of hand sanitizer spilled on packing station counter in greenhouse facility. Cleaning supplies nearby. Minor hygiene concern. Clean modern workstation. Realistic photography, small spill.
+Close-up of red maintenance tag on greenhouse climate control equipment showing "LAST SERVICE: 03/15/2024, NEXT DUE: 09/15/2024" with current date visible as past due. Clean white equipment panel with gauges. Modern CEA facility. Compliance and maintenance tracking. Realistic industrial photography.
 ```
-**Expected Classification:** Minor Safety, Severity 2, Log Only
-
-### Photo 2: Pest Droppings (REAL - Severity 5)
-**Prompt:**
-```
-Mouse droppings visible on packing station shelf in greenhouse facility. Food safety critical concern. Clean otherwise. Serious pest control issue. Realistic photography showing pest evidence.
-```
-**Expected Classification:** Critical Food Safety, Severity 5, Route to Escalation
-
-### Photo 3: Broken Scale (REAL - Severity 3)
-**Prompt:**
-```
-Digital weighing scale on packing station with cracked display screen showing error. Cannot read weight accurately. Modern greenhouse packing area. Equipment malfunction. Realistic photography.
-```
-**Expected Classification:** Equipment Issue, Severity 3, Route to Review
-
-### Photo 4: Empty Coffee Cup (FALSE POSITIVE)
-**Prompt:**
-```
-Empty coffee cup left on packing station counter in greenhouse facility. Minor housekeeping issue only. Clean modern workstation otherwise. Realistic photography, harmless item out of place.
-```
-**Expected Classification:** False Positive (housekeeping only), Dismiss
-
-### Photo 5: Torn Packaging Material (REAL - Severity 2)
-**Prompt:**
-```
-Ripped plastic packaging film roll at packing station in greenhouse. Quality control minor concern. Can be replaced easily. Modern facility. Realistic photography showing supply issue.
-```
-**Expected Classification:** Minor Quality, Severity 2, Log Only
-
-### Photo 6: Unlabeled Chemical Container (REAL - Severity 4)
-**Prompt:**
-```
-Spray bottle without proper labeling on packing station in greenhouse. Chemical safety violation. Clean modern facility. Compliance issue. Realistic photography showing safety protocol breach.
-```
-**Expected Classification:** Safety Compliance, Severity 4, Route to Escalation
-
-### Photo 7: Normal Workstation Setup (FALSE POSITIVE)
-**Prompt:**
-```
-Well-organized packing station in greenhouse facility. Supplies neatly arranged. Scale, labels, packaging materials properly positioned. Clean modern workspace. Everything in order. Realistic professional photography.
-```
-**Expected Classification:** False Positive (normal operations), Dismiss
+**Expected Classification:** Maintenance Compliance, Severity 3, Route to Review
+**Why:** Equipment overdue for service - could lead to failure. Needs scheduling.
 
 ---
 
-## Image Style Guidelines for AI Generation
+## Photo 5: Aphid Infestation on Lettuce (REAL - Severity 5)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/aphid-infestation.jpg`
 
-**General Style:**
-- Realistic photography, not illustrated or cartoon
-- Natural lighting (mix of LED grow lights + daylight through greenhouse panels)
-- Modern, clean industrial environment
-- Big Marble Farms aesthetic (professional, well-maintained facilities)
-- Perspective: Eye-level, slightly documentary style
-- No people in photos (focus on incidents)
-
-**Environment Details:**
-- Controlled Environment Agriculture (CEA) greenhouse
-- Visible elements: LED grow lights, white/light gray walls, epoxy floors
-- Background: Rows of plants on benches or vertical racks
-- Equipment: Industrial, modern, well-maintained (except for incident)
-- Cleanliness: High standard except where incident occurs
-
-**Color Palette:**
-- Greens from plants
-- Whites/grays from walls and equipment
-- Purples/pinks from LED grow lights
-- Industrial metal finishes
-
-**Quality:**
-- High resolution (1024x1024 minimum)
-- Sharp focus on incident area
-- Realistic textures and materials
-- Professional photography style
+**Prompt:**
+```
+Close-up photo of lettuce plants in hydroponic growing system with visible aphid infestation. Small green insects clustered on leaves. Commercial greenhouse with white growing benches and LED grow lights. Modern CEA environment. Serious pest outbreak requiring immediate IPM intervention. Professional agricultural photography.
+```
+**Expected Classification:** Critical Pest Infestation, Severity 5, Route to Escalation
+**Why:** Food safety issue. Can contaminate entire crop. Must be addressed immediately.
 
 ---
 
-## Expected AI Analysis Results Summary
+## Photo 6: Produce Box with Big Marble Farms Logo - Quality Issue (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/quality-issue-box.jpg`
 
-| Location | Photo | Type | Severity | Classification | Routing |
-|----------|-------|------|----------|----------------|---------|
-| Z3-R12 | Conveyor Jam | Equipment | 4 | Real | Escalation |
-| Z3-R12 | Wet Floor | Safety | 3 | Real | Review |
-| Z3-R12 | Loose Guard | Safety | 4 | Real | Escalation |
-| Z3-R12 | Dropped Pen | N/A | N/A | False Positive | Dismiss |
-| Z3-R12 | Normal Operation | N/A | N/A | False Positive | Dismiss |
-| Z3-R12 | Oil Leak | Maintenance | 3 | Real | Review |
-| Z3-R12 | Frayed Cord | Safety | 5 | Real | Escalation |
-| Z2-R08 | Ice Buildup | Equipment | 4 | Real | Escalation |
-| Z2-R08 | Display Error | System | 3 | Real | Review |
-| Z2-R08 | Mold | Health | 4 | Real | Escalation |
-| Z2-R08 | Condensation | Ambiguous | 3 | Ambiguous | Review |
-| Z2-R08 | Blocked Intake | Operational | 3 | Real | Review |
-| Z2-R08 | Clean Filter | N/A | N/A | False Positive | Dismiss |
-| Z2-R08 | Vibration | Maintenance | 2 | Real | Log |
-| A4 | Spilled Sanitizer | Safety | 2 | Real | Log |
-| A4 | Pest Droppings | Food Safety | 5 | Real | Escalation |
-| A4 | Broken Scale | Equipment | 3 | Real | Review |
-| A4 | Coffee Cup | N/A | N/A | False Positive | Dismiss |
-| A4 | Torn Packaging | Quality | 2 | Real | Log |
-| A4 | Unlabeled Chemical | Safety | 4 | Real | Escalation |
-| A4 | Normal Workstation | N/A | N/A | False Positive | Dismiss |
+**Prompt:**
+```
+Photo of cardboard produce box with "Big Marble Farms" logo and branding, containing cucumbers with visible blemishes and quality defects. Pack house setting with stainless steel packing table. Clean professional environment. Quality control concern. Realistic product photography showing both branding and quality issue.
+```
+**Expected Classification:** Quality Control, Severity 3, Route to Review
+**Why:** Affects brand reputation. Need to identify root cause in growing process.
 
-**Summary Statistics:**
-- Total Photos: 21
-- Real Incidents: 15 (71%)
-- False Positives: 5 (24%)
-- Ambiguous: 1 (5%)
-- Severity 5 (Critical): 2
-- Severity 4 (High): 6
-- Severity 3 (Moderate): 6
-- Severity 2 (Minor): 2
-- Route to Escalation: 8 (38%)
-- Route to Review: 7 (33%)
-- Log Only: 2 (10%)
-- Dismiss: 5 (24%)
+---
+
+## Photo 7: Fertigation System Error Code (REAL - Severity 4)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/fertigation-error.jpg`
+
+**Prompt:**
+```
+Digital display panel on fertigation (fertilizer + irrigation) mixing system showing error code "EC-HIGH" with red warning light. Commercial greenhouse nutrient delivery system. White walls, modern equipment. Green plants visible in background. Agricultural technology malfunction. Professional photography.
+```
+**Expected Classification:** System Error, Severity 4, Route to Escalation
+**Why:** Wrong nutrient concentration can damage entire crop. Needs immediate correction.
+
+---
+
+## Photo 8: Dropped Glove on Growing Bench (FALSE POSITIVE)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/dropped-glove.jpg`
+
+**Prompt:**
+```
+Single work glove lying on clean white growing bench in commercial greenhouse. Plants growing normally around it. Purple LED grow lights overhead. Modern CEA facility. No actual hazard present. Realistic photography showing minor housekeeping item, not a real incident.
+```
+**Expected Classification:** False Positive, Dismiss
+**Why:** Harmless item. Not a safety or operational concern.
+
+---
+
+## Photo 9: Produce Packing in Progress - Normal Operations (FALSE POSITIVE)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/normal-packing.jpg`
+
+**Prompt:**
+```
+Photo of pack house workers' station with Big Marble Farms branded boxes being filled with fresh cucumbers. Stainless steel table, scale, and packing materials neatly organized. Everything functioning normally. Clean professional pack house environment. Realistic photography of normal daily operations.
+```
+**Expected Classification:** False Positive, Dismiss
+**Why:** Normal operations, no incident. Shows what "good" looks like.
+
+---
+
+## Photo 10: Ambiguous - Possible Leaf Nutrient Deficiency (AMBIGUOUS - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/nutrient-deficiency.jpg`
+
+**Prompt:**
+```
+Photo of tomato plant leaves in commercial greenhouse showing yellowing between veins. Could be nutrient deficiency (iron/magnesium) OR normal aging of lower leaves OR early disease. Purple LED grow lights overhead. Modern CEA growing benches. Professional agricultural photography showing unclear symptoms requiring expert diagnosis.
+```
+**Expected Classification:** Ambiguous, Route to Review
+**Why:** Unclear if this is normal leaf aging or early problem. Needs grower expertise.
+
+---
+
+## Photo 11: Forklift Hydraulic Leak (REAL - Severity 4)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/forklift-leak.jpg`
+
+**Prompt:**
+```
+Yellow warehouse forklift parked in shipping area with a visible puddle of red hydraulic fluid leaking onto the concrete floor. Big Marble Farms boxes in background. Industrial safety hazard. Realistic photography.
+```
+**Expected Classification:** Safety Hazard, Severity 4, Route to Escalation
+**Why:** Slip hazard, chemical spill, and equipment failure. Immediate safety concern.
+
+---
+
+## Photo 12: Conveyor Belt Tear (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/conveyor-damage.jpg`
+
+**Prompt:**
+```
+Close up of food processing conveyor belt in a packing facility. The belt material is frayed and torn at the edge, exposing internal fibers. Stainless steel equipment. Cucumbers in background. Equipment mechanism failure. Realistic photography.
+```
+**Expected Classification:** Equipment Failure, Severity 3, Route to Review
+**Why:** Needs repair to prevent full failure or product contamination.
+
+---
+
+## Photo 13: Loading Dock Door Seal Damage (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/dock-door-seal-damage.jpg`
+
+**Prompt:**
+```
+Interior view of a closed industrial loading dock door. Sunlight beaming through a large gap in the damaged rubber weather seal at the bottom corner. Concrete floor. Pest and temperature control issue. Realistic photography.
+```
+**Expected Classification:** Infrastructure Damage, Severity 3, Route to Review
+**Why:** Entry point for pests and loss of climate control.
+
+---
+
+## Photo 14: Harvest Cart Rail Obstruction (REAL - Severity 3)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/rail-obstruction.jpg`
+
+**Prompt:**
+```
+Low angle photo of heating pipes on greenhouse floor that serve as rails for harvest carts. A discarded tool and plant debris are blocking the rail track. Tomato vines on both sides. Greenhouse internal logistics hazard. Realistic photography.
+```
+**Expected Classification:** Safety Hazard, Severity 3, Route to Review
+**Why:** Can cause cart derailment or injury. Housekeeping issue.
+
+---
+
+## Photo 15: Collapsed Ventilation Tube (REAL - Severity 4)
+**Save Location:** `/Users/jeffr/Local Project Repo/BMF Pipeline OS/greenhouse-data-bridge/public/incidents/ventilation-tube-damage.jpg`
+
+**Prompt:**
+```
+Commercial greenhouse overhead ventilation system. The long clear plastic air tube (convection tube) is torn and partially detached, hanging down loosely. Purple grow lights. Specialized CEA environment. Infrastructure damage. Realistic photography.
+```
+**Expected Classification:** Infrastructure Damage, Severity 4, Route to Escalation
+**Why:** Critical for climate control and air circulation.
+
+---
+
+## CEA-Specific Environment Details
+
+**Greenhouse Elements to Include:**
+- Purple/pink LED grow lights (CEA signature)
+- White or light gray growing benches
+- Vertical trellising for vine crops (cucumbers, tomatoes)
+- Drip irrigation lines
+- Hydroponic or container growing systems
+- Clean, modern facility aesthetic
+- Temperature/humidity control equipment
+
+**Pack House Elements:**
+- Stainless steel tables and equipment
+- Big Marble Farms branded boxes and packaging
+- Produce quality inspection areas
+- Scales and weighing equipment
+- Clean, food-safe environment
+
+**Big Marble Farms Branding:**
+- Logo on produce boxes (can be simple text "Big Marble Farms")
+- Professional, premium aesthetic
+- Focus on fresh, high-quality produce
+
+**What to AVOID:**
+- Heavy industrial warehouse equipment
+- Automotive/manufacturing settings
+- Dirty or poorly maintained facilities
+- Amazon/logistics warehouse aesthetic
+- Generic office supplies as "incidents" (unless false positive demo)
+
+---
+
+## Image Generation Settings
+
+**Resolution:** 1024x1024 or higher
+**Style:** Realistic photography, documentary style
+**Lighting:** Natural + LED grow light mix (purple/pink tones)
+**Perspective:** Eye level, clear focus on incident area
+**Background:** Always show it's a greenhouse/pack house context
+
+---
+
+## Expected AI Analysis Summary
+
+| # | Type | Severity | Classification | Routing |
+|---|------|----------|----------------|---------|
+| 1 | Crop Disease | 4 | Real | Escalation |
+| 2 | Equipment | 3 | Real | Review |
+| 3 | Equipment Failure | 4 | Real | Escalation |
+| 4 | Maintenance | 3 | Real | Review |
+| 5 | Pest Critical | 5 | Real | Escalation |
+| 6 | Quality | 3 | Real | Review |
+| 7 | System Error | 4 | Real | Escalation |
+| 8 | Housekeeping | N/A | False Positive | Dismiss |
+| 9 | Normal Ops | N/A | False Positive | Dismiss |
+| 10 | Unclear | 3 | Ambiguous | Review |
+| 11 | Safety Hazard | 4 | Real | Escalation |
+| 12 | Equipment Failure| 3 | Real | Review |
+| 13 | Infrastructure | 3 | Real | Review |
+| 14 | Safety Hazard | 3 | Real | Review |
+| 15 | Infrastructure | 4 | Real | Escalation |
+
+**Total: 15 photos**
+- Real Incidents: 12 (80%)
+- False Positives: 2 (13%)
+- Ambiguous: 1 (7%)
+- Route to Escalation: 6 (40%)
+- Route to Review: 7 (47%)
+- Dismiss: 2 (13%)

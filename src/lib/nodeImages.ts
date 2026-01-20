@@ -33,19 +33,37 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
     intake: '/demo_pack/use_case_images/36_incident_queue_realistic.png',
     output: '/demo_pack/use_case_images/37_incident_dashboard_realistic.png',
   },
+  // Customer Orders - reuse shipping images for similar workflows
+  'customer-orders': {
+    outlook: '/demo_pack/use_case_images/19_shipment_alerts_realistic.png',
+    paper: '/demo_pack/use_case_images/18_signed_receipt_realistic.png',
+    excel: '/demo_pack/use_case_images/15_system_of_record_realistic.png',
+    onedrive: '/demo_pack/use_case_images/20_digital_invoices_realistic.png',
+    etl: '/demo_pack/use_case_images/13_data_normalization_realistic.png',
+    processing: '/demo_pack/use_case_images/17_reconciliation_realistic.png',
+    reviewQueue: '/demo_pack/use_case_images/14_review_queue_realistic.png',
+    intake: '/demo_pack/use_case_images/16_data_staging_realistic.png',
+    output: '/demo_pack/use_case_images/24_results_dashboard_realistic.png',
+  },
+  // Quality & Compliance - reuse appropriate images
+  quality: {
+    outlook: '/demo_pack/use_case_images/19_shipment_alerts_realistic.png',
+    paper: '/demo_pack/use_case_images/18_signed_receipt_realistic.png',
+    excel: '/demo_pack/use_case_images/15_system_of_record_realistic.png',
+    onedrive: '/demo_pack/use_case_images/20_digital_invoices_realistic.png',
+    etl: '/demo_pack/use_case_images/13_data_normalization_realistic.png',
+    processing: '/demo_pack/use_case_images/17_reconciliation_realistic.png',
+    reviewQueue: '/demo_pack/use_case_images/14_review_queue_realistic.png',
+    intake: '/demo_pack/use_case_images/16_data_staging_realistic.png',
+    output: '/demo_pack/use_case_images/24_results_dashboard_realistic.png',
+  },
 };
 
 export function getNodeImage(useCase: string, nodeType: string, sourceName?: string): string | null {
-  console.log('getNodeImage called:', { useCase, nodeType, sourceName });
-
   // Special case: Training use case has two excel nodes - route by source name
   if (useCase === 'training' && nodeType === 'excel' && sourceName === 'Acknowledgements') {
-    const image = nodeImageMap[useCase]?.['excel-ack'] || null;
-    console.log('Returning training ack image:', image);
-    return image;
+    return nodeImageMap[useCase]?.['excel-ack'] || null;
   }
 
-  const image = nodeImageMap[useCase]?.[nodeType] || null;
-  console.log('Returning image:', image, 'for', useCase, nodeType);
-  return image;
+  return nodeImageMap[useCase]?.[nodeType] || null;
 }

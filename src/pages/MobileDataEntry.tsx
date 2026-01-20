@@ -3,12 +3,13 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
+import { IncidentReviewQueueMobile } from '../components/incidents/IncidentReviewQueueMobile';
 import { ReconciliationChallenge } from '../components/challenges/ReconciliationChallenge';
 import { ReviewQueueMobile } from '../components/review/ReviewQueueMobile';
 import { ReconciliationQuizMobile } from '../components/reconciliation/ReconciliationQuizMobile';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -607,6 +608,17 @@ export function MobileDataEntry() {
           />
         );
 
+      case 'incident_review':
+        return (
+          <IncidentReviewQueueMobile
+            sessionCode={sessionCode!}
+            participantName={participantName}
+            onComplete={() => {
+              setSubmitComplete(true);
+            }}
+          />
+        );
+
       case 'reconciliation_quiz':
         return (
           <ReconciliationQuizMobile
@@ -649,6 +661,8 @@ export function MobileDataEntry() {
         return { title: 'Reconciliation Challenge', icon: Calculator };
       case 'review_queue':
         return { title: 'Review Discrepancies', icon: ClipboardCheck };
+      case 'incident_review':
+        return { title: 'Triage Incidents', icon: AlertTriangle };
       case 'reconciliation_quiz':
         return { title: 'Data Accuracy Quiz', icon: Database };
       default:

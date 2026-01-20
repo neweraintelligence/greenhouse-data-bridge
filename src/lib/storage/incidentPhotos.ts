@@ -116,42 +116,77 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
   return new Blob([byteArray], { type: mimeType });
 }
 
-// Mock photos for demo when bucket is empty
+// Local photos from public/incidents folder
+// These are AI-generated CEA-specific incident photos for Big Marble Farms greenhouse
 function getMockIncidentPhotos(): IncidentPhoto[] {
   return [
+    // Real incidents (various severities)
     {
-      name: 'conveyor-jam.jpg',
-      publicUrl: 'https://placehold.co/600x400/orange/white?text=Conveyor+Jam',
+      name: 'powdery-mildew.jpg',
+      publicUrl: '/incidents/powdery-mildew.jpg',
       createdAt: new Date().toISOString(),
     },
     {
-      name: 'wet-floor.jpg',
-      publicUrl: 'https://placehold.co/600x400/blue/white?text=Wet+Floor+Hazard',
+      name: 'irrigation-leak.jpg',
+      publicUrl: '/incidents/irrigation-leak.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      name: 'led-failure.jpg',
+      publicUrl: '/incidents/led-failure.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      name: 'maintenance-tag-overdue.jpg',
+      publicUrl: '/incidents/maintenance-tag-overdue.jpg',
       createdAt: new Date().toISOString(),
     },
     {
       name: 'aphid-infestation.jpg',
-      publicUrl: 'https://placehold.co/600x400/green/white?text=Pest+Infestation',
+      publicUrl: '/incidents/aphid-infestation.jpg',
       createdAt: new Date().toISOString(),
     },
     {
-      name: 'dropped-pen.jpg',
-      publicUrl: 'https://placehold.co/600x400/gray/white?text=Dropped+Pen+(False+Positive)',
+      name: 'quality-issue-box.jpg',
+      publicUrl: '/incidents/quality-issue-box.jpg',
       createdAt: new Date().toISOString(),
     },
     {
-      name: 'possible-mold.jpg',
-      publicUrl: 'https://placehold.co/600x400/brown/white?text=Unclear+-+Needs+Review',
+      name: 'fertigation-error.jpg',
+      publicUrl: '/incidents/fertigation-error.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    // Additional logistics/warehouse incidents
+    {
+      name: 'conveyor-damage.jpg',
+      publicUrl: '/incidents/conveyor-damage.jpg',
       createdAt: new Date().toISOString(),
     },
     {
-      name: 'hvac-ice.jpg',
-      publicUrl: 'https://placehold.co/600x400/cyan/white?text=HVAC+Ice+Buildup',
+      name: 'forklift-leak.jpg',
+      publicUrl: '/incidents/forklift-leak.jpg',
       createdAt: new Date().toISOString(),
     },
     {
-      name: 'cracked-panel.jpg',
-      publicUrl: 'https://placehold.co/600x400/red/white?text=Cracked+Glass+Panel',
+      name: 'dock-door-seal-damage.jpg',
+      publicUrl: '/incidents/dock-door-seal-damage.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    // False positives
+    {
+      name: 'dropped-glove.jpg',
+      publicUrl: '/incidents/dropped-glove.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      name: 'normal-packing.jpg',
+      publicUrl: '/incidents/normal-packing.jpg',
+      createdAt: new Date().toISOString(),
+    },
+    // Ambiguous
+    {
+      name: 'nutrient-deficiency.jpg',
+      publicUrl: '/incidents/nutrient-deficiency.jpg',
       createdAt: new Date().toISOString(),
     },
   ];

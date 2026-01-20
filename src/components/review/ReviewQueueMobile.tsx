@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Clock, Send, Loader2, ChevronRight, Bot } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Bot } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ReviewQueueMobileProps {

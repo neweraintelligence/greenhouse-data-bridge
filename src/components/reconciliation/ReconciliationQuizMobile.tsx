@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CheckCircle2, XCircle, Loader2, Eye, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -83,7 +83,7 @@ const QUIZ_QUESTIONS = [
   },
 ];
 
-export function ReconciliationQuizMobile({ sessionCode, participantName, onComplete }: ReconciliationQuizMobileProps) {
+export function ReconciliationQuizMobile({ sessionCode, participantName, onComplete: _onComplete }: ReconciliationQuizMobileProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);

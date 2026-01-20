@@ -18,6 +18,7 @@ function getSourceTypeFromNode(nodeLabel: string): string {
   // Review queue - human-in-the-loop for AI-flagged discrepancies
   if (label.includes('review queue') || label.includes('human review') || label.includes('exception') || label.includes('needs review')) return 'review_queue';
   // Reconciliation quiz - accuracy challenge on merged/normalized data
+  if (label.includes('data engine') || label.includes('reconciled data') || label.includes('reconciliation engine')) return 'reconciliation_quiz';
   if (label.includes('reconcil') && (label.includes('data') || label.includes('view') || label.includes('accuracy') || label.includes('quiz'))) return 'reconciliation_quiz';
   if (label.includes('merged') || label.includes('normalized') || label.includes('combined data')) return 'reconciliation_quiz';
   if (label.includes('billing') || label.includes('invoice') || label.includes('reconcil') || label.includes('document') || label.includes('discrepan')) return 'billing_challenge';
@@ -165,16 +166,7 @@ function InfoOverlayComponent({
   onMaximize,
   sessionCode,
 }: InfoOverlayProps) {
-  console.log('InfoOverlay props:', {
-    hasInfo: !!info,
-    hasPreview: !!nodePreviewContent,
-    canFetch,
-    previewType: nodePreviewContent ? typeof nodePreviewContent : 'none',
-  });
 
-  if (nodePreviewContent) {
-    console.log('Preview content exists!', nodePreviewContent);
-  }
 
   // Track which direction perspective is active - default to inbound (receiving)
   const [activeDirection, setActiveDirection] = useState<FlowDirection>('inbound');
@@ -209,8 +201,10 @@ function InfoOverlayComponent({
   // Check if this is a review queue slide
   const isReviewSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'review_queue';
 
-  // Check if this is a reconciliation quiz slide
-  const isReconciliationSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'reconciliation_quiz';
+  // Check if this is a reconciliation quiz slide (processing node = Data Engine)
+  // Also check nodeType directly for robustness
+  const isReconciliationSlide = nodeType === 'processing' || (nodeLabel && getSourceTypeFromNode(nodeLabel) === 'reconciliation_quiz');
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -358,8 +352,8 @@ function InfoOverlayComponent({
         <X className="w-5 h-5 text-gray-800/70" />
       </button>
 
-      {/* Join button - top right (show QR code on hover) */}
-      {sessionCode && nodeLabel && (
+      {/* Action buttons - top right */}
+      {nodeLabel && (
         <div
           className="absolute top-8 right-8 z-[10000] flex items-center gap-3 transition-all duration-700 ease-out"
           style={{
@@ -367,7 +361,7 @@ function InfoOverlayComponent({
             transform: isPeeking ? 'scale(0.8)' : 'scale(1)',
           }}
         >
-          {/* Reconciliation Data button - only for reconciliation quiz slides */}
+          {/* Reconciliation Data button - for processing/Data Engine node */}
           {isReconciliationSlide && (
             <button
               onClick={(e) => {
@@ -421,36 +415,39 @@ function InfoOverlayComponent({
             </button>
           )}
 
-          <div
-            onMouseEnter={() => setShowJoinQR(true)}
-            onMouseLeave={() => setShowJoinQR(false)}
-          >
-            <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
+          {/* Join button - requires sessionCode for QR code */}
+          {sessionCode && (
+            <div
+              onMouseEnter={() => setShowJoinQR(true)}
+              onMouseLeave={() => setShowJoinQR(false)}
             >
-              <UserPlus className="w-4 h-4" />
-              <span className="text-sm">Join</span>
-            </button>
+              <button
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span className="text-sm">Join</span>
+              </button>
 
-            {/* QR Code Tooltip */}
-            {showJoinQR && (
-              <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
-                <div className="flex flex-col items-center gap-2">
-                  <QRCodeSVG
-                    value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
-                    size={180}
-                    level="M"
-                    includeMargin
-                    className="rounded-lg"
-                  />
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
-                    <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
+              {/* QR Code Tooltip */}
+              {showJoinQR && (
+                <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+                  <div className="flex flex-col items-center gap-2">
+                    <QRCodeSVG
+                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
+                      size={180}
+                      level="M"
+                      includeMargin
+                      className="rounded-lg"
+                    />
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
+                      <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -733,7 +730,7 @@ function InfoOverlayComponent({
       )}
 
       {/* Reconciliation Data panel - large view for the accuracy quiz */}
-      {showReconciliationData && isReconciliationSlide && sessionCode && (
+      {showReconciliationData && isReconciliationSlide && (
         <div
           className="absolute top-20 left-1/2 -translate-x-1/2 z-[10002] w-[90vw] max-w-[1200px] animate-in fade-in zoom-in-95 duration-300"
           onClick={(e) => e.stopPropagation()}
@@ -742,7 +739,7 @@ function InfoOverlayComponent({
           }}
         >
           <div className="bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
-            <ReconciliationDataView sessionCode={sessionCode} />
+            <ReconciliationDataView sessionCode={sessionCode || ''} />
           </div>
         </div>
       )}

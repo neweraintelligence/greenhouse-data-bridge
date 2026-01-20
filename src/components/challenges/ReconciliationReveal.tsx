@@ -65,7 +65,7 @@ const SAMPLE_DISCREPANCIES: Discrepancy[] = [
   },
 ];
 
-export function ReconciliationReveal({ sessionCode, onClose }: ReconciliationRevealProps) {
+export function ReconciliationReveal({ sessionCode, onClose: _onClose }: ReconciliationRevealProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [challengeResults, setChallengeResults] = useState<ChallengeResult[]>([]);
