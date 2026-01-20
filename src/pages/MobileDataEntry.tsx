@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
 
 type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues';
 
@@ -476,110 +477,13 @@ export function MobileDataEntry() {
 
       case 'incidents':
         return (
-          <form onSubmit={handleSubmitIncident} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Incident Type *
-              </label>
-              <select
-                value={incidentData.incident_type}
-                onChange={(e) => setIncidentData({ ...incidentData, incident_type: e.target.value })}
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
-              >
-                <option value="Equipment">Equipment</option>
-                <option value="Safety">Safety</option>
-                <option value="Quality">Quality</option>
-                <option value="Pest">Pest</option>
-                <option value="Environmental">Environmental</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Severity (1=Low, 5=Critical) *
-              </label>
-              <select
-                value={incidentData.severity}
-                onChange={(e) => setIncidentData({ ...incidentData, severity: e.target.value })}
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
-              >
-                <option value="1">1 - Low</option>
-                <option value="2">2 - Minor</option>
-                <option value="3">3 - Moderate</option>
-                <option value="4">4 - Significant</option>
-                <option value="5">5 - Critical</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location *
-              </label>
-              <input
-                type="text"
-                value={incidentData.location}
-                onChange={(e) => setIncidentData({ ...incidentData, location: e.target.value })}
-                placeholder="Zone 3, Row 12"
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
-              </label>
-              <textarea
-                value={incidentData.description}
-                onChange={(e) => setIncidentData({ ...incidentData, description: e.target.value })}
-                placeholder="Describe what happened..."
-                required
-                rows={4}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Reported By *
-              </label>
-              <input
-                type="text"
-                value={incidentData.reported_by}
-                onChange={(e) => setIncidentData({ ...incidentData, reported_by: e.target.value })}
-                placeholder="Your name"
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
-              />
-            </div>
-
-            {error && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 px-4 rounded-xl bg-bmf-blue text-white font-medium hover:bg-bmf-blue-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Reporting...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-5 h-5" />
-                  Report Incident
-                </>
-              )}
-            </button>
-          </form>
+          <IncidentPhotoReporter
+            sessionCode={sessionCode!}
+            participantName={participantName}
+            onComplete={() => {
+              setSubmitComplete(true);
+            }}
+          />
         );
 
       default:
