@@ -118,24 +118,28 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
       )}
 
       {/* Activity stream - messages appear above the indicator */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {activities.map((activity) => (
           <div
             key={activity.id}
-            className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm animate-in fade-in slide-in-from-left-4 duration-300"
+            className="px-4 py-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 shadow-lg shadow-black/20 animate-in fade-in slide-in-from-left-8 duration-500"
             style={{
-              animation: 'fadeInSlide 0.3s ease-out, fadeOut 0.5s ease-in 5.5s forwards',
+              animation: 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), fadeOut 0.5s ease-in 5.5s forwards',
             }}
           >
-            <span className="text-sm text-white font-medium">{activity.message}</span>
+            <span className="text-base text-white font-semibold drop-shadow-sm">{activity.message}</span>
           </div>
         ))}
       </div>
 
       <style>{`
+        @keyframes popIn {
+          0% { opacity: 0; transform: translateX(-20px) scale(0.95); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
         @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
+          from { opacity: 1; transform: scale(1); }
+          to { opacity: 0; transform: scale(0.95); }
         }
       `}</style>
     </div>
