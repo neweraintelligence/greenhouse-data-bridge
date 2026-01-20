@@ -39,15 +39,6 @@ export function MobileDataEntry() {
     scheduled_date: new Date().toISOString().split('T')[0],
   });
 
-  // Form state for incidents
-  const [incidentData, setIncidentData] = useState({
-    incident_type: 'Equipment',
-    severity: '3',
-    location: '',
-    description: '',
-    reported_by: '',
-  });
-
   useEffect(() => {
     // Set viewport for mobile
     const viewport = document.querySelector('meta[name=viewport]');
@@ -138,34 +129,6 @@ export function MobileDataEntry() {
     }
   };
 
-  const handleSubmitIncident = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const { error: insertError } = await supabase.from('incidents').insert({
-        session_code: sessionCode,
-        incident_type: incidentData.incident_type,
-        severity: parseInt(incidentData.severity, 10),
-        location: incidentData.location,
-        description: incidentData.description,
-        reported_by: incidentData.reported_by,
-        status: 'Open',
-        reported_at: new Date().toISOString(),
-      });
-
-      if (insertError) throw insertError;
-
-      setSubmitComplete(true);
-    } catch (err) {
-      console.error('Submission error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to report incident. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleReset = () => {
     setSubmitComplete(false);
     setError(null);
@@ -187,14 +150,6 @@ export function MobileDataEntry() {
         department: '',
         training_type: 'Safety & SOP',
         scheduled_date: new Date().toISOString().split('T')[0],
-      });
-    } else if (sourceType === 'incidents') {
-      setIncidentData({
-        incident_type: 'Equipment',
-        severity: '3',
-        location: '',
-        description: '',
-        reported_by: '',
       });
     }
   };
