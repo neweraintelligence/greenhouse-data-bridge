@@ -40,6 +40,9 @@ import { getNodeImage } from '../../lib/nodeImages';
 import { GlassButton } from '../design-system';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { reconcileShipments } from '../../lib/processing/compareShipments';
+import { reconcileQuality } from '../../lib/processing/reconcileQuality';
+import { reconcileCustomerOrders } from '../../lib/processing/reconcileCustomerOrders';
+import { reconcileExpenses } from '../../lib/processing/reconcileExpenses';
 import { supabase } from '../../lib/supabase';
 import { debug } from '../../lib/debug';
 import type { Discrepancy } from '../../lib/processing/types';
@@ -47,6 +50,7 @@ import { generateEscalationEmail } from '../../lib/ai/geminiService';
 import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
 import { ReportModal } from '../reports/ReportModal';
 import { ToastContainer } from '../Toast';
+import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -153,6 +157,173 @@ function generateTrainingAcknowledgements(): SpreadsheetData {
       ['EMP-1089', 'Safety & SOP', '', 'Pending'],
     ],
   };
+}
+
+// Quality use case demo data generators
+function generateQualityReceivingLog(): SpreadsheetData {
+  return {
+    sheetName: 'Receiving Log',
+    headers: ['Received', 'Receiving ID', 'Supplier', 'Material', 'Lot #', 'Qty'],
+    rows: [
+      ['2025-01-13', 'RCV-2025-0001', 'GreenGrow Solutions', '20-20-20 NPK Fertilizer', 'GRE20250110-421', '45 kg'],
+      ['2025-01-14', 'RCV-2025-0002', 'BioControl Systems', 'Bacillus thuringiensis (Bt)', 'BIO20250112-187', '12 L'],
+      ['2025-01-15', 'RCV-2025-0003', 'AgroChem Canada', 'Neem Oil Concentrate', 'AGR20250108-332', '8 L'],
+      ['2025-01-16', 'RCV-2025-0004', 'Prairie Substrates', 'Coco Coir Substrate', 'PRA20250105-094', '25 bag'],
+      ['2025-01-17', 'RCV-2025-0005', 'NutriBlend Corp', 'Calcium Nitrate', 'NUT20250115-556', '30 kg'],
+      ['2025-01-18', 'RCV-2025-0006', 'GreenGrow Solutions', 'Oxygenated Sanitizer', 'GRE20250116-712', '15 L'],
+    ],
+  };
+}
+
+function generateQualityEmails(): EmailItem[] {
+  return [
+    {
+      id: '1',
+      from: 'GreenGrow Solutions',
+      fromEmail: 'quality@greengrow.com',
+      subject: 'COA for Lot GRE20250110-421 - 20-20-20 NPK',
+      preview: 'Please find attached the Certificate of Analysis for your recent order...',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '2',
+      from: 'BioControl Systems',
+      fromEmail: 'certs@biocontrol.ca',
+      subject: 'Quality Certificate - Bt Lot BIO20250112-187',
+      preview: 'Attached is the COA and batch documentation for Bacillus thuringiensis...',
+      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '3',
+      from: 'AgroChem Canada',
+      fromEmail: 'qa@agrochem.ca',
+      subject: 'RE: COA Request - Neem Oil Lot AGR20250108-332',
+      preview: 'We apologize for the delay. The COA is being processed...',
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: false,
+      unread: false,
+    },
+  ];
+}
+
+// Customer Orders use case demo data generators
+function generateCustomerOrderList(): SpreadsheetData {
+  return {
+    sheetName: 'Customer Orders',
+    headers: ['Order Date', 'Order ID', 'Customer', 'PO #', 'Total', 'Status'],
+    rows: [
+      ['2025-01-18', 'ORD-2025-0001', 'Sobeys Western', 'SOB-PO-54321', '$2,847.50', 'Pending'],
+      ['2025-01-18', 'ORD-2025-0002', 'Save-On-Foods', 'SAV-PO-88432', '$4,215.00', 'Issue'],
+      ['2025-01-19', 'ORD-2025-0003', 'Calgary Co-op', 'CAL-PO-12098', '$1,654.25', 'Pending'],
+      ['2025-01-19', 'ORD-2025-0004', 'Superstore Alberta', 'SUP-PO-77654', '$6,890.00', 'Issue'],
+      ['2025-01-20', 'ORD-2025-0005', 'Sysco Calgary', 'SYS-PO-34521', '$3,445.75', 'Pending'],
+    ],
+  };
+}
+
+function generatePriceList(): SpreadsheetData {
+  return {
+    sheetName: 'Price List',
+    headers: ['SKU', 'Product', 'Unit Price'],
+    rows: [
+      ['TOM-BEEF-4LB', 'Beefsteak Tomatoes (4lb)', '$8.99'],
+      ['TOM-ROMA-2LB', 'Roma Tomatoes (2lb)', '$5.49'],
+      ['TOM-GRAPE-PNT', 'Grape Tomatoes (pint)', '$4.99'],
+      ['CUC-ENG-EA', 'English Cucumber (each)', '$2.49'],
+      ['CUC-MINI-6PK', 'Mini Cucumbers (6-pack)', '$4.99'],
+      ['PEP-BELL-3PK', 'Bell Peppers (3-pack)', '$5.99'],
+      ['PEP-BELL-RED', 'Red Bell Pepper (each)', '$2.49'],
+    ],
+  };
+}
+
+function generateCustomerOrderEmails(): EmailItem[] {
+  return [
+    {
+      id: '1',
+      from: 'Sobeys Western',
+      fromEmail: 'orders@sobeys.ca',
+      subject: 'PO# SOB-PO-54321 - Weekly Produce Order',
+      preview: 'Please process our attached purchase order for delivery on...',
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '2',
+      from: 'Save-On-Foods',
+      fromEmail: 'produce@saveonfoods.com',
+      subject: 'Urgent: PO# SAV-PO-88432 - Large Order',
+      preview: 'Confirming our order for the upcoming promotion. Please expedite...',
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '3',
+      from: 'Sysco Calgary',
+      fromEmail: 'procurement@sysco.com',
+      subject: 'RE: Standing Order - Weekly Restock',
+      preview: 'Attached is our standard weekly order. Please confirm availability...',
+      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: false,
+    },
+  ];
+}
+
+// Expense use case demo data generators
+function generateExpenseTracker(): SpreadsheetData {
+  return {
+    sheetName: 'Expense Tracker',
+    headers: ['Date', 'Expense ID', 'Employee', 'Category', 'Merchant', 'Amount', 'Status'],
+    rows: [
+      ['2025-01-13', 'EXP-2025-0001', 'M. Santos', 'meals', 'Tim Hortons', '$42.50', 'Pending'],
+      ['2025-01-14', 'EXP-2025-0002', 'L. Martinez', 'travel', 'WestJet', '$285.00', 'Flagged'],
+      ['2025-01-15', 'EXP-2025-0003', 'N. Brooks', 'supplies', 'Staples', '$87.25', 'Pending'],
+      ['2025-01-16', 'EXP-2025-0004', 'P. Singh', 'fuel', 'Shell', '$65.00', 'Flagged'],
+      ['2025-01-17', 'EXP-2025-0005', 'G. Hall', 'training', 'Udemy', '$149.99', 'Pending'],
+    ],
+  };
+}
+
+function generateExpenseEmails(): EmailItem[] {
+  return [
+    {
+      id: '1',
+      from: 'M. Santos',
+      fromEmail: 'm.santos@bigmarblefarms.com',
+      subject: 'Expense Report - Team Lunch Jan 13',
+      preview: 'Please find attached my expense report and receipt for the team lunch...',
+      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '2',
+      from: 'L. Martinez',
+      fromEmail: 'l.martinez@bigmarblefarms.com',
+      subject: 'Travel Expense - Calgary Conference',
+      preview: 'Submitting my travel expenses for the industry conference...',
+      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: true,
+      unread: true,
+    },
+    {
+      id: '3',
+      from: 'P. Singh',
+      fromEmail: 'p.singh@bigmarblefarms.com',
+      subject: 'Fuel Receipt - Delivery Vehicle',
+      preview: 'Weekly fuel expense for maintenance vehicle...',
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      hasAttachment: false,
+      unread: false,
+    },
+  ];
 }
 
 export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMode, onPresentationStart }: FlowCanvasProps) {
@@ -521,34 +692,217 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             newData.spreadsheet = sourceName === 'Acknowledgements'
               ? generateTrainingAcknowledgements()
               : generateTrainingRoster();
+          } else if (selectedUseCase?.id === 'quality') {
+            // Fetch quality receiving log from Supabase
+            const { data } = await supabase
+              .from('quality_receiving_log')
+              .select('received_date, receiving_id, supplier_name, material_name, lot_number, quantity, unit')
+              .eq('session_code', sessionCode)
+              .order('received_date');
+
+            if (data && data.length > 0) {
+              newData.spreadsheet = {
+                sheetName: 'Receiving Log',
+                headers: ['Received', 'Receiving ID', 'Supplier', 'Material', 'Lot #', 'Qty'],
+                rows: data.map(r => [
+                  r.received_date,
+                  r.receiving_id,
+                  r.supplier_name,
+                  r.material_name,
+                  r.lot_number,
+                  `${r.quantity} ${r.unit}`,
+                ]),
+              };
+            } else {
+              newData.spreadsheet = generateQualityReceivingLog();
+            }
+          } else if (selectedUseCase?.id === 'customer-orders') {
+            // Determine which spreadsheet based on source name
+            if (sourceName === 'Price List') {
+              const { data } = await supabase
+                .from('product_price_list')
+                .select('sku, product_name, unit_price')
+                .eq('session_code', sessionCode);
+
+              if (data && data.length > 0) {
+                newData.spreadsheet = {
+                  sheetName: 'Price List',
+                  headers: ['SKU', 'Product', 'Unit Price'],
+                  rows: data.map(p => [p.sku, p.product_name, `$${p.unit_price.toFixed(2)}`]),
+                };
+              } else {
+                newData.spreadsheet = generatePriceList();
+              }
+            } else if (sourceName === 'Inventory Status') {
+              const { data } = await supabase
+                .from('product_inventory')
+                .select('sku, product_name, available_qty')
+                .eq('session_code', sessionCode);
+
+              if (data && data.length > 0) {
+                newData.spreadsheet = {
+                  sheetName: 'Inventory Status',
+                  headers: ['SKU', 'Product', 'Available'],
+                  rows: data.map(p => [p.sku, p.product_name, p.available_qty]),
+                };
+              } else {
+                newData.spreadsheet = {
+                  sheetName: 'Inventory Status',
+                  headers: ['SKU', 'Product', 'Available'],
+                  rows: [
+                    ['TOM-BEEF-4LB', 'Beefsteak Tomatoes', 450],
+                    ['TOM-ROMA-2LB', 'Roma Tomatoes', 320],
+                    ['CUC-ENG-EA', 'English Cucumber', 520],
+                    ['PEP-BELL-3PK', 'Bell Peppers (3pk)', 150],
+                  ],
+                };
+              }
+            } else {
+              // Default: Customer orders list
+              const { data } = await supabase
+                .from('customer_orders')
+                .select('order_date, order_id, customer_name, po_number, total_value, status')
+                .eq('session_code', sessionCode)
+                .order('order_date');
+
+              if (data && data.length > 0) {
+                newData.spreadsheet = {
+                  sheetName: 'Customer Orders',
+                  headers: ['Order Date', 'Order ID', 'Customer', 'PO #', 'Total', 'Status'],
+                  rows: data.map(o => [
+                    o.order_date,
+                    o.order_id,
+                    o.customer_name,
+                    o.po_number,
+                    `$${o.total_value?.toFixed(2) || '0.00'}`,
+                    o.status,
+                  ]),
+                };
+              } else {
+                newData.spreadsheet = generateCustomerOrderList();
+              }
+            }
+          } else if (selectedUseCase?.id === 'expenses') {
+            // Fetch expense data from Supabase
+            const { data } = await supabase
+              .from('expense_submissions')
+              .select('submission_date, expense_id, employee_name, category, merchant, amount, status')
+              .eq('session_code', sessionCode)
+              .order('submission_date');
+
+            if (data && data.length > 0) {
+              newData.spreadsheet = {
+                sheetName: 'Expense Tracker',
+                headers: ['Date', 'Expense ID', 'Employee', 'Category', 'Merchant', 'Amount', 'Status'],
+                rows: data.map(e => [
+                  e.submission_date,
+                  e.expense_id,
+                  e.employee_name,
+                  e.category,
+                  e.merchant,
+                  `$${e.amount.toFixed(2)}`,
+                  e.status,
+                ]),
+              };
+            } else {
+              newData.spreadsheet = generateExpenseTracker();
+            }
           } else {
             newData.spreadsheet = generateDemoSpreadsheet();
           }
         } else if (sourceType === 'outlook') {
-          // Generate email from actual order data
-          const { data: orders } = await supabase
-            .from('shipments_expected')
-            .select('*')
-            .eq('session_code', sessionCode)
-            .limit(5);
+          if (selectedUseCase?.id === 'quality') {
+            // Generate COA emails from quality receiving data
+            const { data: receiving } = await supabase
+              .from('quality_receiving_log')
+              .select('*')
+              .eq('session_code', sessionCode)
+              .limit(5);
 
-          // Use first order for email demo
-          if (orders && orders.length > 0) {
-            const order = orders[0];
-            newData.emails = [
-              {
-                id: '1',
-                from: order.vendor,
-                fromEmail: `orders@${order.vendor.toLowerCase().replace(/\s+/g, '').replace('#', '')}.com`,
-                subject: `${order.shipment_id} - Shipment Notification`,
-                preview: `Order confirmed: ${order.expected_qty} units of ${order.expected_sku}`,
-                timestamp: new Date().toISOString(),
+            if (receiving && receiving.length > 0) {
+              newData.emails = receiving.slice(0, 3).map((r, i) => ({
+                id: String(i + 1),
+                from: r.supplier_name,
+                fromEmail: `quality@${r.supplier_name.toLowerCase().replace(/\s+/g, '')}.com`,
+                subject: `COA for Lot ${r.lot_number} - ${r.material_name}`,
+                preview: `Certificate of Analysis attached for your order...`,
+                timestamp: new Date(Date.now() - i * 4 * 60 * 60 * 1000).toISOString(),
                 hasAttachment: true,
-                unread: true,
-              },
-            ];
+                unread: i < 2,
+              }));
+            } else {
+              newData.emails = generateQualityEmails();
+            }
+          } else if (selectedUseCase?.id === 'customer-orders') {
+            // Generate customer PO emails
+            const { data: customerOrders } = await supabase
+              .from('customer_orders')
+              .select('*')
+              .eq('session_code', sessionCode)
+              .limit(5);
+
+            if (customerOrders && customerOrders.length > 0) {
+              newData.emails = customerOrders.slice(0, 3).map((o, i) => ({
+                id: String(i + 1),
+                from: o.customer_name,
+                fromEmail: o.customer_contact || `orders@${o.customer_name.toLowerCase().replace(/\s+/g, '')}.com`,
+                subject: `PO# ${o.po_number} - ${o.status === 'issue' ? 'URGENT: ' : ''}Order Request`,
+                preview: `Please process our attached purchase order for delivery...`,
+                timestamp: new Date(Date.now() - i * 4 * 60 * 60 * 1000).toISOString(),
+                hasAttachment: true,
+                unread: i < 2,
+              }));
+            } else {
+              newData.emails = generateCustomerOrderEmails();
+            }
+          } else if (selectedUseCase?.id === 'expenses') {
+            // Generate expense submission emails
+            const { data: expenseData } = await supabase
+              .from('expense_submissions')
+              .select('*')
+              .eq('session_code', sessionCode)
+              .limit(5);
+
+            if (expenseData && expenseData.length > 0) {
+              newData.emails = expenseData.slice(0, 3).map((e, i) => ({
+                id: String(i + 1),
+                from: e.employee_name,
+                fromEmail: `${e.employee_name.toLowerCase().replace(/\s+/g, '.')}@bigmarblefarms.com`,
+                subject: `Expense Report - ${e.description || e.category} ${e.submission_date}`,
+                preview: `Submitting my ${e.category} expense of $${e.amount.toFixed(2)} at ${e.merchant}...`,
+                timestamp: new Date(Date.now() - i * 6 * 60 * 60 * 1000).toISOString(),
+                hasAttachment: e.receipt_attached,
+                unread: i < 2,
+              }));
+            } else {
+              newData.emails = generateExpenseEmails();
+            }
           } else {
-            newData.emails = generateDemoEmails();
+            // Generate email from actual order data (shipping)
+            const { data: orders } = await supabase
+              .from('shipments_expected')
+              .select('*')
+              .eq('session_code', sessionCode)
+              .limit(5);
+
+            // Use first order for email demo
+            if (orders && orders.length > 0) {
+              const order = orders[0];
+              newData.emails = [
+                {
+                  id: '1',
+                  from: order.vendor,
+                  fromEmail: `orders@${order.vendor.toLowerCase().replace(/\s+/g, '').replace('#', '')}.com`,
+                  subject: `${order.shipment_id} - Shipment Notification`,
+                  preview: `Order confirmed: ${order.expected_qty} units of ${order.expected_sku}`,
+                  timestamp: new Date().toISOString(),
+                  hasAttachment: true,
+                  unread: true,
+                },
+              ];
+            } else {
+              newData.emails = generateDemoEmails();
+            }
           }
         } else if (sourceType === 'onedrive') {
           newData.files = generateDemoFiles();
@@ -709,6 +1063,293 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           // Mark outputs as ready
           setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
 
+          onProcessComplete?.(stats);
+        }, 3000);
+      } else if (selectedUseCase.id === 'quality') {
+        // Quality/Compliance reconciliation
+        const [receivingRes, coaRes, issuesRes] = await Promise.all([
+          supabase.from('quality_receiving_log').select('*').eq('session_code', sessionCode),
+          supabase.from('quality_coa_records').select('*').eq('session_code', sessionCode),
+          supabase.from('quality_issues').select('*').eq('session_code', sessionCode),
+        ]);
+
+        // Run quality reconciliation
+        const result = reconcileQuality(
+          receivingRes.data || [],
+          coaRes.data || [],
+          issuesRes.data || []
+        );
+
+        // Complete after delay with REAL stats
+        setTimeout(async () => {
+          clearInterval(interval);
+          setProcessingProgress(100);
+
+          const stats = {
+            processed: result.totalProcessed,
+            flagged: result.totalFlagged,
+            errors: 0,
+          };
+          setProcessingStats(stats);
+          setDiscrepancies(result.discrepancies);
+
+          // Generate escalations for critical quality issues
+          const escalationInserts = result.discrepancies
+            .filter(d => d.severity === 'critical' || d.severity === 'high')
+            .map(d => ({
+              session_code: sessionCode,
+              source_type: 'quality_issue',
+              source_id: d.shipment_id,
+              severity: d.severity,
+              routed_to: d.severity === 'critical' ? 'Quality Manager' : 'Receiving Supervisor',
+              status: 'pending',
+            }));
+
+          if (escalationInserts.length > 0) {
+            await supabase.from('escalations').insert(escalationInserts);
+          }
+
+          const newEscalations = escalationInserts.map((e, i) => ({
+            id: `esc-${Date.now()}-${i}`,
+            ...e,
+          }));
+          setEscalations(newEscalations);
+
+          // Generate communications for quality alerts
+          const newCommunications = [];
+
+          // Quality escalation emails
+          for (const d of result.discrepancies.filter(d => d.severity === 'critical' || d.severity === 'high')) {
+            newCommunications.push({
+              id: `comm-quality-${d.id}`,
+              comm_type: 'email',
+              recipient: d.severity === 'critical' ? 'Quality Manager' : 'Receiving Supervisor',
+              subject: `${d.severity === 'critical' ? 'CRITICAL' : 'ALERT'}: Quality Issue - ${d.shipment_id}`,
+              body: `${d.details}\n\nRecommended Action: ${d.recommendedAction}`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          // Summary alert
+          if (result.totalFlagged > 0) {
+            newCommunications.push({
+              id: 'comm-quality-summary',
+              comm_type: 'alert',
+              recipient: 'Quality Team',
+              subject: `Quality Review Complete: ${result.totalFlagged} issues found`,
+              body: `Processed ${result.totalProcessed} receiving entries. ${result.totalFlagged} compliance issues flagged for review.`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          if (newCommunications.length > 0) {
+            const commsToInsert = newCommunications.map(c => ({
+              session_code: sessionCode,
+              comm_type: c.comm_type,
+              recipient: c.recipient,
+              subject: c.subject,
+              body: c.body || null,
+            }));
+            await supabase.from('communications_log').insert(commsToInsert);
+          }
+
+          setCommunications(newCommunications);
+          setProcessingStatus('complete');
+          setFocusedNodeId('output');
+          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
+          onProcessComplete?.(stats);
+        }, 3000);
+      } else if (selectedUseCase.id === 'customer-orders') {
+        // Customer Order reconciliation
+        const [ordersRes, linesRes, priceRes, inventoryRes, issuesRes] = await Promise.all([
+          supabase.from('customer_orders').select('*').eq('session_code', sessionCode),
+          supabase.from('customer_order_lines').select('*').eq('session_code', sessionCode),
+          supabase.from('product_price_list').select('*').eq('session_code', sessionCode),
+          supabase.from('product_inventory').select('*').eq('session_code', sessionCode),
+          supabase.from('customer_order_issues').select('*').eq('session_code', sessionCode),
+        ]);
+
+        // Run customer order reconciliation
+        const result = reconcileCustomerOrders(
+          ordersRes.data || [],
+          linesRes.data || [],
+          priceRes.data || [],
+          inventoryRes.data || [],
+          issuesRes.data || []
+        );
+
+        // Complete after delay with REAL stats
+        setTimeout(async () => {
+          clearInterval(interval);
+          setProcessingProgress(100);
+
+          const stats = {
+            processed: result.totalProcessed,
+            flagged: result.totalFlagged,
+            errors: 0,
+          };
+          setProcessingStats(stats);
+          setDiscrepancies(result.discrepancies);
+
+          // Generate escalations for high severity order issues
+          const escalationInserts = result.discrepancies
+            .filter(d => d.severity === 'high')
+            .map(d => ({
+              session_code: sessionCode,
+              source_type: 'order_issue',
+              source_id: d.shipment_id,
+              severity: d.severity,
+              routed_to: 'Sales Manager',
+              status: 'pending',
+            }));
+
+          if (escalationInserts.length > 0) {
+            await supabase.from('escalations').insert(escalationInserts);
+          }
+
+          const newEscalations = escalationInserts.map((e, i) => ({
+            id: `esc-${Date.now()}-${i}`,
+            ...e,
+          }));
+          setEscalations(newEscalations);
+
+          // Generate communications
+          const newCommunications = [];
+
+          // Order issue alerts
+          for (const d of result.discrepancies.filter(d => d.severity === 'high')) {
+            newCommunications.push({
+              id: `comm-order-${d.id}`,
+              comm_type: 'email',
+              recipient: 'Sales Manager',
+              subject: `ORDER ALERT: ${d.shipment_id} - ${d.type.replace(/_/g, ' ')}`,
+              body: `${d.details}\n\nRecommended Action: ${d.recommendedAction}`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          // Summary
+          if (result.totalProcessed > 0) {
+            newCommunications.push({
+              id: 'comm-order-summary',
+              comm_type: 'alert',
+              recipient: 'Sales Team',
+              subject: `Order Processing Complete: ${result.totalProcessed} orders, ${result.totalFlagged} issues`,
+              body: `Processed ${result.totalProcessed} customer orders. ${result.clean.length} ready for fulfillment, ${result.totalFlagged} need attention.`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          if (newCommunications.length > 0) {
+            const commsToInsert = newCommunications.map(c => ({
+              session_code: sessionCode,
+              comm_type: c.comm_type,
+              recipient: c.recipient,
+              subject: c.subject,
+              body: c.body || null,
+            }));
+            await supabase.from('communications_log').insert(commsToInsert);
+          }
+
+          setCommunications(newCommunications);
+          setProcessingStatus('complete');
+          setFocusedNodeId('output');
+          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
+          onProcessComplete?.(stats);
+        }, 3000);
+      } else if (selectedUseCase.id === 'expenses') {
+        // Expense reconciliation
+        const [expensesRes, limitsRes, issuesRes] = await Promise.all([
+          supabase.from('expense_submissions').select('*').eq('session_code', sessionCode),
+          supabase.from('expense_policy_limits').select('*').eq('session_code', sessionCode),
+          supabase.from('expense_issues').select('*').eq('session_code', sessionCode),
+        ]);
+
+        // Run expense reconciliation
+        const result = reconcileExpenses(
+          expensesRes.data || [],
+          limitsRes.data || [],
+          issuesRes.data || []
+        );
+
+        // Complete after delay with REAL stats
+        setTimeout(async () => {
+          clearInterval(interval);
+          setProcessingProgress(100);
+
+          const stats = {
+            processed: result.totalProcessed,
+            flagged: result.totalFlagged,
+            errors: 0,
+          };
+          setProcessingStats(stats);
+          setDiscrepancies(result.discrepancies);
+
+          // Generate escalations for high severity expense issues
+          const escalationInserts = result.discrepancies
+            .filter(d => d.severity === 'high')
+            .map(d => ({
+              session_code: sessionCode,
+              source_type: 'expense_issue',
+              source_id: d.shipment_id,
+              severity: d.severity,
+              routed_to: 'Finance Manager',
+              status: 'pending',
+            }));
+
+          if (escalationInserts.length > 0) {
+            await supabase.from('escalations').insert(escalationInserts);
+          }
+
+          const newEscalations = escalationInserts.map((e, i) => ({
+            id: `esc-${Date.now()}-${i}`,
+            ...e,
+          }));
+          setEscalations(newEscalations);
+
+          // Generate communications
+          const newCommunications = [];
+
+          // Expense issue alerts
+          for (const d of result.discrepancies.filter(d => d.severity === 'high' || d.severity === 'medium')) {
+            newCommunications.push({
+              id: `comm-expense-${d.id}`,
+              comm_type: 'email',
+              recipient: d.severity === 'high' ? 'Finance Manager' : 'Department Supervisor',
+              subject: `EXPENSE ${d.severity === 'high' ? 'ALERT' : 'NOTICE'}: ${d.shipment_id} - ${d.type.replace(/_/g, ' ')}`,
+              body: `${d.details}\n\nRecommended Action: ${d.recommendedAction}`,
+              sent_at: new Date().toISOString(),
+            });
+          }
+
+          // Summary
+          const totalApproved = result.clean.length;
+          const totalAmount = (expensesRes.data || []).reduce((sum, e) => sum + Number(e.amount), 0);
+
+          newCommunications.push({
+            id: 'comm-expense-summary',
+            comm_type: 'alert',
+            recipient: 'Finance Team',
+            subject: `Expense Processing Complete: ${result.totalProcessed} submissions, $${totalAmount.toFixed(2)} total`,
+            body: `Processed ${result.totalProcessed} expense submissions totaling $${totalAmount.toFixed(2)}. ${totalApproved} approved for reimbursement, ${result.totalFlagged} flagged for review.`,
+            sent_at: new Date().toISOString(),
+          });
+
+          if (newCommunications.length > 0) {
+            const commsToInsert = newCommunications.map(c => ({
+              session_code: sessionCode,
+              comm_type: c.comm_type,
+              recipient: c.recipient,
+              subject: c.subject,
+              body: c.body || null,
+            }));
+            await supabase.from('communications_log').insert(commsToInsert);
+          }
+
+          setCommunications(newCommunications);
+          setProcessingStatus('complete');
+          setFocusedNodeId('output');
+          setOutputFiles((prev) => prev.map((f) => ({ ...f, ready: true })));
           onProcessComplete?.(stats);
         }, 3000);
       } else {
@@ -1841,6 +2482,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               subject: `RE: ${selectedEmail.subject}`,
               body: replyBody,
             });
+          }}
+        />
+      )}
+
+      {/* Floating AI Assistant */}
+      {selectedUseCase && (
+        <FloatingAIAssistant
+          context={{
+            useCase: selectedUseCase.id,
+            sessionCode,
+            discrepancies: discrepancies.map(d => ({
+              type: d.type,
+              severity: d.severity,
+              details: d.details,
+            })),
+            extractedData: sourceData,
           }}
         />
       )}

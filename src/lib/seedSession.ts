@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 import { generateDeterministicScenario } from './ai/orderGenerator';
+import { generateDeterministicQualityScenario } from './ai/qualityGenerator';
+import { generateDeterministicCustomerOrderScenario } from './ai/customerOrderGenerator';
+import { generateDeterministicExpenseScenario } from './ai/expenseGenerator';
 
 // Training and incident data (still static for now)
 // Focus on shipping scenario for dynamic generation
@@ -218,5 +221,264 @@ export async function seedSession(sessionCode: string): Promise<void> {
     throw receivedError;
   }
 
-  console.log(`Session ${sessionCode} seeded successfully with all data including barcode scans and received shipments`);
+  // ============================================
+  // QUALITY/COMPLIANCE DATA
+  // ============================================
+  const qualityScenario = generateDeterministicQualityScenario();
+  console.log('Generated quality scenario with planted errors:', qualityScenario.plantedErrors.map(e => e.type));
+
+  // Insert quality receiving log
+  const receivingToInsert = qualityScenario.receivingLog.map((row) => ({
+    session_code: sessionCode,
+    receiving_id: row.receiving_id,
+    received_date: row.received_date,
+    supplier_id: row.supplier_id,
+    supplier_name: row.supplier_name,
+    sku: row.sku,
+    material_name: row.material_name,
+    lot_number: row.lot_number,
+    quantity: row.quantity,
+    unit: row.unit,
+    po_number: row.po_number,
+    receiver_name: row.receiver_name,
+    notes: row.notes || null,
+  }));
+
+  const { error: receivingLogError } = await supabase
+    .from('quality_receiving_log')
+    .insert(receivingToInsert);
+
+  if (receivingLogError) {
+    console.error('Error seeding quality receiving log:', receivingLogError);
+    throw receivingLogError;
+  }
+
+  // Insert COA records
+  const coaToInsert = qualityScenario.coaRecords.map((row) => ({
+    session_code: sessionCode,
+    coa_id: row.coa_id,
+    receiving_id: row.receiving_id,
+    lot_number: row.lot_number,
+    supplier_name: row.supplier_name,
+    material_name: row.material_name,
+    manufacture_date: row.manufacture_date,
+    expiry_date: row.expiry_date === 'N/A' ? null : row.expiry_date,
+    test_results: row.test_results,
+    overall_status: row.overall_status,
+    coa_received: row.coa_received,
+    shelf_life_weeks: row.shelf_life_weeks,
+  }));
+
+  const { error: coaError } = await supabase
+    .from('quality_coa_records')
+    .insert(coaToInsert);
+
+  if (coaError) {
+    console.error('Error seeding COA records:', coaError);
+    throw coaError;
+  }
+
+  // Insert quality issues (planted errors)
+  if (qualityScenario.plantedErrors.length > 0) {
+    const issuesToInsert = qualityScenario.plantedErrors.map((row) => ({
+      session_code: sessionCode,
+      receiving_id: row.receiving_id,
+      issue_type: row.type,
+      severity: row.severity,
+      material_name: qualityScenario.receivingLog.find(r => r.receiving_id === row.receiving_id)?.material_name || 'Unknown',
+      lot_number: qualityScenario.receivingLog.find(r => r.receiving_id === row.receiving_id)?.lot_number || null,
+      supplier_name: qualityScenario.receivingLog.find(r => r.receiving_id === row.receiving_id)?.supplier_name || null,
+      details: row.description,
+      canadagap_section: row.canadagap_section,
+      recommended_action: row.recommendedAction,
+    }));
+
+    const { error: issuesError } = await supabase
+      .from('quality_issues')
+      .insert(issuesToInsert);
+
+    if (issuesError) {
+      console.error('Error seeding quality issues:', issuesError);
+      throw issuesError;
+    }
+  }
+
+  // ============================================
+  // CUSTOMER ORDER DATA
+  // ============================================
+  const customerOrderScenario = generateDeterministicCustomerOrderScenario();
+  console.log('Generated customer order scenario with planted errors:', customerOrderScenario.plantedErrors.map(e => e.type));
+
+  // Insert customer orders
+  const ordersToInsert = customerOrderScenario.orders.map((row) => ({
+    session_code: sessionCode,
+    order_id: row.order_id,
+    customer_id: row.customer_id,
+    customer_name: row.customer_name,
+    customer_contact: row.customer_contact,
+    order_date: row.order_date,
+    requested_delivery: row.requested_delivery,
+    status: row.status,
+    po_number: row.po_number,
+    total_value: row.total_value,
+  }));
+
+  const { error: ordersError } = await supabase
+    .from('customer_orders')
+    .insert(ordersToInsert);
+
+  if (ordersError) {
+    console.error('Error seeding customer orders:', ordersError);
+    throw ordersError;
+  }
+
+  // Insert order line items
+  const linesToInsert = customerOrderScenario.lineItems.map((row) => ({
+    session_code: sessionCode,
+    order_id: row.order_id,
+    line_number: row.line_number,
+    sku: row.sku,
+    product_name: row.product_name,
+    quantity: row.quantity,
+    unit_price: row.unit_price,
+    customer_price: row.customer_price,
+    line_total: row.line_total,
+  }));
+
+  const { error: linesError } = await supabase
+    .from('customer_order_lines')
+    .insert(linesToInsert);
+
+  if (linesError) {
+    console.error('Error seeding order lines:', linesError);
+    throw linesError;
+  }
+
+  // Insert order issues
+  if (customerOrderScenario.plantedErrors.length > 0) {
+    const issuesToInsert = customerOrderScenario.plantedErrors.map((row) => ({
+      session_code: sessionCode,
+      order_id: row.order_id,
+      issue_type: row.type,
+      severity: row.severity,
+      sku: row.sku || null,
+      details: row.description,
+      recommended_action: row.recommendedAction,
+    }));
+
+    const { error: issuesError } = await supabase
+      .from('customer_order_issues')
+      .insert(issuesToInsert);
+
+    if (issuesError) {
+      console.error('Error seeding order issues:', issuesError);
+      throw issuesError;
+    }
+  }
+
+  // Insert price list
+  const priceListToInsert = customerOrderScenario.priceList.map((row) => ({
+    session_code: sessionCode,
+    sku: row.sku,
+    product_name: row.name,
+    unit_price: row.price,
+  }));
+
+  const { error: priceError } = await supabase
+    .from('product_price_list')
+    .insert(priceListToInsert);
+
+  if (priceError) {
+    console.error('Error seeding price list:', priceError);
+    throw priceError;
+  }
+
+  // Insert inventory
+  const inventoryToInsert = customerOrderScenario.inventory.map((row) => ({
+    session_code: sessionCode,
+    sku: row.sku,
+    product_name: row.name,
+    available_qty: row.available,
+  }));
+
+  const { error: inventoryError } = await supabase
+    .from('product_inventory')
+    .insert(inventoryToInsert);
+
+  if (inventoryError) {
+    console.error('Error seeding inventory:', inventoryError);
+    throw inventoryError;
+  }
+
+  // ============================================
+  // EXPENSE DATA
+  // ============================================
+  const expenseScenario = generateDeterministicExpenseScenario();
+  console.log('Generated expense scenario with planted errors:', expenseScenario.plantedErrors.map(e => e.type));
+
+  // Insert expense submissions
+  const expensesToInsert = expenseScenario.expenses.map((row) => ({
+    session_code: sessionCode,
+    expense_id: row.expense_id,
+    employee_id: row.employee_id,
+    employee_name: row.employee_name,
+    department: row.department,
+    approver: row.approver,
+    submission_date: row.submission_date,
+    category: row.category,
+    merchant: row.merchant,
+    description: row.description,
+    amount: row.amount,
+    receipt_attached: row.receipt_attached,
+    status: row.status,
+  }));
+
+  const { error: expensesError } = await supabase
+    .from('expense_submissions')
+    .insert(expensesToInsert);
+
+  if (expensesError) {
+    console.error('Error seeding expenses:', expensesError);
+    throw expensesError;
+  }
+
+  // Insert expense issues
+  if (expenseScenario.plantedErrors.length > 0) {
+    const expenseIssuesToInsert = expenseScenario.plantedErrors.map((row) => ({
+      session_code: sessionCode,
+      expense_id: row.expense_id,
+      issue_type: row.type,
+      severity: row.severity,
+      details: row.description,
+      recommended_action: row.recommendedAction,
+    }));
+
+    const { error: expenseIssuesError } = await supabase
+      .from('expense_issues')
+      .insert(expenseIssuesToInsert);
+
+    if (expenseIssuesError) {
+      console.error('Error seeding expense issues:', expenseIssuesError);
+      throw expenseIssuesError;
+    }
+  }
+
+  // Insert policy limits
+  const limitsToInsert = expenseScenario.policyLimits.map((row) => ({
+    session_code: sessionCode,
+    category: row.category,
+    limit_amount: row.limit,
+    description: row.description,
+  }));
+
+  const { error: limitsError } = await supabase
+    .from('expense_policy_limits')
+    .insert(limitsToInsert);
+
+  if (limitsError) {
+    console.error('Error seeding policy limits:', limitsError);
+    throw limitsError;
+  }
+
+  console.log(`Session ${sessionCode} seeded successfully with all data including shipping, quality/compliance, customer orders, and expenses`);
 }

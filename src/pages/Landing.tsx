@@ -47,7 +47,10 @@ export function Landing() {
           .eq('code', sessionCode)
           .single();
 
+        console.log('Supabase query result:', { existingSession, fetchError, sessionCode });
+
         if (fetchError || !existingSession) {
+          console.error('Session lookup failed:', fetchError);
           throw new Error('Session not found');
         }
 
