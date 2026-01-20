@@ -268,7 +268,7 @@ export function Landing() {
 
           {/* Footer */}
           <p className="text-center text-gray-500 text-sm mt-8">
-            Powered by Big Marble Farms & New Era Intelligence
+            Powered by New Era Intelligence
           </p>
         </div>
       </div>
