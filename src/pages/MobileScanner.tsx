@@ -45,6 +45,44 @@ export function MobileScanner() {
               return;
             }
 
+            // Validate against expected shipments
+            const { data: expected } = await supabase
+              .from('shipments_expected')
+              .select('shipment_id, expected_sku, expected_qty')
+              .eq('session_code', sessionCode)
+              .eq('shipment_id', data.shipmentId)
+              .single();
+
+            if (!expected) {
+              addScanResult(data.shipmentId, data.productName, data.qty, 'error', '⚠️ UNEXPECTED SHIPMENT - Not in order list');
+
+              // Log as escalation
+              await supabase.from('escalations').insert({
+                session_code: sessionCode,
+                source_type: 'scan_validation',
+                source_id: data.shipmentId,
+                severity: 'high',
+                routed_to: 'Warehouse Supervisor',
+                status: 'pending',
+              });
+              return;
+            }
+
+            if (expected.expected_sku !== data.sku) {
+              addScanResult(data.shipmentId, data.productName, data.qty, 'error', `❌ WRONG PRODUCT! Expected ${expected.expected_sku}, got ${data.sku}`);
+
+              // Log as escalation
+              await supabase.from('escalations').insert({
+                session_code: sessionCode,
+                source_type: 'sku_mismatch',
+                source_id: data.shipmentId,
+                severity: 'critical',
+                routed_to: 'Operations Manager',
+                status: 'pending',
+              });
+              return;
+            }
+
             // Insert scan to Supabase
             const { error: insertError } = await supabase.from('barcode_scans').insert({
               session_code: sessionCode,
@@ -57,7 +95,7 @@ export function MobileScanner() {
             if (insertError) {
               addScanResult(data.shipmentId, data.productName, data.qty, 'error', 'Failed to save scan');
             } else {
-              addScanResult(data.shipmentId, data.productName, data.qty, 'success', 'Scan recorded');
+              addScanResult(data.shipmentId, data.productName, data.qty, 'success', `✓ Validated! ${data.qty} units of ${data.sku}`);
             }
 
             // Brief pause before allowing next scan

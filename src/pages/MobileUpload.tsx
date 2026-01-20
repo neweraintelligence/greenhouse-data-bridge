@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Camera, Upload, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { analyzeDocument } from '../lib/ai/geminiService';
 
 export function MobileUpload() {
   const { sessionCode, sourceId } = useParams<{ sessionCode: string; sourceId: string }>();
@@ -37,19 +39,44 @@ export function MobileUpload() {
     setError(null);
 
     try {
-      // Store in localStorage for the main app to pick up
-      // In a real app, this would upload to a server
-      const uploadKey = `upload_${sessionCode}_${sourceId}`;
-      localStorage.setItem(uploadKey, capturedImage);
+      // Analyze receipt with Gemini Vision
+      const analysis = await analyzeDocument(capturedImage, 'bol');
 
-      // Trigger a storage event for the main app
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: uploadKey,
-        newValue: capturedImage,
-      }));
+      // Extract shipment ID from analysis
+      const shipmentIdField = analysis.fields.find(f => f.label.toLowerCase().includes('shipment'));
+      const qtyField = analysis.fields.find(f => f.label.toLowerCase().includes('quantity') || f.label.toLowerCase().includes('qty'));
+      const conditionField = analysis.fields.find(f => f.label.toLowerCase().includes('condition'));
+
+      const shipmentId = shipmentIdField?.value || 'UNKNOWN';
+      const receivedQty = parseInt(qtyField?.value || '0', 10);
+      const condition = conditionField?.value || 'Scanned from mobile';
+
+      // Save to shipments_received table
+      const { error: insertError } = await supabase.from('shipments_received').insert({
+        session_code: sessionCode,
+        shipment_id: shipmentId,
+        received_qty: receivedQty,
+        received_at: new Date().toISOString(),
+        receiver_name: 'Mobile Upload',
+        condition: condition,
+        reconciled: false,
+      });
+
+      if (insertError) throw insertError;
+
+      // Also store image reference in documents_registry
+      await supabase.from('documents_registry').insert({
+        session_code: sessionCode,
+        doc_type: 'receipt',
+        source: sourceId,
+        filename: `receipt-${shipmentId}.jpg`,
+        extracted_data: { fields: analysis.fields },
+        confidence: analysis.fields.reduce((sum, f) => sum + f.confidence, 0) / analysis.fields.length,
+      });
 
       setUploadComplete(true);
-    } catch {
+    } catch (err) {
+      console.error('Upload error:', err);
       setError('Failed to upload. Please try again.');
     } finally {
       setIsUploading(false);
