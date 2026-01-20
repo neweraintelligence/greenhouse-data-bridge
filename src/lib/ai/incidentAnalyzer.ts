@@ -25,6 +25,15 @@ export interface IncidentAnalysisResult {
   needsEscalation: boolean;
   dismissalReason?: string; // If not an incident
   ambiguityNote?: string; // If confidence is medium
+  routingDestination?: 'escalation' | 'review' | 'log_only'; // Where to route
+  routingReason?: string; // Why routed there
+}
+
+export interface RoutingDecision {
+  destination: 'escalation' | 'review' | 'log_only';
+  reason: string;
+  priority: number; // 1=highest, 5=lowest
+  assignedTo?: string;
 }
 
 /**
@@ -310,4 +319,114 @@ Safety Monitoring System`;
       body: `See incident details in attached log. ${criticalIncidents.length} critical incidents require immediate attention.`,
     };
   }
+}
+
+/**
+ * Determine routing destination based on severity and classification
+ *
+ * ROUTING RULES:
+ * - Severity 5 (Critical): Escalation → Safety Team (immediate)
+ * - Severity 4 (High): Escalation → Maintenance/Safety (urgent)
+ * - Severity 3 (Moderate): Review Queue → Human review required
+ * - Severity 2 (Minor): Log Only → Track for patterns
+ * - Severity 1 (Minimal): Log Only → Informational
+ * - Ambiguous (any severity): Review Queue → Human verification needed
+ * - Low confidence (<75%): Review Queue → Human verification needed
+ */
+export function determineIncidentRouting(
+  severity: number,
+  classification: string,
+  confidence: number,
+  incidentType?: string
+): RoutingDecision {
+  // Critical severity - immediate escalation
+  if (severity >= 5) {
+    return {
+      destination: 'escalation',
+      reason: `Critical severity (${severity}/5) requires immediate Safety Team attention`,
+      priority: 1,
+      assignedTo: 'Safety Team',
+    };
+  }
+
+  // High severity - urgent escalation
+  if (severity === 4) {
+    const team = incidentType?.toLowerCase().includes('pest') || incidentType?.toLowerCase().includes('food')
+      ? 'Safety Team'
+      : 'Maintenance Team';
+
+    return {
+      destination: 'escalation',
+      reason: `High severity (${severity}/5) requires urgent ${team} intervention`,
+      priority: 2,
+      assignedTo: team,
+    };
+  }
+
+  // Ambiguous classification - always needs human review
+  if (classification === 'ambiguous') {
+    return {
+      destination: 'review',
+      reason: 'Ambiguous classification requires human judgment and verification',
+      priority: 2,
+    };
+  }
+
+  // Low AI confidence - needs human verification
+  if (confidence < 75) {
+    return {
+      destination: 'review',
+      reason: `Low AI confidence (${confidence}%) - human verification recommended`,
+      priority: 3,
+    };
+  }
+
+  // Moderate severity - review queue
+  if (severity === 3) {
+    return {
+      destination: 'review',
+      reason: `Moderate severity (${severity}/5) requires Maintenance review and prioritization`,
+      priority: 3,
+      assignedTo: 'Maintenance Team',
+    };
+  }
+
+  // Minor severity - log only
+  if (severity <= 2 && severity > 0) {
+    return {
+      destination: 'log_only',
+      reason: `Minor severity (${severity}/5) logged for tracking and pattern analysis`,
+      priority: 4,
+    };
+  }
+
+  // Default to log only for edge cases
+  return {
+    destination: 'log_only',
+    reason: 'Incident logged for record keeping',
+    priority: 5,
+  };
+}
+
+/**
+ * Enhanced analysis that includes routing decision
+ */
+export async function analyzeIncidentWithRouting(
+  imageData: string
+): Promise<IncidentAnalysisResult & { routing: RoutingDecision }> {
+  const analysis = await analyzeIncidentPhoto(imageData);
+
+  const routing = determineIncidentRouting(
+    analysis.severity,
+    analysis.isIncident ? 'real_incident' : 'false_positive',
+    analysis.confidence,
+    analysis.incident_type
+  );
+
+  return {
+    ...analysis,
+    routingDestination: routing.destination,
+    routingReason: routing.reason,
+    routing,
+  };
 }

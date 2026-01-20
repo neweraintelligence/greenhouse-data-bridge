@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
 import { ReconciliationChallenge } from '../components/challenges/ReconciliationChallenge';
+import { ReviewQueueMobile } from '../components/review/ReviewQueueMobile';
+import { ReconciliationQuizMobile } from '../components/reconciliation/ReconciliationQuizMobile';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -594,6 +596,28 @@ export function MobileDataEntry() {
           />
         );
 
+      case 'review_queue':
+        return (
+          <ReviewQueueMobile
+            sessionCode={sessionCode!}
+            participantName={participantName}
+            onComplete={() => {
+              setSubmitComplete(true);
+            }}
+          />
+        );
+
+      case 'reconciliation_quiz':
+        return (
+          <ReconciliationQuizMobile
+            sessionCode={sessionCode!}
+            participantName={participantName}
+            onComplete={() => {
+              setSubmitComplete(true);
+            }}
+          />
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -623,6 +647,10 @@ export function MobileDataEntry() {
         return { title: 'Send Response', icon: Mail };
       case 'billing_challenge':
         return { title: 'Reconciliation Challenge', icon: Calculator };
+      case 'review_queue':
+        return { title: 'Review Discrepancies', icon: ClipboardCheck };
+      case 'reconciliation_quiz':
+        return { title: 'Data Accuracy Quiz', icon: Database };
       default:
         return { title: 'Add Data', icon: Plus };
     }

@@ -1,7 +1,9 @@
 import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, ClipboardCheck, Database } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
+import { ReviewDecisionsPanel } from '../review/ReviewDecisionsPanel';
+import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
 
 // Helper function to map node labels to Supabase source table names
 function getSourceTypeFromNode(nodeLabel: string): string {
@@ -13,6 +15,11 @@ function getSourceTypeFromNode(nodeLabel: string): string {
   if (label.includes('quality')) return 'quality_issues';
   if (label.includes('email') || label.includes('outlook') || label.includes('mail') || label.includes('communication')) return 'communications';
   if (label.includes('scan') || label.includes('barcode')) return 'barcode_scans';
+  // Review queue - human-in-the-loop for AI-flagged discrepancies
+  if (label.includes('review queue') || label.includes('human review') || label.includes('exception') || label.includes('needs review')) return 'review_queue';
+  // Reconciliation quiz - accuracy challenge on merged/normalized data
+  if (label.includes('reconcil') && (label.includes('data') || label.includes('view') || label.includes('accuracy') || label.includes('quiz'))) return 'reconciliation_quiz';
+  if (label.includes('merged') || label.includes('normalized') || label.includes('combined data')) return 'reconciliation_quiz';
   if (label.includes('billing') || label.includes('invoice') || label.includes('reconcil') || label.includes('document') || label.includes('discrepan')) return 'billing_challenge';
   // Default fallback
   return 'shipments_expected';
@@ -190,8 +197,20 @@ function InfoOverlayComponent({
   // Track leaderboard visibility
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
+  // Track review decisions panel visibility
+  const [showReviewDecisions, setShowReviewDecisions] = useState(false);
+
+  // Track reconciliation data view visibility
+  const [showReconciliationData, setShowReconciliationData] = useState(false);
+
   // Check if this is a billing challenge slide
   const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'billing_challenge';
+
+  // Check if this is a review queue slide
+  const isReviewSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'review_queue';
+
+  // Check if this is a reconciliation quiz slide
+  const isReconciliationSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'reconciliation_quiz';
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -348,10 +367,49 @@ function InfoOverlayComponent({
             transform: isPeeking ? 'scale(0.8)' : 'scale(1)',
           }}
         >
+          {/* Reconciliation Data button - only for reconciliation quiz slides */}
+          {isReconciliationSlide && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowReconciliationData(!showReconciliationData);
+              }}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
+                showReconciliationData
+                  ? 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              <span className="text-sm">View Data</span>
+            </button>
+          )}
+
+          {/* Review Decisions button - only for review queue slides */}
+          {isReviewSlide && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowReviewDecisions(!showReviewDecisions);
+              }}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
+                showReviewDecisions
+                  ? 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+              }`}
+            >
+              <ClipboardCheck className="w-4 h-4" />
+              <span className="text-sm">Decisions</span>
+            </button>
+          )}
+
           {/* Leaderboard button - only for billing challenges */}
           {isBillingSlide && (
             <button
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLeaderboard(!showLeaderboard);
+              }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
                 showLeaderboard
                   ? 'bg-amber-500 hover:bg-amber-600 text-white'
@@ -622,7 +680,7 @@ function InfoOverlayComponent({
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 {/* Glassmorphism container */}
-                <div className="relative px-8 py-6 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/40 shadow-2xl hover:bg-white/30 hover:scale-105 transition-all duration-300 ease-out">
+                <div className="relative p-7 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/40 shadow-2xl hover:bg-white/30 hover:scale-105 transition-all duration-300 ease-out">
                   {/* Inner glow effect */}
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-50" />
 
@@ -656,6 +714,36 @@ function InfoOverlayComponent({
           }}
         >
           <ChallengeLeaderboard sessionCode={sessionCode} />
+        </div>
+      )}
+
+      {/* Review Decisions panel - slides in from right when shown */}
+      {showReviewDecisions && isReviewSlide && sessionCode && (
+        <div
+          className="absolute top-24 right-8 z-[10002] w-[420px] animate-in slide-in-from-right duration-300"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            opacity: isPeeking ? 0 : 1,
+          }}
+        >
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-4">
+            <ReviewDecisionsPanel sessionCode={sessionCode} />
+          </div>
+        </div>
+      )}
+
+      {/* Reconciliation Data panel - large view for the accuracy quiz */}
+      {showReconciliationData && isReconciliationSlide && sessionCode && (
+        <div
+          className="absolute top-20 left-1/2 -translate-x-1/2 z-[10002] w-[90vw] max-w-[1200px] animate-in fade-in zoom-in-95 duration-300"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            opacity: isPeeking ? 0 : 1,
+          }}
+        >
+          <div className="bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <ReconciliationDataView sessionCode={sessionCode} />
+          </div>
         </div>
       )}
 
