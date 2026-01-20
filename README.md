@@ -71,3 +71,4 @@ export default defineConfig([
   },
 ])
 ```
+# Trigger rebuild with env vars
