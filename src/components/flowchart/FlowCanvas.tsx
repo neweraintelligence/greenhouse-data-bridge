@@ -1239,68 +1239,134 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
 
     // Check if it's a pipeline node (not a source)
-    if (infoNodeId === 'etl' && etlStatus === 'complete' && transformations.length > 0) {
-      return (
-        <div className="space-y-2 p-3">
-          <p className="text-xs font-semibold text-purple-700 mb-3">Transformation Log</p>
-          {transformations.slice(0, 5).map((t, i) => (
-            <div key={i} className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-xs">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium text-gray-700">{t.field}:</span>
-                <code className="px-1.5 py-0.5 bg-white rounded text-gray-600">{t.original}</code>
-                <span>→</span>
-                <code className="px-1.5 py-0.5 bg-white rounded text-purple-700 font-semibold">{t.transformed}</code>
+    if (infoNodeId === 'etl') {
+      if (etlStatus === 'complete' && transformations.length > 0) {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-purple-700 mb-3">Transformation Log</p>
+            {transformations.slice(0, 5).map((t, i) => (
+              <div key={i} className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-xs">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium text-gray-700">{t.field}:</span>
+                  <code className="px-1.5 py-0.5 bg-white rounded text-gray-600">{t.original}</code>
+                  <span>→</span>
+                  <code className="px-1.5 py-0.5 bg-white rounded text-purple-700 font-semibold">{t.transformed}</code>
+                </div>
+                <p className="text-gray-500 text-[10px]">{t.type.replace(/_/g, ' ')}</p>
               </div>
-              <p className="text-gray-500 text-[10px]">{t.type.replace(/_/g, ' ')}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-gray-500">Waiting for sources to complete...</p>
+          </div>
+        );
+      }
+    }
+
+    if (infoNodeId === 'review-queue') {
+      if (discrepancies.length > 0) {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-amber-700 mb-3">Items Needing Review ({discrepancies.length})</p>
+            {discrepancies.slice(0, 4).map((d) => (
+              <div key={d.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs">
+                <p className="font-semibold text-gray-900">{d.shipment_id}</p>
+                <p className="text-gray-700">{d.details}</p>
+                <p className="text-amber-700 text-[10px] mt-1">→ {d.recommendedAction}</p>
+              </div>
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-gray-500">No items flagged for review</p>
+            <p className="text-xs text-gray-400 mt-1">Items will appear here after processing</p>
+          </div>
+        );
+      }
+    }
+
+    if (infoNodeId === 'escalation') {
+      if (escalations.length > 0) {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-red-700 mb-3">Escalated Items ({escalations.length})</p>
+            {escalations.map((e) => (
+              <div key={e.id} className="p-2 rounded-lg bg-red-50 border border-red-200 text-xs">
+                <p className="font-semibold text-gray-900">{e.source_id}</p>
+                <p className="text-gray-700">Severity: {e.severity}</p>
+                <p className="text-red-700">→ Routed to: {e.routed_to}</p>
+              </div>
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-gray-500">No critical escalations</p>
+            <p className="text-xs text-gray-400 mt-1">High severity items will appear here</p>
+          </div>
+        );
+      }
+    }
+
+    if (infoNodeId === 'communications') {
+      if (communications.length > 0) {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-blue-700 mb-3">Recent Communications ({communications.length})</p>
+            {communications.slice(0, 4).map((c) => (
+              <div
+                key={c.id}
+                onClick={() => setSelectedEmail(c)}
+                className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-xs cursor-pointer hover:bg-blue-100 transition-colors"
+              >
+                <p className="font-semibold text-gray-900">{c.recipient}</p>
+                <p className="text-gray-700">{c.subject}</p>
+                <p className="text-blue-600 text-[10px]">{c.comm_type.toUpperCase()}</p>
+              </div>
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-gray-500">No communications yet</p>
+            <p className="text-xs text-gray-400 mt-1">Notifications will appear after processing</p>
+          </div>
+        );
+      }
+    }
+
+    if (infoNodeId === 'intake') {
+      return (
+        <div className="p-4">
+          <p className="text-sm text-gray-700 mb-3">Data sources ready for processing</p>
+          <div className="space-y-1">
+            {selectedUseCase?.sources.map(s => (
+              <div key={s.name} className="flex items-center gap-2 p-2 rounded bg-blue-50 text-xs">
+                <span className={`w-2 h-2 rounded-full ${sourceStatuses[s.name] === 'complete' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <span className="text-gray-700">{s.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
 
-    if (infoNodeId === 'review-queue' && discrepancies.length > 0) {
+    if (infoNodeId === 'output') {
       return (
-        <div className="space-y-2 p-3">
-          <p className="text-xs font-semibold text-amber-700 mb-3">Items Needing Review ({discrepancies.length})</p>
-          {discrepancies.slice(0, 4).map((d) => (
-            <div key={d.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs">
-              <p className="font-semibold text-gray-900">{d.shipment_id}</p>
-              <p className="text-gray-700">{d.details}</p>
-              <p className="text-amber-700 text-[10px] mt-1">→ {d.recommendedAction}</p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    if (infoNodeId === 'escalation' && escalations.length > 0) {
-      return (
-        <div className="space-y-2 p-3">
-          <p className="text-xs font-semibold text-red-700 mb-3">Escalated Items ({escalations.length})</p>
-          {escalations.map((e) => (
-            <div key={e.id} className="p-2 rounded-lg bg-red-50 border border-red-200 text-xs">
-              <p className="font-semibold text-gray-900">{e.source_id}</p>
-              <p className="text-gray-700">Severity: {e.severity}</p>
-              <p className="text-red-700">→ Routed to: {e.routed_to}</p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    if (infoNodeId === 'communications' && communications.length > 0) {
-      return (
-        <div className="space-y-2 p-3">
-          <p className="text-xs font-semibold text-blue-700 mb-3">Recent Communications ({communications.length})</p>
-          {communications.slice(0, 4).map((c) => (
-            <div
-              key={c.id}
-              onClick={() => setSelectedEmail(c)}
-              className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-xs cursor-pointer hover:bg-blue-100 transition-colors"
-            >
-              <p className="font-semibold text-gray-900">{c.recipient}</p>
-              <p className="text-gray-700">{c.subject}</p>
-              <p className="text-blue-600 text-[10px]">{c.comm_type.toUpperCase()}</p>
+        <div className="p-4">
+          <p className="text-sm text-gray-700 mb-3">Generated Reports</p>
+          {outputFiles.map(f => (
+            <div key={f.id} className="p-2 rounded-lg bg-green-50 border border-green-200 text-xs mb-2">
+              <p className="font-semibold text-gray-900">{f.name}</p>
+              <p className="text-green-700">{f.type.toUpperCase()}</p>
+              <p className="text-gray-500 text-[10px]">{f.ready ? 'Ready' : 'Processing...'}</p>
             </div>
           ))}
         </div>
