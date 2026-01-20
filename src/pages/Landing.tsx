@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Hash, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Hash, ArrowRight, Loader2, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateSessionCode, isValidSessionCode } from '../lib/sessionCodes';
 import { useSessionStore } from '../store/sessionStore';
@@ -17,35 +17,13 @@ export function Landing() {
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
 
-  const handleJoinDemo = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Check if DEMO26 session exists
-      const { data: existingSession, error: fetchError } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('code', DEMO_SESSION_CODE)
-        .single();
-
-      if (fetchError || !existingSession) {
-        throw new Error('Demo session not found. Please contact workshop organizer.');
-      }
-
-      // Update last_active_at
-      await supabase
-        .from('sessions')
-        .update({ last_active_at: new Date().toISOString() })
-        .eq('code', DEMO_SESSION_CODE);
-
-      setSession({ code: DEMO_SESSION_CODE, name: existingSession.name });
-      navigate('/flowchart');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleJoinDemo = () => {
+    // Pre-fill DEMO26 code but still require name for audit trail
+    setCode(DEMO_SESSION_CODE);
+    // Focus on name input
+    setTimeout(() => {
+      document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
+    }, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,31 +146,36 @@ export function Landing() {
           {/* Form card */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             {/* Quick Demo Banner */}
-            <div className="bg-bmf-blue px-8 py-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  Workshop Demo
-                </h3>
-                <p className="text-blue-100 text-sm mb-4">
-                  Access pre-configured demo session
-                </p>
-                <button
-                  onClick={handleJoinDemo}
-                  disabled={isLoading}
-                  className="w-full py-3 px-6 bg-white hover:bg-gray-50 text-bmf-blue font-semibold rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <span>Join Session</span>
-                      <span className="font-mono tracking-wider">{DEMO_SESSION_CODE}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
+            {!code && (
+              <div className="bg-bmf-blue px-8 py-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Workshop Demo
+                  </h3>
+                  <p className="text-blue-100 text-sm mb-4">
+                    Join the shared demo session
+                  </p>
+                  <button
+                    onClick={handleJoinDemo}
+                    type="button"
+                    className="w-full py-3 px-6 bg-white hover:bg-gray-50 text-bmf-blue font-semibold rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm"
+                  >
+                    <span>Use Session</span>
+                    <span className="font-mono tracking-wider">{DEMO_SESSION_CODE}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {code === DEMO_SESSION_CODE && (
+              <div className="bg-emerald-50 px-8 py-4 border-b border-emerald-100">
+                <div className="flex items-center justify-center gap-2 text-emerald-700">
+                  <Check className="w-5 h-5" />
+                  <span className="font-medium">Demo session selected. Enter your name below.</span>
+                </div>
+              </div>
+            )}
 
             {/* Main form */}
             <div className="p-8">
@@ -207,7 +190,7 @@ export function Landing() {
               {/* Name input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Name
+                  {code === DEMO_SESSION_CODE ? 'Your Name (Required for Audit Trail)' : 'Your Name'}
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -216,29 +199,30 @@ export function Landing() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
-                    disabled={!!code}
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue transition-all"
                   />
                 </div>
               </div>
 
-              {/* Session code input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Or Resume Session
-                </label>
-                <div className="relative">
-                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="Enter session code"
-                    maxLength={6}
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue font-mono tracking-widest transition-all"
-                  />
+              {/* Session code input - hidden when DEMO26 is selected */}
+              {code !== DEMO_SESSION_CODE && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Or Resume Session
+                  </label>
+                  <div className="relative">
+                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.toUpperCase())}
+                      placeholder="Enter session code"
+                      maxLength={6}
+                      className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue font-mono tracking-widest transition-all"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Error message */}
               {error && (
@@ -250,18 +234,29 @@ export function Landing() {
               {/* Submit button */}
               <button
                 type="submit"
-                disabled={isLoading || (!name.trim() && !code.trim())}
+                disabled={isLoading || !name.trim()}
                 className="w-full py-3.5 px-6 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    <span>{code ? 'Resume Session' : 'Start New Session'}</span>
+                    <span>{code === DEMO_SESSION_CODE ? 'Join Workshop Demo' : code ? 'Resume Session' : 'Start New Session'}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
               </button>
+
+              {/* Clear demo selection */}
+              {code === DEMO_SESSION_CODE && (
+                <button
+                  type="button"
+                  onClick={() => setCode('')}
+                  className="w-full text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Use different session code
+                </button>
+              )}
             </form>
               </div>
           </div>
