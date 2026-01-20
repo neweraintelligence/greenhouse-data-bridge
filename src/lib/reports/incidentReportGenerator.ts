@@ -222,7 +222,7 @@ ${moderateIncidents.map((inc, idx) => `
   const minorSection = minorIncidents.length > 0 ? `
 ## ℹ️ Minor Incidents
 
-${minorIncidents.map((inc, idx) => `
+${minorIncidents.map((inc) => `
 - **${inc.incident_type}** - ${inc.location} (Severity ${inc.severity}) - ${inc.reported_by}
 `).join('\n')}
 ` : '';
