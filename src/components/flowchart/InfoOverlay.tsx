@@ -1,7 +1,7 @@
 import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText } from 'lucide-react';
 
-// Match the header colors from SourceNode
+// Match the header colors from all node types
 const headerColors = {
   outlook: {
     bg: 'bg-gradient-to-r from-blue-500 to-blue-600',
@@ -23,6 +23,34 @@ const headerColors = {
     bg: 'bg-gradient-to-r from-violet-500 to-purple-600',
     glow: 'shadow-[0_4px_20px_rgba(139,92,246,0.3)]',
   },
+  etl: {
+    bg: 'bg-gradient-to-r from-purple-500 to-violet-600',
+    glow: 'shadow-[0_4px_20px_rgba(139,92,246,0.3)]',
+  },
+  intake: {
+    bg: 'bg-gradient-to-r from-sky-500 to-blue-500',
+    glow: 'shadow-[0_4px_20px_rgba(14,165,233,0.3)]',
+  },
+  processing: {
+    bg: 'bg-gradient-to-r from-indigo-500 to-purple-600',
+    glow: 'shadow-[0_4px_20px_rgba(99,102,241,0.3)]',
+  },
+  reviewQueue: {
+    bg: 'bg-gradient-to-r from-amber-500 to-orange-500',
+    glow: 'shadow-[0_4px_20px_rgba(245,158,11,0.3)]',
+  },
+  escalation: {
+    bg: 'bg-gradient-to-r from-red-500 to-orange-600',
+    glow: 'shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
+  },
+  communications: {
+    bg: 'bg-gradient-to-r from-blue-500 to-cyan-600',
+    glow: 'shadow-[0_4px_20px_rgba(59,130,246,0.3)]',
+  },
+  output: {
+    bg: 'bg-gradient-to-r from-emerald-500 to-emerald-600',
+    glow: 'shadow-[0_4px_20px_rgba(16,185,129,0.3)]',
+  },
 };
 
 const iconMap = {
@@ -31,6 +59,13 @@ const iconMap = {
   excel: FileSpreadsheet,
   paper: Camera,
   barcode: ScanBarcode,
+  etl: RefreshCw,
+  intake: Inbox,
+  processing: Cog,
+  reviewQueue: ClipboardList,
+  escalation: AlertOctagon,
+  communications: Send,
+  output: FileText,
 };
 
 export type FlowDirection = 'inbound' | 'outbound' | 'both';

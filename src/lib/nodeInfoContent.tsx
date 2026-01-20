@@ -235,7 +235,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
 export const trainingNodeInfo: Record<string, NodeInfo> = {
   excel: {
     id: 'excel',
-    title: 'Employee List',
+    title: 'EMPLOYEE LIST',
     subtitle: 'Who Needs Training',
     imageOnLeft: false,
     description:
@@ -247,7 +247,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   'excel-ack': {
     id: 'excel-ack',
-    title: 'Training Acknowledgements',
+    title: 'TRAINING ACKNOWLEDGEMENTS',
     subtitle: 'Completion Records',
     imageOnLeft: true,
     description:
@@ -259,7 +259,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   paper: {
     id: 'paper',
-    title: 'Paper Sign-off Forms',
+    title: 'PAPER SIGN-OFF FORMS',
     subtitle: 'Physical Signatures',
     description:
       'The physical forms from in-person training sessions. Employee signs, trainer signs, date is written. These get scanned and uploaded into the system for digital storage.',
@@ -270,7 +270,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   outlook: {
     id: 'outlook',
-    title: 'Training Completion Emails',
+    title: 'TRAINING COMPLETION EMAILS',
     subtitle: 'Digital Confirmations',
     description:
       'When someone finishes an online training module, the Learning Management System sends an automated email: "John Doe completed Safety 101 on January 15th." This system captures those emails.',
@@ -281,7 +281,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   processing: {
     id: 'processing',
-    title: 'Compliance Check',
+    title: 'COMPLIANCE CHECK',
     subtitle: 'Who\'s Current, Who\'s Overdue',
     description:
       'The system matches each employee against all completion records (online, paper, email). It flags who\'s compliant, who\'s overdue, and who\'s missing required training entirely.',
@@ -292,7 +292,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   intake: {
     id: 'intake',
-    title: 'Record Collection',
+    title: 'RECORD COLLECTION',
     subtitle: 'Gathering All the Data',
     description:
       'Collection point for the employee roster and all forms of completion records before running the compliance check. Shows what\'s been received and what\'s pending.',
@@ -303,7 +303,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 
   output: {
     id: 'output',
-    title: 'Compliance Report',
+    title: 'COMPLIANCE REPORT',
     subtitle: 'Who\'s Good, Who\'s Not',
     description:
       'The final report: who\'s compliant, who\'s overdue, who\'s missing training. Every name linked to completion dates and proof (signatures, emails, etc.).',
@@ -319,7 +319,7 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 export const incidentsNodeInfo: Record<string, NodeInfo> = {
   outlook: {
     id: 'outlook',
-    title: 'Incident Reports',
+    title: 'INCIDENT REPORTS',
     subtitle: 'Someone Reported a Problem',
     description:
       'When an employee sees something wrong — a leak, broken equipment, safety hazard — they send an email describing what happened, where, and how severe. This creates the incident case.',
@@ -330,7 +330,7 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 
   paper: {
     id: 'paper',
-    title: 'Photos of the Issue',
+    title: 'PHOTOS OF THE ISSUE',
     subtitle: 'See What Actually Happened',
     description:
       'Pictures of the problem: the spill, the broken valve, the damaged pallet. Employee takes a photo with their phone and uploads it immediately.',
@@ -341,7 +341,7 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 
   excel: {
     id: 'excel',
-    title: 'Maintenance Calendar',
+    title: 'MAINTENANCE CALENDAR',
     subtitle: 'What\'s Already Scheduled',
     description:
       'Your schedule of planned maintenance work: what\'s being fixed, where, and when. The system checks new incidents against this to avoid duplicate work orders.',
@@ -352,7 +352,7 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 
   processing: {
     id: 'processing',
-    title: 'Automatic Routing',
+    title: 'AUTOMATIC ROUTING',
     subtitle: 'Getting Issues to the Right Team',
     description:
       'The system reads the incident, checks the severity, links any photos, and automatically routes it to the right team. Safety issues go to the safety team. Equipment problems go to maintenance.',
@@ -363,7 +363,7 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 
   intake: {
     id: 'intake',
-    title: 'Incident Queue',
+    title: 'INCIDENT QUEUE',
     subtitle: 'Everything in One Place',
     description:
       'All incident reports flow here before they\'re routed. Shows what\'s waiting for triage and what\'s already been assigned.',
@@ -374,7 +374,7 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 
   output: {
     id: 'output',
-    title: 'Incident Dashboard',
+    title: 'INCIDENT DASHBOARD',
     subtitle: 'What\'s Open, What\'s Resolved',
     description:
       'Live view of all incidents: how many are open, how many are in progress, how many were resolved. Response times measured. SLA violations flagged.',
