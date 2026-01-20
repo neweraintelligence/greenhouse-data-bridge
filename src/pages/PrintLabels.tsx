@@ -3,45 +3,85 @@ import { useParams } from 'react-router-dom';
 import { PrintableLabels } from '../components/PrintableLabels';
 import { supabase } from '../lib/supabase';
 import { debug } from '../lib/debug';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+
+interface ShipmentWithStatus {
+  shipment_id: string;
+  product_name: string;
+  sku: string;
+  expected_qty: number;
+  isScanned: boolean;
+  isReceived: boolean;
+}
 
 export function PrintLabels() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
-  const [shipments, setShipments] = useState<Array<{shipment_id: string; product_name: string; sku: string; expected_qty: number}>>([]);
+  const [shipments, setShipments] = useState<ShipmentWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchShipments = async () => {
-      if (!sessionCode) return;
+  const fetchShipments = async () => {
+    if (!sessionCode) return;
 
-      try {
-        const { data, error: fetchError } = await supabase
+    setLoading(true);
+    try {
+      // Fetch all data in parallel
+      const [expectedRes, scansRes, receivedRes] = await Promise.all([
+        supabase
           .from('shipments_expected')
           .select('shipment_id, vendor, expected_sku, expected_qty')
-          .eq('session_code', sessionCode)
-          .limit(4); // Only first 4 for demo
+          .eq('session_code', sessionCode),
+        supabase
+          .from('barcode_scans')
+          .select('shipment_id')
+          .eq('session_code', sessionCode),
+        supabase
+          .from('shipments_received')
+          .select('shipment_id')
+          .eq('session_code', sessionCode),
+      ]);
 
-        if (fetchError) throw fetchError;
+      if (expectedRes.error) throw expectedRes.error;
 
-        // Map to printable format with product names
-        const mapped = (data || []).map(s => ({
-          shipment_id: s.shipment_id,
-          product_name: getProductName(s.expected_sku),
-          sku: s.expected_sku,
-          expected_qty: s.expected_qty,
-        }));
+      // Create sets for quick lookup
+      const scannedIds = new Set((scansRes.data || []).map(s => s.shipment_id));
+      const receivedIds = new Set((receivedRes.data || []).map(r => r.shipment_id));
 
-        setShipments(mapped);
-      } catch (err) {
-        debug.criticalError('Shipments fetch failed for labels', err);
-        setError('Failed to load shipments');
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Map to printable format with status
+      const mapped: ShipmentWithStatus[] = (expectedRes.data || []).map(s => ({
+        shipment_id: s.shipment_id,
+        product_name: getProductName(s.expected_sku),
+        sku: s.expected_sku,
+        expected_qty: s.expected_qty,
+        isScanned: scannedIds.has(s.shipment_id),
+        isReceived: receivedIds.has(s.shipment_id),
+      }));
 
+      setShipments(mapped);
+    } catch (err) {
+      debug.criticalError('Shipments fetch failed for labels', err);
+      setError('Failed to load shipments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchShipments();
+
+    // Subscribe to realtime updates
+    if (!sessionCode) return;
+
+    const channel = supabase
+      .channel(`labels-${sessionCode}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments_expected', filter: `session_code=eq.${sessionCode}` }, () => fetchShipments())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'barcode_scans', filter: `session_code=eq.${sessionCode}` }, () => fetchShipments())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments_received', filter: `session_code=eq.${sessionCode}` }, () => fetchShipments())
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, [sessionCode]);
 
   // Helper to get product name from SKU (realistic greenhouse products)
@@ -70,6 +110,10 @@ export function PrintLabels() {
     return productMap[sku] || sku;
   };
 
+  // Stats
+  const unscannedCount = shipments.filter(s => !s.isScanned).length;
+  const unreceivedCount = shipments.filter(s => !s.isReceived).length;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -93,5 +137,36 @@ export function PrintLabels() {
     );
   }
 
-  return <PrintableLabels sessionCode={sessionCode} shipments={shipments} />;
+  return (
+    <div>
+      {/* Status bar - not printed */}
+      <div className="print:hidden sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <div className="flex items-center gap-6">
+            <div className="text-sm">
+              <span className="text-gray-500">Total:</span>{' '}
+              <span className="font-semibold">{shipments.length}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-500">Not scanned:</span>{' '}
+              <span className="font-semibold text-amber-600">{unscannedCount}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-500">Not received:</span>{' '}
+              <span className="font-semibold text-blue-600">{unreceivedCount}</span>
+            </div>
+          </div>
+          <button
+            onClick={fetchShipments}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <PrintableLabels sessionCode={sessionCode} shipments={shipments} />
+    </div>
+  );
 }

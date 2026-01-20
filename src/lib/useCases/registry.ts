@@ -75,9 +75,9 @@ registerUseCase({
   icon: 'AlertTriangle',
   color: 'orange',
   sources: [
-    { type: 'camera', name: 'Incident Photos', icon: 'Camera', description: 'Pre-seeded incident photos for AI analysis' },
-    { type: 'ai', name: 'Gemini Vision Analysis', icon: 'Sparkles', description: 'AI analyzes photos, detects incident type & severity' },
-    { type: 'excel', name: 'Severity Config', icon: 'Settings', description: 'Configurable severity thresholds and routing rules', optional: true },
+    { type: 'outlook', name: 'Incident Reports', icon: 'Mail', description: 'Incoming incident reports via email or mobile submission' },
+    { type: 'paper', name: 'Incident Photos', icon: 'Camera', description: 'Photos of the issue uploaded via mobile device' },
+    { type: 'excel', name: 'Maintenance Calendar', icon: 'Calendar', description: 'Scheduled maintenance to check for duplicates', optional: true },
   ],
   outputTemplates: [
     { id: 'incident-summary', name: 'Incident Summary', fileType: 'pdf', description: 'Overview of reported incidents' },
