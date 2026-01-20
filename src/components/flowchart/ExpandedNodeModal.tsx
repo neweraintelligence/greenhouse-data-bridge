@@ -1,5 +1,6 @@
-import { X, Maximize2, ZoomIn, ZoomOut, Plus } from 'lucide-react';
+import { X, Maximize2, ZoomIn, ZoomOut, Plus, QrCode } from 'lucide-react';
 import { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { OutlookMiniApp, type EmailItem } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './nodes/mini-apps/OneDriveMiniApp';
 import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';
@@ -24,6 +25,8 @@ interface ExpandedNodeModalProps {
   // For editable spreadsheet
   onSpreadsheetUpdate?: (data: SpreadsheetData) => void;
   onAddRow?: () => void;
+  // QR code URL for mobile participation
+  qrCodeUrl?: string;
 }
 
 export function ExpandedNodeModal({
@@ -42,9 +45,11 @@ export function ExpandedNodeModal({
   onConfirm,
   onSpreadsheetUpdate,
   onAddRow,
+  qrCodeUrl,
 }: ExpandedNodeModalProps) {
   const [zoom, setZoom] = useState(1);
   const [editableSpreadsheet, setEditableSpreadsheet] = useState<SpreadsheetData | undefined>(spreadsheet);
+  const [showQrCode, setShowQrCode] = useState(false);
 
   const handleCellEdit = (rowIndex: number, colIndex: number, value: string | number) => {
     if (!editableSpreadsheet) return;
@@ -90,6 +95,16 @@ export function ExpandedNodeModal({
                   icon={<ZoomIn className="w-4 h-4" />}
                 >{''}</GlassButton>
               </>
+            )}
+            {qrCodeUrl && (
+              <GlassButton
+                variant={showQrCode ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setShowQrCode(!showQrCode)}
+                icon={<QrCode className="w-4 h-4" />}
+              >
+                {showQrCode ? 'Hide' : 'Mobile'}
+              </GlassButton>
             )}
             <GlassButton
               variant="ghost"
@@ -147,6 +162,7 @@ export function ExpandedNodeModal({
                 onClear={onImageClear}
                 onConfirm={onConfirm}
                 expanded
+                qrCodeUrl={qrCodeUrl}
               />
             </div>
           )}

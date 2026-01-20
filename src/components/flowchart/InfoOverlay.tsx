@@ -1,5 +1,6 @@
 import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Match the header colors from all node types
 const headerColors = {
@@ -121,6 +122,8 @@ interface InfoOverlayProps {
   nodeLabel?: string;
   // Trigger full modal (same as flowchart mode)
   onMaximize?: () => void;
+  // Session code for QR code generation
+  sessionCode?: string;
 }
 
 function InfoOverlayComponent({
@@ -137,6 +140,7 @@ function InfoOverlayComponent({
   nodeType,
   nodeLabel,
   onMaximize,
+  sessionCode,
 }: InfoOverlayProps) {
   console.log('InfoOverlay props:', {
     hasInfo: !!info,
@@ -163,6 +167,9 @@ function InfoOverlayComponent({
 
   // Track "peek through" mode - hold spacebar to see flowchart behind
   const [isPeeking, setIsPeeking] = useState(false);
+
+  // Track QR code hover
+  const [showJoinQR, setShowJoinQR] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -309,6 +316,45 @@ function InfoOverlayComponent({
       >
         <X className="w-5 h-5 text-gray-800/70" />
       </button>
+
+      {/* Join button - top right (show QR code on hover) */}
+      {sessionCode && nodeLabel && (
+        <div
+          className="absolute top-8 right-8 z-[10000] transition-all duration-700 ease-out"
+          style={{
+            opacity: isPeeking ? 0 : 1,
+            transform: isPeeking ? 'scale(0.8)' : 'scale(1)',
+          }}
+          onMouseEnter={() => setShowJoinQR(true)}
+          onMouseLeave={() => setShowJoinQR(false)}
+        >
+          <button
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span className="text-sm">Join</span>
+          </button>
+
+          {/* QR Code Tooltip */}
+          {showJoinQR && (
+            <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+              <div className="flex flex-col items-center gap-2">
+                <QRCodeSVG
+                  value={`${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(nodeLabel)}`}
+                  size={180}
+                  level="M"
+                  includeMargin
+                  className="rounded-lg"
+                />
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
+                  <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Peek through hint - bottom center, subtle */}
       {!isPeeking && (

@@ -1738,6 +1738,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             }));
           }}
           onAddRow={selectedUseCase?.id === 'shipping' ? handleAddRow : undefined}
+          qrCodeUrl={`${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(expandedNode.label)}`}
         />
       )}
 
@@ -1773,6 +1774,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         imageUrl={infoNodeType && selectedUseCase && infoNodeLabel ? getNodeImage(selectedUseCase.id, infoNodeType, infoNodeLabel) : null}
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
+        sessionCode={sessionCode}
         onMaximize={() => {
           // Trigger full modal (same as clicking node in flowchart mode)
           if (infoNodeType && infoNodeLabel) {
