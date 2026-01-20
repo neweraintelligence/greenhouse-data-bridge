@@ -244,9 +244,13 @@ function InfoOverlayComponent({
 
   if (!info) return null;
 
-  // Get header colors and icon for preview card based on node type
-  const nodeColors = nodeType ? headerColors[nodeType as keyof typeof headerColors] : headerColors.paper;
-  const NodeIcon = nodeType ? iconMap[nodeType as keyof typeof iconMap] : Camera;
+  // Get header colors and icon for preview card based on node type (with fallback)
+  const nodeColors = nodeType && headerColors[nodeType as keyof typeof headerColors]
+    ? headerColors[nodeType as keyof typeof headerColors]
+    : { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', glow: 'shadow-[0_4px_20px_rgba(107,114,128,0.3)]' };
+  const NodeIcon = nodeType && iconMap[nodeType as keyof typeof iconMap]
+    ? iconMap[nodeType as keyof typeof iconMap]
+    : FileText;
 
   // Determine what content to show based on active direction
   const hasDirectionalContent = info.flowContext?.inbound || info.flowContext?.outbound;
