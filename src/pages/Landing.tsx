@@ -36,7 +36,8 @@ export function Landing() {
 
       if (sessionCode) {
         // Resume existing session
-        if (!isValidSessionCode(sessionCode)) {
+        // Skip validation for demo session
+        if (sessionCode !== DEMO_SESSION_CODE && !isValidSessionCode(sessionCode)) {
           throw new Error('Invalid session code format');
         }
 
