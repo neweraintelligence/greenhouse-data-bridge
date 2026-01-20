@@ -10,6 +10,8 @@ function getSourceTypeFromNode(nodeLabel: string): string {
   if (label.includes('incident')) return 'incidents';
   if (label.includes('customer') || label.includes('order')) return 'customer_orders';
   if (label.includes('quality')) return 'quality_issues';
+  if (label.includes('email') || label.includes('outlook') || label.includes('mail') || label.includes('communication')) return 'communications';
+  if (label.includes('scan') || label.includes('barcode')) return 'barcode_scans';
   // Default fallback
   return 'shipments_expected';
 }

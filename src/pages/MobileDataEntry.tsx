@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -39,6 +39,12 @@ export function MobileDataEntry() {
     department: '',
     training_type: 'Safety & SOP',
     scheduled_date: new Date().toISOString().split('T')[0],
+  });
+
+  // Form state for email/communications
+  const [emailData, setEmailData] = useState({
+    subject: 'Re: Order Acknowledgment',
+    body: '',
   });
 
   useEffect(() => {
@@ -154,6 +160,41 @@ export function MobileDataEntry() {
     }
   };
 
+  const handleSubmitEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const { error: insertError } = await supabase.from('communications_log').insert({
+        session_code: sessionCode,
+        comm_type: 'email',
+        recipient: 'customer@example.com',
+        subject: emailData.subject,
+        body: `${emailData.body}\n\nBest regards,\n${participantName}`,
+        sent_at: new Date().toISOString(),
+        submitted_by: participantName,
+      });
+
+      if (insertError) throw insertError;
+
+      setSubmitComplete(true);
+      setToast({
+        message: '✓ Email sent successfully!',
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Submission error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to send email. Please try again.');
+      setToast({
+        message: 'Failed to send email. Please try again.',
+        type: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleReset = () => {
     setSubmitComplete(false);
     setError(null);
@@ -175,6 +216,11 @@ export function MobileDataEntry() {
         department: '',
         training_type: 'Safety & SOP',
         scheduled_date: new Date().toISOString().split('T')[0],
+      });
+    } else if (sourceType === 'communications') {
+      setEmailData({
+        subject: 'Re: Order Acknowledgment',
+        body: '',
       });
     }
   };
@@ -466,6 +512,75 @@ export function MobileDataEntry() {
           />
         );
 
+      case 'communications':
+        return (
+          <form onSubmit={handleSubmitEmail} className="space-y-4">
+            {/* Pre-filled context */}
+            <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+              <p className="text-xs text-blue-600 font-medium mb-1">Responding to:</p>
+              <p className="text-sm text-gray-700">Customer inquiry about order status</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subject
+              </label>
+              <input
+                type="text"
+                value={emailData.subject}
+                onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Your Message *
+              </label>
+              <textarea
+                value={emailData.body}
+                onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+                placeholder="Thank you for your inquiry. I've reviewed your order and can confirm..."
+                required
+                rows={5}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue resize-none"
+              />
+            </div>
+
+            {/* Signature preview */}
+            <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <p className="text-xs text-gray-500 mb-1">Signature:</p>
+              <p className="text-sm text-gray-700">Best regards,</p>
+              <p className="text-sm font-medium text-gray-800">{participantName}</p>
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3 px-4 rounded-xl bg-bmf-blue text-white font-medium hover:bg-bmf-blue-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Send Email
+                </>
+              )}
+            </button>
+          </form>
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -491,6 +606,8 @@ export function MobileDataEntry() {
         return { title: 'Add Customer Order', icon: FileText };
       case 'quality_issues':
         return { title: 'Report Quality Issue', icon: AlertCircle };
+      case 'communications':
+        return { title: 'Send Response', icon: Mail };
       default:
         return { title: 'Add Data', icon: Plus };
     }

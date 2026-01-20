@@ -90,6 +90,16 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
           addActivity(`${who} flagged ${q.issue_type || 'quality issue'}`);
         }
       )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'communications_log', filter: `session_code=eq.${sessionCode}` },
+        (payload) => {
+          console.log('[ActivityLog] Email sent:', payload.new);
+          const c = payload.new as { comm_type?: string; submitted_by?: string };
+          const who = c.submitted_by || 'Someone';
+          addActivity(`${who} sent ${c.comm_type || 'message'}`);
+        }
+      )
       .subscribe((status) => {
         console.log('[ActivityLog] Subscription status:', status);
         setIsLive(status === 'SUBSCRIBED');
