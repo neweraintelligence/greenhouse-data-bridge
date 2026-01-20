@@ -317,26 +317,27 @@ export const trainingNodeInfo: Record<string, NodeInfo> = {
 // INCIDENTS / MAINTENANCE USE CASE
 // ============================================================================
 export const incidentsNodeInfo: Record<string, NodeInfo> = {
-  paper: {
-    id: 'paper',
-    title: 'INCIDENT PHOTO GALLERY',
-    subtitle: 'What Does the Problem Look Like?',
-    description:
-      'Pre-seeded photos of common CEA issues: powdery mildew, aphid infestations, equipment failures, irrigation leaks, safety hazards. Participant selects a photo to report — simulating finding an issue in the greenhouse.',
-    painPoint: 'Today: someone sees a problem, takes a blurry photo, sends it via text with no context. "What am I looking at? Where is this?"',
-    solution: 'Standardized photo capture with location tagging. AI analyzes the image to classify the issue automatically.',
-    keyInsight: 'The photo becomes the incident record. AI reads the image, not just the person describing it.',
-  },
-
   excel: {
     id: 'excel',
-    title: 'ROUTING CONFIGURATION',
-    subtitle: 'Who Handles What?',
+    title: 'BUSINESS RULES & RACI MATRIX',
+    subtitle: 'Who Gets Notified? Who Owns It?',
     description:
-      'Severity thresholds and team routing rules. Severity 5 (critical) goes to Safety Team immediately. Severity 4 (urgent) routes to Maintenance. Severity 3 or ambiguous cases go to Review Queue. Minor issues just get logged.',
-    painPoint: 'Today: every incident goes to one person who manually decides who should handle it. Bottleneck and inconsistent triage.',
-    solution: 'Rules-based routing. Configure once: "If severity >= 4 AND type = equipment, route to Maintenance Team."',
-    keyInsight: 'You control the rules. Change thresholds anytime. Add new teams. No code changes needed.',
+      'The responsibility matrix for incident handling. Defines incident categories (pest, equipment, safety, contamination), severity levels (1-5), and the RACI for each: Responsible (handles it), Accountable (owns the outcome), Consulted (provides input), Informed (needs to know).',
+    painPoint: 'Today: "Who handles pest issues? Is that maintenance or the grower?" Nobody knows who owns what. Critical issues bounce between people.',
+    solution: 'Clear ownership in a spreadsheet. Severity 5 → Safety Manager (Maria) is Accountable, Safety Team is Responsible. Severity 3 → Shift Lead is Responsible, Ops Manager is Informed.',
+    keyInsight: 'The exception owner (senior manager) gets ALL human-in-the-loop cases. They\'re the backstop when AI is uncertain.',
+    imageOnLeft: true,
+  },
+
+  paper: {
+    id: 'paper',
+    title: 'INCIDENT REPORT FORM',
+    subtitle: 'Submit What You See',
+    description:
+      'Mobile form that captures the incident: Reporter signs in with their name. Selects the zone/section where the issue was found. Adds a description. Time is auto-captured. Then uploads photos from their phone\'s gallery — simulated here with pre-seeded CEA incident images.',
+    painPoint: 'Today: someone texts a photo to their supervisor with "check this out." No location, no time, no context. Who sent this? When? Where exactly?',
+    solution: 'Structured capture: who, what, where, when. Photos attached directly. Everything linked together in one incident record.',
+    keyInsight: 'The photo gallery simulates the iPhone camera roll — participant selects from pre-seeded images showing real CEA issues like powdery mildew, aphids, equipment failures.',
   },
 
   processing: {
@@ -344,21 +345,21 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
     title: 'AI VISION ANALYSIS',
     subtitle: 'Gemini Reads the Photo',
     description:
-      'Google Gemini Vision analyzes the incident photo. It detects: What type of issue is this? (pest, equipment, safety, contamination). How severe is it? (1-5 scale). How confident is the AI? Routes based on severity + confidence.',
-    painPoint: 'Today: someone has to manually look at every photo, classify it, assess severity, and decide routing. Takes time and varies by person.',
-    solution: 'AI does initial triage in seconds. High-confidence cases route automatically. Low-confidence cases go to human review.',
-    keyInsight: 'AI handles 80% of cases instantly. Humans focus on the 20% that actually need judgment.',
+      'Google Gemini Vision analyzes the uploaded photo. Detects: What type of issue? (pest, equipment, safety). How severe? (1-5). Confidence score. Then looks up the Business Rules to determine routing: who is Responsible? Who is Accountable? Who needs to be Informed?',
+    painPoint: 'Today: someone manually reviews every report, classifies it, looks up who handles it, forwards the email. Slow and inconsistent.',
+    solution: 'AI classifies in seconds. Rules determine routing. Emails drafted automatically to the right people per the RACI matrix.',
+    keyInsight: 'AI + Rules = Consistent triage. Same issue always routes to the same team, regardless of who submitted it.',
   },
 
   intake: {
     id: 'intake',
     title: 'INCIDENT QUEUE',
-    subtitle: 'Waiting for AI Analysis',
+    subtitle: 'Reports Coming In',
     description:
-      'Photos arrive here before AI processes them. In production, this happens in seconds. For the demo, you can see the queue filling as participants submit reports.',
-    painPoint: 'Today: incidents come via email, phone calls, text messages, walk-ups. No single place to see them all.',
-    solution: 'Everything funnels to one queue. Consistent capture regardless of how it was reported.',
-    keyInsight: 'Real-time visibility. Watch reports come in during the workshop as people scan QR codes.',
+      'All submitted incident reports flow here. Watch in real-time as workshop participants scan the QR code and submit reports. Each shows: reporter name, location, timestamp, thumbnail of the photo.',
+    painPoint: 'Today: incidents come via email, text, phone calls. No single place to see what\'s been reported.',
+    solution: 'One queue. Everything visible. Nothing lost. Real-time updates as reports come in.',
+    keyInsight: 'During the demo, you\'ll see this queue populate as people submit reports from their phones.',
   },
 
   output: {
@@ -366,34 +367,32 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
     title: 'INCIDENT DASHBOARD',
     subtitle: 'What Got Routed Where?',
     description:
-      'Live view of all incidents after AI processing: which went to Safety Team, which to Maintenance, which are in Review Queue. See AI confidence scores and routing decisions.',
-    painPoint: 'Today: executive asks "How many open incidents do we have?" You have to check multiple systems and compile the answer.',
-    solution: 'One dashboard. See exactly what the AI detected, how confident it was, and where it routed each issue.',
-    keyInsight: 'Transparency in AI decisions. Every routing choice is explainable and auditable.',
+      'Live view after AI processing: which incidents went to Safety Team, which to Maintenance, which are in Review Queue. See the AI\'s classification, confidence score, and who was notified per the RACI matrix.',
+    painPoint: 'Today: "How many open incidents? Who\'s handling the pest issue in Zone 3?" Nobody knows without checking multiple systems.',
+    solution: 'One dashboard. Filter by severity, type, status, assigned team. Click any incident for full details including the AI analysis.',
+    keyInsight: 'Transparency: see exactly why each incident was routed where it was. Every decision is auditable.',
   },
 
-  // Review queue for low-confidence or ambiguous cases
   reviewQueue: {
     id: 'reviewQueue',
     title: 'HUMAN REVIEW QUEUE',
-    subtitle: 'AI Needs a Second Opinion',
+    subtitle: 'Exception Owner\'s Inbox',
     description:
-      'Cases where AI confidence is below 75%, or the classification is ambiguous. Human reviewer sees the photo, AI suggestion, and confidence score. They can confirm, override, or escalate.',
-    painPoint: 'Today: either trust AI blindly (risky) or review everything manually (defeats the purpose).',
-    solution: 'AI handles clear cases. Humans review edge cases. Best of both worlds.',
-    keyInsight: 'The AI learns from corrections. Over time, fewer cases need human review.',
+      'Cases where AI confidence is below 75%, or classification is ambiguous. Goes to the senior manager designated as Exception Owner in the RACI. They see: photo, AI\'s best guess, confidence %, and can confirm, override, or escalate.',
+    painPoint: 'Today: ambiguous cases get stuck. "Is this powdery mildew or just dust?" Someone has to make a call but nobody wants to.',
+    solution: 'Clear ownership of exceptions. Senior manager is Accountable for all edge cases. They decide, the decision is logged.',
+    keyInsight: 'AI handles the clear 80%. The exception owner handles the ambiguous 20%. No cases fall through cracks.',
   },
 
-  // Escalation paths
   escalation: {
     id: 'escalation',
-    title: 'ESCALATION PATHS',
-    subtitle: 'Critical Issues Get Immediate Attention',
+    title: 'ESCALATION EMAILS',
+    subtitle: 'Notifications Per RACI',
     description:
-      'Severity 5 issues bypass normal routing. Safety Team gets notified immediately. Email drafted automatically with photo, location, and AI analysis. No waiting for someone to check a queue.',
-    painPoint: 'Today: critical incident sits in someone\'s inbox until they happen to check it. Hours of delay on urgent issues.',
-    solution: 'Instant notification for critical issues. Email + push notification + escalation log.',
-    keyInsight: 'SLA timers start the moment the incident is reported, not when someone notices it.',
+      'Auto-drafted emails based on the Business Rules. Severity 5: Safety Manager gets immediate notification with photo + location + AI analysis. Maintenance Lead CC\'d. Operations Director informed. All defined in the RACI spreadsheet.',
+    painPoint: 'Today: critical incident sits in someone\'s inbox. "Did Maria see the pest alert?" Nobody knows until they call her.',
+    solution: 'Automatic notifications. The RACI defines who gets emailed at each severity level. No manual forwarding needed.',
+    keyInsight: 'Mock emails in the demo: safety@bigmarblefarms.com, maintenance.lead@bigmarblefarms.com. See exactly who would be notified.',
   },
 };
 

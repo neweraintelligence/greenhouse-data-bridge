@@ -75,8 +75,8 @@ registerUseCase({
   icon: 'AlertTriangle',
   color: 'orange',
   sources: [
-    { type: 'paper', name: 'Incident Photo Gallery', icon: 'Camera', description: 'Pre-seeded CEA incident photos - participant selects one to report' },
-    { type: 'excel', name: 'Routing Configuration', icon: 'Settings', description: 'Severity thresholds and team routing rules' },
+    { type: 'excel', name: 'Business Rules & RACI', icon: 'Users', description: 'Incident categories, severity definitions, and responsibility matrix (who gets notified, who owns exceptions)' },
+    { type: 'paper', name: 'Incident Report Form', icon: 'ClipboardList', description: 'Mobile form: reporter signs in, selects location, uploads photos from gallery' },
   ],
   outputTemplates: [
     { id: 'incident-summary', name: 'Incident Summary', fileType: 'pdf', description: 'Overview of reported incidents' },
