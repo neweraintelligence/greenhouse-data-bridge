@@ -119,6 +119,8 @@ interface InfoOverlayProps {
   // Node type and label for preview card styling
   nodeType?: string;
   nodeLabel?: string;
+  // Trigger full modal (same as flowchart mode)
+  onMaximize?: () => void;
 }
 
 function InfoOverlayComponent({
@@ -134,6 +136,7 @@ function InfoOverlayComponent({
   imageUrl,
   nodeType,
   nodeLabel,
+  onMaximize,
 }: InfoOverlayProps) {
   console.log('InfoOverlay props:', {
     hasInfo: !!info,
@@ -586,12 +589,18 @@ function InfoOverlayComponent({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setPreviewExpanded(!previewExpanded);
+                    if (onMaximize) {
+                      // Trigger full modal (same as flowchart mode)
+                      onMaximize();
+                    } else {
+                      // Fallback: just expand card
+                      setPreviewExpanded(!previewExpanded);
+                    }
                   }}
                   className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center"
-                  title={previewExpanded ? 'Minimize' : 'Maximize'}
+                  title={onMaximize ? 'Open Full View' : (previewExpanded ? 'Minimize' : 'Maximize')}
                 >
-                  {previewExpanded ? (
+                  {previewExpanded && !onMaximize ? (
                     <Minimize2 className="w-3.5 h-3.5 text-white" />
                   ) : (
                     <Maximize2 className="w-3.5 h-3.5 text-white" />

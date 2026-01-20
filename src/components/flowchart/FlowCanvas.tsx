@@ -1773,6 +1773,15 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         imageUrl={infoNodeType && selectedUseCase && infoNodeLabel ? getNodeImage(selectedUseCase.id, infoNodeType, infoNodeLabel) : null}
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
+        onMaximize={() => {
+          // Trigger full modal (same as clicking node in flowchart mode)
+          if (infoNodeType && infoNodeLabel) {
+            setExpandedNode({
+              type: infoNodeType as 'outlook' | 'onedrive' | 'excel' | 'paper',
+              label: infoNodeLabel,
+            });
+          }
+        }}
       />
 
       {/* Discrepancy List Modal */}
