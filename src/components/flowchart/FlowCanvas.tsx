@@ -22,6 +22,7 @@ import { ExpandedNodeModal } from './ExpandedNodeModal';
 import { InfoOverlay, type NodeInfo } from './InfoOverlay';
 import { DiscrepancyListModal } from '../decisions/DiscrepancyListModal';
 import { DiscrepancyDecisionModal } from '../decisions/DiscrepancyDecisionModal';
+import { EmailViewerModal } from '../communications/EmailViewerModal';
 import { OutlookMiniApp } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp } from './nodes/mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp } from './nodes/mini-apps/ExcelMiniApp';
@@ -209,6 +210,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track discrepancy list modal
   const [showDiscrepancyList, setShowDiscrepancyList] = useState(false);
   const [selectedDiscrepancy, setSelectedDiscrepancy] = useState<Discrepancy | null>(null);
+
+  // Track email viewer modal
+  const [selectedEmail, setSelectedEmail] = useState<{id: string; recipient: string; subject: string; body?: string; sent_at: string} | null>(null);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -1009,7 +1013,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         data: {
           label: 'Communications',
           communications: communications,
-          onViewCommunications: () => console.log('View communications'),
+          onViewCommunications: () => {
+            if (communications.length > 0) {
+              setSelectedEmail(communications[0]); // Open first email
+            }
+          },
           onShowInfo: () => handleShowInfo('communications', 'communications', 'Communications', -1, undefined, undefined),
         },
         className: presentationActiveNode === 'communications' ? 'node-presentation-active' : '',
@@ -1284,7 +1292,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         <div className="space-y-2 p-3">
           <p className="text-xs font-semibold text-blue-700 mb-3">Recent Communications ({communications.length})</p>
           {communications.slice(0, 4).map((c) => (
-            <div key={c.id} className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-xs">
+            <div
+              key={c.id}
+              onClick={() => setSelectedEmail(c)}
+              className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-xs cursor-pointer hover:bg-blue-100 transition-colors"
+            >
               <p className="font-semibold text-gray-900">{c.recipient}</p>
               <p className="text-gray-700">{c.subject}</p>
               <p className="text-blue-600 text-[10px]">{c.comm_type.toUpperCase()}</p>
@@ -1516,6 +1528,35 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         <ReportModal
           report={reconciliationReport}
           onClose={() => setShowReportModal(false)}
+        />
+      )}
+
+      {/* Email Viewer Modal */}
+      {selectedEmail && (
+        <EmailViewerModal
+          email={selectedEmail}
+          onClose={() => setSelectedEmail(null)}
+          onSendReply={async (replyBody) => {
+            // Log reply to communications
+            const newComm = {
+              id: `reply-${Date.now()}`,
+              comm_type: 'email',
+              recipient: selectedEmail.recipient,
+              subject: `RE: ${selectedEmail.subject}`,
+              body: replyBody,
+              sent_at: new Date().toISOString(),
+            };
+            setCommunications(prev => [newComm, ...prev]);
+
+            // Save to Supabase
+            await supabase.from('communications_log').insert({
+              session_code: sessionCode,
+              comm_type: 'email',
+              recipient: selectedEmail.recipient,
+              subject: `RE: ${selectedEmail.subject}`,
+              body: replyBody,
+            });
+          }}
         />
       )}
     </div>
