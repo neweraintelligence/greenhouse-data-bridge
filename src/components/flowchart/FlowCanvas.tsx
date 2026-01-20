@@ -1280,6 +1280,61 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       }
     }
 
+    if (infoNodeId === 'processing') {
+      if (processingStatus === 'complete') {
+        return (
+          <div className="space-y-2 p-3">
+            <p className="text-xs font-semibold text-indigo-700 mb-3">Reconciliation Results</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="p-2 rounded-lg bg-green-50 border border-green-200 text-center">
+                <p className="text-xl font-bold text-green-600">{processingStats.processed}</p>
+                <p className="text-[10px] text-gray-600">Processed</p>
+              </div>
+              <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-center">
+                <p className="text-xl font-bold text-amber-600">{processingStats.flagged}</p>
+                <p className="text-[10px] text-gray-600">Flagged</p>
+              </div>
+              <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-center">
+                <p className="text-xl font-bold text-red-600">{processingStats.errors}</p>
+                <p className="text-[10px] text-gray-600">Errors</p>
+              </div>
+            </div>
+            {discrepancies.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-semibold text-gray-700 mb-2">Top Discrepancies:</p>
+                {discrepancies.slice(0, 3).map(d => (
+                  <div key={d.id} className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs mb-1">
+                    <p className="font-semibold text-gray-900">{d.shipment_id}</p>
+                    <p className="text-gray-600">{d.type.replace(/_/g, ' ')}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      } else if (processingStatus === 'processing') {
+        return (
+          <div className="p-4 text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2" />
+            <p className="text-sm text-gray-700">Running reconciliation...</p>
+          </div>
+        );
+      } else {
+        return (
+          <div className="p-4">
+            <p className="text-sm text-gray-700 mb-3">Reconciliation Engine</p>
+            <div className="space-y-2 text-xs text-gray-600">
+              <p>• Compares Expected vs Scanned vs Received</p>
+              <p>• Detects quantity mismatches</p>
+              <p>• Flags SKU discrepancies</p>
+              <p>• Calculates confidence scores</p>
+              <p>• Routes critical issues</p>
+            </div>
+          </div>
+        );
+      }
+    }
+
     if (infoNodeId === 'review-queue') {
       if (discrepancies.length > 0) {
         return (
