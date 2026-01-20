@@ -326,7 +326,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track expanded node for modal view
   const [expandedNode, setExpandedNode] = useState<{
     id: string;
-    type: 'outlook' | 'onedrive' | 'excel' | 'paper';
+    type: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai';
     label: string;
   } | null>(null);
 
