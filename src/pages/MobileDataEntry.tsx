@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
+import { BillingChallenge } from '../components/challenges/BillingChallenge';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -581,6 +582,18 @@ export function MobileDataEntry() {
           </form>
         );
 
+      case 'billing_challenge':
+        return (
+          <BillingChallenge
+            sessionCode={sessionCode!}
+            participantName={participantName}
+            onComplete={(result) => {
+              // Don't show the generic success screen, the challenge has its own
+              console.log('Challenge completed:', result);
+            }}
+          />
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -608,6 +621,8 @@ export function MobileDataEntry() {
         return { title: 'Report Quality Issue', icon: AlertCircle };
       case 'communications':
         return { title: 'Send Response', icon: Mail };
+      case 'billing_challenge':
+        return { title: 'Reconciliation Challenge', icon: Calculator };
       default:
         return { title: 'Add Data', icon: Plus };
     }

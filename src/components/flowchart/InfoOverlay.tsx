@@ -12,6 +12,7 @@ function getSourceTypeFromNode(nodeLabel: string): string {
   if (label.includes('quality')) return 'quality_issues';
   if (label.includes('email') || label.includes('outlook') || label.includes('mail') || label.includes('communication')) return 'communications';
   if (label.includes('scan') || label.includes('barcode')) return 'barcode_scans';
+  if (label.includes('billing') || label.includes('invoice') || label.includes('reconcil') || label.includes('document') || label.includes('discrepan')) return 'billing_challenge';
   // Default fallback
   return 'shipments_expected';
 }
@@ -584,19 +585,57 @@ function InfoOverlayComponent({
             )}
           </div>
 
-          {/* Button overlay at bottom - compact Live Preview */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            {/* Show preview button - compact and centered */}
+          {/* "Step Into" button - centered in image area */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             {!showNodePreview && nodePreviewContent && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNodePreview(true);
                 }}
-                className="px-6 py-2 rounded-xl bg-bmf-blue/90 backdrop-blur-sm border border-white/30 text-white text-sm font-medium hover:bg-bmf-blue transition-all shadow-lg"
+                className="group relative"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
-                Live Preview
+                {/* Glassmorphism container */}
+                <div className="relative px-8 py-6 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/40 shadow-2xl hover:bg-white/30 hover:scale-105 transition-all duration-300 ease-out">
+                  {/* Inner glow effect */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-50" />
+
+                  {/* Content */}
+                  <div className="relative flex flex-col items-center gap-3">
+                    {/* Door icon - stepping into metaphor */}
+                    <div className="relative">
+                      <svg
+                        className="w-12 h-12 text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        {/* Door frame */}
+                        <rect x="6" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                        {/* Door handle */}
+                        <circle cx="15" cy="12" r="0.8" fill="currentColor" />
+                        {/* Door opening line */}
+                        <path d="M12 3 L12 21" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+                        {/* Person stepping in */}
+                        <g transform="translate(9, 10)" className="group-hover:translate-x-1 transition-transform duration-300">
+                          <circle cx="0" cy="-3" r="1.2" fill="currentColor" opacity="0.9" />
+                          <path d="M0,-1.5 L0,2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+                          <path d="M-1.5,0.5 L1.5,0.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+                        </g>
+                      </svg>
+                    </div>
+
+                    {/* Text */}
+                    <span className="text-white text-sm font-medium tracking-wide drop-shadow-md">
+                      Step Inside
+                    </span>
+                  </div>
+                </div>
+
+                {/* Ambient shadow */}
+                <div className="absolute inset-0 rounded-3xl bg-black/20 blur-xl -z-10 group-hover:bg-black/30 transition-all duration-300" />
               </button>
             )}
           </div>
