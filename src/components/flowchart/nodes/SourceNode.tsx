@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Mail, FolderOpen, FileSpreadsheet, FileText, Camera, Check, Loader2, ChevronDown, ChevronUp, Maximize2, Clock, Zap, QrCode, ScanBarcode, Presentation } from 'lucide-react';
+import { Mail, FolderOpen, FileSpreadsheet, FileText, Camera, Check, Loader2, ChevronDown, ChevronUp, Maximize2, Clock, Zap, QrCode, ScanBarcode, Presentation, UserPlus } from 'lucide-react';
 import { OutlookMiniApp, type EmailItem } from './mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp, type FileItem } from './mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp, type SpreadsheetData } from './mini-apps/ExcelMiniApp';
@@ -20,6 +20,8 @@ export interface SourceNodeData {
   onExpand?: () => void;
   onShowInfo?: () => void;
   isFocused?: boolean;
+  // Session code for QR code generation
+  sessionCode?: string;
   // Mini-app data
   emails?: EmailItem[];
   files?: FileItem[];
@@ -76,6 +78,7 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
   // Display mode: collapsed (just header), preview (inline content), maximized (modal - handled by parent)
   // Always start collapsed - user clicks to expand
   const [displayMode, setDisplayMode] = useState<DisplayMode>('collapsed');
+  const [showJoinQR, setShowJoinQR] = useState(false);
 
   const Icon = iconMap[data.type] || FileText;
   const colors = headerColors[data.type] || headerColors.paper;
@@ -155,6 +158,34 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
                 <Presentation className="w-3.5 h-3.5 text-white" />
               </button>
             )}
+            {/* Join/Participate button - QR code on hover */}
+            {data.sessionCode && (
+              <div className="relative">
+                <button
+                  onMouseEnter={() => setShowJoinQR(true)}
+                  onMouseLeave={() => setShowJoinQR(false)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center relative"
+                  title="Scan to participate"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-white" />
+                  <UserPlus className="w-2 h-2 text-white absolute -top-0.5 -right-0.5" />
+                </button>
+                {/* QR Code Tooltip */}
+                {showJoinQR && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 p-3 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 animate-in fade-in duration-200">
+                    <QRCodeSVG
+                      value={`${window.location.origin}/upload/${data.sessionCode}/${encodeURIComponent(data.label)}`}
+                      size={140}
+                      level="M"
+                      includeMargin
+                      className="rounded"
+                    />
+                    <p className="text-[10px] text-gray-600 text-center mt-2">Scan to join</p>
+                  </div>
+                )}
+              </div>
+            )}
             {/* Fetch/Download button for digital sources - circular */}
             {data.status === 'pending' && data.type !== 'paper' && (
               <button
@@ -164,15 +195,6 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
               >
                 <Zap className="w-3.5 h-3.5 text-white" />
               </button>
-            )}
-            {/* QR indicator for paper - circular */}
-            {data.status === 'pending' && data.type === 'paper' && (
-              <div
-                className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
-                title="Scan via QR code"
-              >
-                <QrCode className="w-3.5 h-3.5 text-white" />
-              </div>
             )}
             <ChevronDown className="w-4 h-4 text-white/60" />
           </div>

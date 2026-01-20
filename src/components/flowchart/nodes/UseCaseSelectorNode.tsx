@@ -1,12 +1,15 @@
 import { memo, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { ChevronDown, Truck, GraduationCap, AlertTriangle, Check } from 'lucide-react';
+import { ChevronDown, Truck, GraduationCap, AlertTriangle, Check, Receipt, ClipboardList, ShieldCheck } from 'lucide-react';
 import type { UseCase } from '../../../lib/useCases/types';
 
 const useCaseIcons: Record<string, typeof Truck> = {
   shipping: Truck,
   training: GraduationCap,
   incidents: AlertTriangle,
+  expenses: Receipt,
+  'customer-orders': ClipboardList,
+  quality: ShieldCheck,
 };
 
 export interface UseCaseSelectorNodeData {

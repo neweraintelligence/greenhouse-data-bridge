@@ -93,3 +93,82 @@ registerUseCase({
     { id: 'hot-zones', name: 'Hot Zones', description: 'Locations with most incidents' },
   ],
 });
+
+// ============================================
+// NEW USE CASES FOR WORKSHOP DEMO
+// ============================================
+
+registerUseCase({
+  id: 'expenses',
+  name: 'Expense Report Processing',
+  description: 'Validate employee expense submissions against policies, OCR receipts, and prepare reimbursements',
+  icon: 'Receipt',
+  color: 'purple',
+  sources: [
+    { type: 'outlook', name: 'Expense Submission Email', icon: 'Mail', description: 'Employee expense submission with details' },
+    { type: 'paper', name: 'Receipt Images', icon: 'Camera', description: 'Scanned or photographed receipts' },
+    { type: 'excel', name: 'Expense Tracker', icon: 'Table', description: 'Running expense log/tracker' },
+    { type: 'onedrive', name: 'Expense Policy', icon: 'FileText', description: 'Company expense policy document', optional: true },
+  ],
+  outputTemplates: [
+    { id: 'expense-summary', name: 'Expense Summary Report', fileType: 'pdf', description: 'Summary of processed expenses with approvals' },
+    { id: 'policy-violations', name: 'Policy Violations', fileType: 'pdf', description: 'Expenses flagged for policy violations' },
+    { id: 'reimbursement-export', name: 'Reimbursement Export', fileType: 'csv', description: 'Approved expenses ready for payroll' },
+  ],
+  dashboardQueries: [
+    { id: 'pending-approval', name: 'Pending Approval', description: 'Expenses awaiting manager review' },
+    { id: 'policy-flags', name: 'Policy Violations', description: 'Submissions flagged for policy issues' },
+    { id: 'spending-by-category', name: 'Spending by Category', description: 'Expense breakdown by category' },
+    { id: 'monthly-trend', name: 'Monthly Spending Trend', description: 'Expense trends over time' },
+  ],
+});
+
+registerUseCase({
+  id: 'customer-orders',
+  name: 'Customer PO Intake',
+  description: 'Process inbound customer purchase orders, validate pricing, and check inventory availability',
+  icon: 'ClipboardList',
+  color: 'teal',
+  sources: [
+    { type: 'outlook', name: 'Customer PO Email', icon: 'Mail', description: 'Email with customer purchase order' },
+    { type: 'paper', name: 'PO Document Scan', icon: 'FileSignature', description: 'Scanned or faxed PO document' },
+    { type: 'excel', name: 'Price List', icon: 'DollarSign', description: 'Current product price list' },
+    { type: 'excel', name: 'Inventory Status', icon: 'Package', description: 'Current inventory levels', optional: true },
+  ],
+  outputTemplates: [
+    { id: 'order-confirmation', name: 'Order Confirmation', fileType: 'pdf', description: 'Confirmation sent back to customer' },
+    { id: 'order-issues', name: 'Order Issues Report', fileType: 'pdf', description: 'Pricing or availability issues to resolve' },
+    { id: 'order-export', name: 'Order Export', fileType: 'csv', description: 'Orders ready for fulfillment system' },
+  ],
+  dashboardQueries: [
+    { id: 'pending-orders', name: 'Pending Orders', description: 'Orders awaiting processing' },
+    { id: 'pricing-discrepancies', name: 'Pricing Issues', description: 'Orders with price mismatches' },
+    { id: 'stock-availability', name: 'Stock Availability', description: 'Orders affected by low inventory' },
+    { id: 'orders-by-customer', name: 'Orders by Customer', description: 'Order volume by customer' },
+  ],
+});
+
+registerUseCase({
+  id: 'quality',
+  name: 'Quality & Compliance Documents',
+  description: 'Process COAs, lab reports, and compliance documents against CanadaGAP standards',
+  icon: 'ShieldCheck',
+  color: 'emerald',
+  sources: [
+    { type: 'outlook', name: 'COA/Lab Report Email', icon: 'Mail', description: 'Certificate of Analysis from supplier or lab' },
+    { type: 'paper', name: 'COA Document Scan', icon: 'FileSignature', description: 'Scanned COA or quality certificate' },
+    { type: 'excel', name: 'Receiving Log', icon: 'ClipboardCheck', description: 'Incoming materials log to match' },
+    { type: 'onedrive', name: 'CanadaGAP Reference', icon: 'BookOpen', description: 'CanadaGAP manual for compliance queries', optional: true },
+  ],
+  outputTemplates: [
+    { id: 'compliance-summary', name: 'Compliance Summary', fileType: 'pdf', description: 'Overview of compliance status for received materials' },
+    { id: 'exception-report', name: 'Exception Report', fileType: 'pdf', description: 'Failed tests or missing documentation' },
+    { id: 'quality-log-export', name: 'Quality Log Export', fileType: 'csv', description: 'Full quality records for audit' },
+  ],
+  dashboardQueries: [
+    { id: 'pending-review', name: 'Pending Review', description: 'COAs awaiting verification' },
+    { id: 'failed-tests', name: 'Failed Tests', description: 'Materials with out-of-spec results' },
+    { id: 'expiring-materials', name: 'Expiring Materials', description: 'Items approaching expiration' },
+    { id: 'supplier-compliance', name: 'Supplier Compliance Score', description: 'Compliance rate by supplier' },
+  ],
+});
