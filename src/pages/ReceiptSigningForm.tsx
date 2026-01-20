@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, Loader2, AlertCircle, User } from 'lucide-react';
+import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export function ReceiptSigningForm() {

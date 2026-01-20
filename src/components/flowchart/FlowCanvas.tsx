@@ -802,7 +802,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         },
         (payload) => {
           console.log('New barcode scan detected:', payload.new);
-          const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_by: string};
+          const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_at: string; scanned_by: string};
           setLiveScans(prev => [scan, ...prev]);
 
           // Show notification

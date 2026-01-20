@@ -65,6 +65,17 @@ Generate a JSON response with:
 Make it sound authentic for a greenhouse/agriculture supply chain context.
 Only return valid JSON, no markdown formatting.`;
 
+  if (!client) {
+    // Return fallback if no client
+    return {
+      from: context.vendor,
+      fromEmail: `shipping@${context.vendor.toLowerCase().replace(/\s+/g, '')}.com`,
+      subject: `Shipment Update - ${context.shipmentId || 'Order Confirmation'}`,
+      body: `Dear Team,\n\nPlease find the attached documentation for your recent shipment.\n\nBest regards,\n${context.vendor} Team`,
+      hasAttachment: true,
+    };
+  }
+
   try {
     const response = await client.models.generateContent({
       model: 'gemini-2.0-flash-exp',
@@ -102,7 +113,6 @@ export async function analyzeDocument(
   if (!client) {
     return {
       documentType,
-      confidence: 50,
       fields: [
         { label: 'Shipment ID', value: 'DEMO-001', confidence: 50 },
         { label: 'Quantity', value: '42', confidence: 50 },
@@ -330,6 +340,14 @@ Return JSON format:
 }
 
 Only return valid JSON, no markdown formatting.`;
+
+  if (!client) {
+    // Return fallback if no client
+    return {
+      subject: `URGENT: ${discrepancy.type.replace(/_/g, ' ')} on ${discrepancy.shipment_id}`,
+      body: `Dear Operations Team,\n\nWe have detected a ${discrepancy.severity} severity discrepancy on shipment ${discrepancy.shipment_id}.\n\n${discrepancy.details}\n\nExpected: ${discrepancy.expected}\nActual: ${discrepancy.actual}\n\nRecommended Action: ${discrepancy.recommendedAction}\n\nPlease address this issue immediately.\n\nBest regards,\nData Reconciliation System`,
+    };
+  }
 
   try {
     const response = await client.models.generateContent({
