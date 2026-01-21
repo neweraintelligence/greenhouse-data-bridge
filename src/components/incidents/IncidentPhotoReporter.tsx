@@ -342,17 +342,23 @@ export function IncidentPhotoReporter({
               <Image className="w-4 h-4" />
               Or select from gallery
             </p>
-            <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">
+            <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden bg-gray-100">
               {photos.map((photo) => (
                 <button
                   key={photo.name}
                   onClick={() => handleSelectPhoto(photo.publicUrl)}
-                  className="relative aspect-square overflow-hidden group"
+                  className="relative aspect-square overflow-hidden group bg-gray-200"
                 >
                   <img
                     src={photo.publicUrl}
                     alt={photo.name}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    onError={(e) => {
+                      // Show placeholder on error
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement?.classList.add('bg-gray-300');
+                    }}
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
                     <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

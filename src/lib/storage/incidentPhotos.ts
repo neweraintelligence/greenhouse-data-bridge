@@ -20,7 +20,8 @@ export async function listIncidentPhotos(): Promise<IncidentPhoto[]> {
 
     if (error) {
       console.error('Error listing incident photos:', error);
-      return [];
+      // Fall back to local mock photos on error
+      return getMockIncidentPhotos();
     }
 
     if (!files || files.length === 0) {
