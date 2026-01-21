@@ -8,6 +8,7 @@ interface ScanEntry {
   time: string;
   type: string;
   sku: string;
+  scannedBy?: string;
 }
 
 interface ShipmentLabel {
@@ -139,6 +140,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
           time: new Date(s.scanned_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
           type: 'Shipment',
           sku: s.sku,
+          scannedBy: s.scanned_by,
         }));
         setScans(newScans);
       }
@@ -164,18 +166,18 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
           onClick={() => setActiveTab('scans')}
           className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'scans'
-              ? 'bg-white shadow-sm text-violet-700'
+              ? 'bg-white shadow-sm text-gray-900'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
           <ScanBarcode className="w-3 h-3" />
-          <span>Scans</span>
+          <span>Scan Log</span>
         </button>
         <button
           onClick={() => setActiveTab('labels')}
           className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'labels'
-              ? 'bg-white shadow-sm text-violet-700'
+              ? 'bg-white shadow-sm text-gray-900'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -190,20 +192,39 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
           <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
             <ScanBarcode className="w-3 h-3" />
             <span>Recent scans</span>
+            {scans.length > 0 && (
+              <span className="ml-auto text-[9px] text-gray-400">{scans.length} entries</span>
+            )}
           </div>
-          <div className="space-y-1 max-h-[300px] overflow-y-auto">
-            {scans.map((entry, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs">
-                <div className="flex flex-col gap-0.5">
+          <div className={`space-y-1.5 overflow-y-auto ${expanded ? 'max-h-[500px]' : 'max-h-[300px]'}`}>
+            {scans.length === 0 ? (
+              <div className="text-center py-6 text-gray-400 text-xs">
+                <ScanBarcode className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>No scans yet</p>
+                <p className="text-[10px]">Scan shipping labels to see them here</p>
+              </div>
+            ) : scans.map((entry, i) => (
+              <div key={i} className={`flex items-start justify-between rounded-lg border border-gray-200 bg-white shadow-sm ${expanded ? 'p-3' : 'p-2'}`}>
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <code className="font-mono text-violet-600 font-semibold text-[11px]">{entry.code}</code>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600">
+                    <code className={`font-mono text-gray-900 font-semibold ${expanded ? 'text-sm' : 'text-[11px]'}`}>{entry.code}</code>
+                    <span className={`px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium ${expanded ? 'text-[10px]' : 'text-[9px]'}`}>
                       {entry.type}
                     </span>
                   </div>
-                  <code className="font-mono text-gray-500 text-[10px]">{entry.sku}</code>
+                  <div className="flex items-center gap-2">
+                    <code className={`font-mono text-gray-500 ${expanded ? 'text-xs' : 'text-[10px]'}`}>{entry.sku}</code>
+                    {entry.scannedBy && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span className={`text-gray-600 ${expanded ? 'text-xs' : 'text-[10px]'}`}>
+                          by <span className="font-medium">{entry.scannedBy}</span>
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <span className="text-gray-400 text-[10px]">{entry.time}</span>
+                <span className={`text-gray-400 whitespace-nowrap ${expanded ? 'text-xs' : 'text-[10px]'}`}>{entry.time}</span>
               </div>
             ))}
           </div>
@@ -212,8 +233,21 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
 
       {/* Labels tab content */}
       {activeTab === 'labels' && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
+        <div className="space-y-2 relative">
+          {/* Box background for expanded labels view */}
+          {expanded && (
+            <div
+              className="absolute inset-0 -m-6 pointer-events-none overflow-hidden rounded-b-2xl"
+              style={{ opacity: 0.7 }}
+            >
+              <img
+                src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className={`flex items-center gap-1.5 text-[10px] text-gray-500 relative z-10 ${expanded ? 'bg-white/90 -mx-2 px-2 py-1 rounded-lg' : ''}`}>
             <Tag className="w-3 h-3" />
             <span>Shipping Labels</span>
             {shipments.length > 0 && (
@@ -224,11 +258,11 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-violet-300 border-t-violet-600 rounded-full animate-spin" />
+            <div className="flex items-center justify-center py-8 relative z-10">
+              <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
             </div>
           ) : shipments.length === 0 ? (
-            <div className="text-center py-6 text-gray-400 text-xs">
+            <div className="text-center py-6 text-gray-400 text-xs relative z-10">
               <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No shipments found</p>
               <p className="text-[10px]">Add expected shipments first</p>
@@ -258,7 +292,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                 : 'border-gray-300';
 
               return (
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center relative z-10">
                   {/* Progress summary bar */}
                   <div className="w-full flex items-center justify-between mb-4 px-2">
                     <div className="flex items-center gap-3">
@@ -408,7 +442,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                   ? 'border-emerald-300 bg-emerald-50'
                   : shipment.isScanned
                   ? 'border-amber-300 bg-amber-50'
-                  : 'border-violet-200 bg-violet-50';
+                  : 'border-gray-200 bg-gray-50';
 
                 return (
                   <div
@@ -459,7 +493,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
           )}
 
           {/* Help text */}
-          <p className={`text-gray-400 text-center pt-1 ${expanded ? 'text-xs' : 'text-[9px]'}`}>
+          <p className={`text-gray-400 text-center pt-1 relative z-10 ${expanded ? 'text-xs bg-white/80 mx-auto px-3 py-1 rounded-lg w-fit' : 'text-[9px]'}`}>
             Scan QR codes with phone to log shipments
           </p>
         </div>

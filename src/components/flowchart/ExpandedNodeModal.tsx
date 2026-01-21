@@ -75,19 +75,6 @@ export function ExpandedNodeModal({
         className="relative bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Full modal background for barcode type */}
-        {nodeType === 'barcode' && (
-          <div
-            className="absolute inset-0 top-[65px] pointer-events-none overflow-hidden"
-            style={{ opacity: 0.6 }}
-          >
-            <img
-              src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-3">
