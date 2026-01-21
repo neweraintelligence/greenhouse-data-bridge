@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database } from 'lucide-react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database, ScanBarcode } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
 import { IncidentReviewQueueMobile } from '../components/incidents/IncidentReviewQueueMobile';
@@ -14,6 +14,7 @@ type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'inci
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const sourceType = searchParams.get('source') as SourceType;
   const nodeName = searchParams.get('node') || 'Unknown Node';
 
@@ -630,6 +631,25 @@ export function MobileDataEntry() {
           />
         );
 
+      case 'barcode_scans':
+        // Set identity for MobileScanner and redirect
+        sessionStorage.setItem('user_identity', JSON.stringify({
+          name: participantName,
+          role: 'Dock Worker'
+        }));
+        // Navigate to the barcode scanner page
+        setTimeout(() => {
+          navigate(`/scan/${sessionCode}`);
+        }, 100);
+        return (
+          <div className="text-center py-8">
+            <ScanBarcode className="w-12 h-12 text-bmf-blue mx-auto mb-3 animate-pulse" />
+            <p className="text-gray-600">
+              Opening barcode scanner...
+            </p>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -665,6 +685,8 @@ export function MobileDataEntry() {
         return { title: 'Triage Incidents', icon: AlertTriangle };
       case 'reconciliation_quiz':
         return { title: 'Data Accuracy Quiz', icon: Database };
+      case 'barcode_scans':
+        return { title: 'Scan Barcodes', icon: ScanBarcode };
       default:
         return { title: 'Add Data', icon: Plus };
     }
