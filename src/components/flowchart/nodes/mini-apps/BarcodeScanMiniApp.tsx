@@ -258,9 +258,21 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                 : 'border-gray-300';
 
               return (
-                <div className="flex flex-col items-center">
+                <div className="relative flex flex-col items-center min-h-[400px]">
+                  {/* Full-size shipping box background */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
+                    style={{ opacity: 0.4 }}
+                  >
+                    <img
+                      src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
+                      alt=""
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
                   {/* Progress summary bar */}
-                  <div className="w-full flex items-center justify-between mb-4 px-2">
+                  <div className="relative w-full flex items-center justify-between mb-4 px-2 z-10">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
                         <CheckCheck className="w-4 h-4" />
@@ -277,22 +289,8 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                     </span>
                   </div>
 
-                  {/* Carousel with box background */}
-                  <div className="relative">
-                    {/* Faded shipping box background */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                      style={{ opacity: 0.15 }}
-                    >
-                      <img
-                        src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
-                        alt=""
-                        className="w-[500px] h-auto object-contain"
-                      />
-                    </div>
-
-                    {/* Carousel with navigation */}
-                    <div className="relative flex items-center gap-4 py-2">
+                  {/* Carousel with navigation */}
+                  <div className="relative flex items-center gap-4 py-2 z-10">
                       {/* Left arrow */}
                       <button
                         onClick={(e) => {
@@ -382,10 +380,9 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                         <ChevronRight className="w-6 h-6" />
                       </button>
                     </div>
-                  </div>
 
                   {/* Dot indicators */}
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="relative flex items-center gap-2 mt-2 z-10">
                     {shipments.map((s, i) => (
                       <button
                         key={s.shipment_id}
