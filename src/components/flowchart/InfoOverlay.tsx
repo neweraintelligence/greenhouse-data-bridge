@@ -291,9 +291,31 @@ function InfoOverlayComponent({
   // Also check nodeType directly for robustness
   const isReconciliationSlide = nodeType === 'processing' || (nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'reconciliation_quiz');
 
+  // Check if this is a COMPETITION slide (billing challenge or reconciliation quiz)
+  // These get a trophy icon instead of the regular join button
+  const isCompetitionSlide = isBillingSlide || isReconciliationSlide;
+
   // Check if this is an informational slide that needs no participant action
-  // For these slides, we hide the Join button and QR code
-  const isInformationalSlide = nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'incident_info';
+  // For these slides, we hide the Join button and QR code entirely
+  const sourceType = nodeLabel ? getSourceTypeFromNode(nodeLabel, useCase) : '';
+  const isInformationalSlide = (() => {
+    // Incident use case informational slides
+    if (sourceType === 'incident_info') return true;
+
+    // Shipping use case informational slides (no participation needed)
+    // Bill of Lading Email (communications), ETL, Intake, Escalation, Communications, Reports
+    if (sourceType === 'communications') return true; // Bill of Lading Email
+    if (sourceType === 'reconciliation_report') return true; // Reports/Output
+
+    // Pipeline nodes that are display-only
+    if (nodeType === 'etl') return true;
+    if (nodeType === 'intake') return true;
+    if (nodeType === 'escalation') return true;
+    if (nodeType === 'communications') return true;
+    if (nodeType === 'output') return true;
+
+    return false;
+  })();
 
 
   useEffect(() => {
@@ -487,8 +509,42 @@ function InfoOverlayComponent({
             </button>
           )}
 
-          {/* Join button - requires sessionCode for QR code, hidden for informational slides */}
-          {sessionCode && !isInformationalSlide && (
+          {/* Competition button - trophy icon with amber color for billing/reconciliation challenges */}
+          {sessionCode && !isInformationalSlide && isCompetitionSlide && (
+            <div
+              onMouseEnter={() => setShowJoinQR(true)}
+              onMouseLeave={() => setShowJoinQR(false)}
+            >
+              <button
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium shadow-lg transition-all"
+              >
+                <Trophy className="w-4 h-4" />
+                <span className="text-sm">Compete</span>
+              </button>
+
+              {/* QR Code Tooltip */}
+              {showJoinQR && (
+                <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+                  <div className="flex flex-col items-center gap-2">
+                    <QRCodeSVG
+                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
+                      size={180}
+                      level="M"
+                      includeMargin
+                      className="rounded-lg"
+                    />
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-gray-900">Scan to Compete</p>
+                      <p className="text-xs text-gray-500 mt-1">Race against AI!</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Join button - regular participation for workflow slides */}
+          {sessionCode && !isInformationalSlide && !isCompetitionSlide && (
             <div
               onMouseEnter={() => setShowJoinQR(true)}
               onMouseLeave={() => setShowJoinQR(false)}
@@ -505,7 +561,7 @@ function InfoOverlayComponent({
                 <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
-                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel, useCase)}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
+                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
                       size={180}
                       level="M"
                       includeMargin
