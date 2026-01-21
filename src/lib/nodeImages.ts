@@ -35,6 +35,7 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
     reviewQueue: '/demo_pack/use_case_images/39_incident_review_queue_realistic.png',
     escalation: '/demo_pack/use_case_images/40_incident_escalation_emails_realistic.png',
     etl: '/demo_pack/use_case_images/41_incident_data_normalization_realistic.png',
+    communications: '/demo_pack/use_case_images/42_incident_closing_loop_realistic.png',
   },
   // Customer Orders - reuse shipping images for similar workflows
   'customer-orders': {
