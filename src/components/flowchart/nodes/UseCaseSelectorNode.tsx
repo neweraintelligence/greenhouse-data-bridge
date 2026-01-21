@@ -1,14 +1,11 @@
 import { memo, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { ChevronDown, Truck, GraduationCap, AlertTriangle, Check, Receipt, ClipboardList, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Truck, AlertTriangle, Check, ShieldCheck } from 'lucide-react';
 import type { UseCase } from '../../../lib/useCases/types';
 
 const useCaseIcons: Record<string, typeof Truck> = {
   shipping: Truck,
-  training: GraduationCap,
   incidents: AlertTriangle,
-  expenses: Receipt,
-  'customer-orders': ClipboardList,
   quality: ShieldCheck,
 };
 
@@ -39,7 +36,14 @@ function UseCaseSelectorNodeComponent({ data }: UseCaseSelectorNodeProps) {
         className="!bg-white !border-2 !border-bmf-blue !w-3 !h-3"
       />
 
-      {/* Header - always visible */}
+      {/* Section Header */}
+      <div className="mb-2 px-1">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Use Cases
+        </h3>
+      </div>
+
+      {/* Selector - always visible */}
       <div
         className={`
           px-4 py-3 rounded-xl cursor-pointer transition-all
