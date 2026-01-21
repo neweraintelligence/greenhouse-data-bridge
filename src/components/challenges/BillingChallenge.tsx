@@ -164,6 +164,12 @@ function getSkuColor(sku: string, isTarget: boolean): string {
   return colors[hash % colors.length];
 }
 
+interface ChallengeSession {
+  id: string;
+  status: 'lobby' | 'active' | 'finished';
+  started_at: string | null;
+}
+
 export function BillingChallenge({ sessionCode, participantName, onComplete }: BillingChallengeProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,16 +184,106 @@ export function BillingChallenge({ sessionCode, participantName, onComplete }: B
   const [elapsedTime, setElapsedTime] = useState(0);
   const [challenge, setChallenge] = useState<ChallengeData | null>(null);
 
+  // Lobby system state
+  const [lobbyStatus, setLobbyStatus] = useState<'loading' | 'lobby' | 'active' | 'finished'>('loading');
+  const [participantCount, setParticipantCount] = useState(0);
+  const [challengeStartedAt, setChallengeStartedAt] = useState<Date | null>(null);
+
   const startTimeRef = useRef<number>(Date.now());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate challenge on mount
+  // Check/create challenge session and subscribe to updates
+  useEffect(() => {
+    if (!sessionCode) return;
+
+    const challengeType = 'billing';
+
+    const initChallengeSession = async () => {
+      // Try to get existing challenge session
+      const { data: existing } = await supabase
+        .from('challenge_sessions')
+        .select('*')
+        .eq('session_code', sessionCode)
+        .eq('challenge_type', challengeType)
+        .single();
+
+      if (existing) {
+        setLobbyStatus(existing.status as 'lobby' | 'active' | 'finished');
+        if (existing.started_at) {
+          setChallengeStartedAt(new Date(existing.started_at));
+        }
+      } else {
+        // Create new challenge session in lobby state
+        await supabase.from('challenge_sessions').insert({
+          session_code: sessionCode,
+          challenge_type: challengeType,
+          status: 'lobby',
+        });
+        setLobbyStatus('lobby');
+      }
+
+      // Get participant count
+      const { count } = await supabase
+        .from('billing_challenge_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_code', sessionCode);
+      setParticipantCount(count || 0);
+    };
+
+    initChallengeSession();
+
+    // Subscribe to challenge session changes
+    const channel = supabase
+      .channel(`challenge-session-${sessionCode}-billing`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'challenge_sessions',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const session = payload.new as ChallengeSession;
+          if (session.status) {
+            setLobbyStatus(session.status);
+            if (session.started_at) {
+              setChallengeStartedAt(new Date(session.started_at));
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'billing_challenge_responses',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        () => {
+          setParticipantCount(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [sessionCode]);
+
+  // Generate challenge on mount (but don't start timer until active)
   useEffect(() => {
     const newChallenge = generateChallenge();
     setChallenge(newChallenge);
+  }, []);
 
-    // Start timer
-    startTimeRef.current = Date.now();
+  // Start timer when challenge becomes active
+  useEffect(() => {
+    if (lobbyStatus !== 'active' || !challengeStartedAt) return;
+
+    // Start timer from the official start time
+    startTimeRef.current = challengeStartedAt.getTime();
     timerRef.current = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 100) / 10);
     }, 100);
@@ -195,7 +291,7 @@ export function BillingChallenge({ sessionCode, participantName, onComplete }: B
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [lobbyStatus, challengeStartedAt]);
 
   const handleSubmit = async () => {
     if (!selectedAnswer || !challenge) return;
@@ -270,10 +366,75 @@ export function BillingChallenge({ sessionCode, participantName, onComplete }: B
     }
   };
 
-  if (!challenge) {
+  // Loading state
+  if (!challenge || lobbyStatus === 'loading') {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 text-bmf-blue animate-spin" />
+      </div>
+    );
+  }
+
+  // Waiting room / Lobby state
+  if (lobbyStatus === 'lobby') {
+    return (
+      <div className="space-y-4">
+        {/* Locked challenge preview */}
+        <div className="relative">
+          {/* Blurred background of actual challenge */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl" />
+          <div className="relative p-6 rounded-xl border-2 border-dashed border-gray-300 bg-white/80 backdrop-blur-sm">
+            {/* Lock icon */}
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center mb-3">
+                <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">Challenge Locked</h3>
+              <p className="text-sm text-gray-500 mt-1">Waiting for host to start...</p>
+            </div>
+
+            {/* Blurred preview of what's coming */}
+            <div className="relative overflow-hidden rounded-lg">
+              <div className="blur-md pointer-events-none select-none opacity-50">
+                <div className="bg-blue-600 text-white rounded-lg p-3 mb-3">
+                  <p className="text-xs">Purchase Order</p>
+                  <p className="text-2xl font-bold">??? units</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[1,2,3,4,5,6].map(i => (
+                    <div key={i} className="h-12 bg-gray-200 rounded-lg" />
+                  ))}
+                </div>
+              </div>
+              {/* Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+                <p className="text-sm font-medium text-gray-600 px-4 py-2 bg-white rounded-full shadow">
+                  🔒 Hidden until start
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Participant status */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-amber-800">Participants Ready</span>
+            <span className="text-2xl font-bold text-amber-600">{participantCount + 1}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs text-gray-600">You're in! ({participantName})</span>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="text-center text-sm text-gray-500">
+          <p>The challenge will begin when the host clicks <strong>Start</strong>.</p>
+          <p className="mt-1">Everyone's timer starts at the same moment.</p>
+        </div>
       </div>
     );
   }

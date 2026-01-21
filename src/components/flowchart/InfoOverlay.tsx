@@ -1,8 +1,9 @@
-import { memo, useEffect, useState, useRef } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, Database } from 'lucide-react';
+import { memo, useEffect, useState, useRef, useCallback } from 'react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, Database, Play, Users, ArrowRight, MessageSquareMore } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
 import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
+import { supabase } from '../../lib/supabase';
 
 // Helper function to map node labels to Supabase source table names
 // Uses both node label AND use case context to determine correct routing
@@ -239,6 +240,10 @@ interface InfoOverlayProps {
   sessionCode?: string;
   // Use case for proper QR code routing
   useCase?: string;
+  // Transition slide props
+  isTransitionSlide?: boolean;
+  nextUseCaseInfo?: { id: string; name: string; description: string } | null;
+  onStartNextUseCase?: () => void;
 }
 
 function InfoOverlayComponent({
@@ -257,6 +262,9 @@ function InfoOverlayComponent({
   onMaximize,
   sessionCode,
   useCase,
+  isTransitionSlide,
+  nextUseCaseInfo,
+  onStartNextUseCase,
 }: InfoOverlayProps) {
 
 
@@ -283,6 +291,11 @@ function InfoOverlayComponent({
 
   // Track reconciliation data view visibility
   const [showReconciliationData, setShowReconciliationData] = useState(false);
+
+  // Challenge lobby state
+  const [challengeStatus, setChallengeStatus] = useState<'lobby' | 'active' | 'finished' | null>(null);
+  const [challengeParticipants, setChallengeParticipants] = useState(0);
+  const [isStartingChallenge, setIsStartingChallenge] = useState(false);
 
   // Check if this is a billing challenge slide
   const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'billing_challenge';
@@ -317,6 +330,138 @@ function InfoOverlayComponent({
     return false;
   })();
 
+  // Determine challenge type based on slide
+  const getChallengeType = useCallback(() => {
+    if (isBillingSlide) return 'billing';
+    if (isReconciliationSlide) return 'reconciliation';
+    return null;
+  }, [isBillingSlide, isReconciliationSlide]);
+
+  // Fetch and subscribe to challenge session for competition slides
+  useEffect(() => {
+    if (!sessionCode || !isCompetitionSlide) return;
+
+    const challengeType = getChallengeType();
+    if (!challengeType) return;
+
+    const fetchChallengeSession = async () => {
+      // Get or create challenge session
+      const { data: existing } = await supabase
+        .from('challenge_sessions')
+        .select('*')
+        .eq('session_code', sessionCode)
+        .eq('challenge_type', challengeType)
+        .maybeSingle();
+
+      if (existing) {
+        setChallengeStatus(existing.status);
+      } else {
+        // Create new session in lobby state
+        await supabase.from('challenge_sessions').insert({
+          session_code: sessionCode,
+          challenge_type: challengeType,
+          status: 'lobby',
+        });
+        setChallengeStatus('lobby');
+      }
+
+      // Get participant count
+      const tableName = challengeType === 'billing' ? 'billing_challenge_responses' : 'billing_challenge_responses';
+      const { count } = await supabase
+        .from(tableName)
+        .select('*', { count: 'exact', head: true })
+        .eq('session_code', sessionCode);
+      setChallengeParticipants(count || 0);
+    };
+
+    fetchChallengeSession();
+
+    // Subscribe to updates
+    const channel = supabase
+      .channel(`presenter-challenge-${sessionCode}-${challengeType}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'challenge_sessions',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const session = payload.new as { status: 'lobby' | 'active' | 'finished' };
+          if (session.status) {
+            setChallengeStatus(session.status);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'billing_challenge_responses',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        () => {
+          setChallengeParticipants(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [sessionCode, isCompetitionSlide, getChallengeType]);
+
+  // Start the challenge (presenter action)
+  const handleStartChallenge = async () => {
+    if (!sessionCode || !isCompetitionSlide) return;
+
+    const challengeType = getChallengeType();
+    if (!challengeType) return;
+
+    setIsStartingChallenge(true);
+
+    try {
+      await supabase
+        .from('challenge_sessions')
+        .update({
+          status: 'active',
+          started_at: new Date().toISOString(),
+        })
+        .eq('session_code', sessionCode)
+        .eq('challenge_type', challengeType);
+
+      setChallengeStatus('active');
+    } catch (error) {
+      console.error('Failed to start challenge:', error);
+    } finally {
+      setIsStartingChallenge(false);
+    }
+  };
+
+  // Reset challenge back to lobby (for re-running)
+  const handleResetChallenge = async () => {
+    if (!sessionCode || !isCompetitionSlide) return;
+
+    const challengeType = getChallengeType();
+    if (!challengeType) return;
+
+    try {
+      await supabase
+        .from('challenge_sessions')
+        .update({
+          status: 'lobby',
+          started_at: null,
+        })
+        .eq('session_code', sessionCode)
+        .eq('challenge_type', challengeType);
+
+      setChallengeStatus('lobby');
+    } catch (error) {
+      console.error('Failed to reset challenge:', error);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -514,8 +659,10 @@ function InfoOverlayComponent({
             <div
               onMouseEnter={() => setShowJoinQR(true)}
               onMouseLeave={() => setShowJoinQR(false)}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
+                onClick={(e) => e.stopPropagation()}
                 className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 hover:from-amber-600 hover:via-yellow-500 hover:to-orange-600 text-white font-medium shadow-lg transition-all overflow-hidden"
               >
                 {/* Metallic shimmer overlay */}
@@ -526,7 +673,7 @@ function InfoOverlayComponent({
                   }}
                 />
                 <Trophy className="w-4 h-4 relative z-10 drop-shadow-sm" />
-                <span className="text-sm relative z-10 drop-shadow-sm">Compete</span>
+                <span className="text-sm relative z-10 drop-shadow-sm">Challenge</span>
               </button>
               <style>{`
                 @keyframes shimmer {
@@ -535,19 +682,61 @@ function InfoOverlayComponent({
                 }
               `}</style>
 
-              {/* QR Code Tooltip */}
+              {/* QR Code Tooltip with Start Button */}
               {showJoinQR && (
-                <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
-                  <div className="flex flex-col items-center gap-2">
+                <div
+                  className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-col items-center gap-3">
                     <QRCodeSVG
                       value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
-                      size={180}
+                      size={160}
                       level="M"
                       includeMargin
                       className="rounded-lg"
                     />
+
+                    {/* Participant count */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full">
+                      <Users className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {challengeParticipants} {challengeParticipants === 1 ? 'participant' : 'participants'}
+                      </span>
+                      {challengeStatus === 'lobby' && (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      )}
+                    </div>
+
+                    {/* Start/Status button */}
+                    {challengeStatus === 'lobby' && (
+                      <button
+                        onClick={handleStartChallenge}
+                        disabled={isStartingChallenge || challengeParticipants === 0}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Play className="w-5 h-5" />
+                        <span>Start Challenge</span>
+                      </button>
+                    )}
+
+                    {challengeStatus === 'active' && (
+                      <div className="w-full text-center">
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl">
+                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="font-medium">Challenge Active</span>
+                        </div>
+                        <button
+                          onClick={handleResetChallenge}
+                          className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline"
+                        >
+                          Reset to lobby
+                        </button>
+                      </div>
+                    )}
+
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-gray-900">Scan to Compete</p>
+                      <p className="text-sm font-semibold text-gray-900">Scan to Challenge</p>
                       <p className="text-xs text-gray-500 mt-1">How fast can you spot it?</p>
                     </div>
                   </div>
@@ -561,8 +750,10 @@ function InfoOverlayComponent({
             <div
               onMouseEnter={() => setShowJoinQR(true)}
               onMouseLeave={() => setShowJoinQR(false)}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
               >
                 <UserPlus className="w-4 h-4" />
@@ -632,7 +823,89 @@ function InfoOverlayComponent({
         </button>
       )}
 
-      {/* Two-column layout - conditionally flipped, nearly invisible when peeking */}
+      {/* TRANSITION SLIDE - Special full-screen centered layout */}
+      {isTransitionSlide && (
+        <div
+          className="relative z-10 w-full h-full flex items-center justify-center transition-all duration-700 ease-out"
+          style={{
+            opacity: isPeeking ? 0 : 1,
+            transform: isPeeking ? 'scale(0.95)' : 'scale(1)',
+            pointerEvents: isPeeking ? 'none' : 'auto',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="max-w-3xl text-center px-8">
+            {/* "Up Next" label with animated gradient */}
+            <div className="mb-6">
+              <span
+                className="inline-block px-6 py-2 rounded-full text-sm font-semibold tracking-[0.2em] uppercase bg-gradient-to-r from-bmf-blue/10 to-nei-green/10 text-bmf-blue"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                {info.title}
+              </span>
+            </div>
+
+            {/* Use case name - large and prominent */}
+            <h1
+              className="text-6xl font-bold text-gray-900 tracking-tight mb-8 leading-[1.1]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {info.subtitle}
+            </h1>
+
+            {/* Description */}
+            <p
+              className="text-xl text-gray-600 leading-relaxed mb-12 max-w-2xl mx-auto"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
+            >
+              {info.description}
+            </p>
+
+            {/* Start button or end message */}
+            {onStartNextUseCase && nextUseCaseInfo ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStartNextUseCase();
+                }}
+                className="group inline-flex items-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                <Play className="w-7 h-7 group-hover:scale-110 transition-transform" />
+                <span>Start Demo</span>
+                <ArrowRight className="w-6 h-6 opacity-70 group-hover:translate-x-2 transition-transform" />
+              </button>
+            ) : (
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-4 px-8 py-5 rounded-2xl bg-gray-100 text-gray-600">
+                  <MessageSquareMore className="w-7 h-7" />
+                  <span className="font-semibold text-xl" style={{ fontFamily: 'var(--font-display)' }}>
+                    Ready for Questions
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
+                  Press Escape or click outside to close
+                </p>
+              </div>
+            )}
+
+            {/* Key insight - bottom quote */}
+            {info.keyInsight && (
+              <div className="mt-16 pt-8 border-t border-gray-200">
+                <p
+                  className="text-base text-gray-500 italic max-w-xl mx-auto"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
+                >
+                  "{info.keyInsight}"
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* REGULAR SLIDES - Two-column layout - conditionally flipped, nearly invisible when peeking */}
+      {!isTransitionSlide && (
       <div
         className={`relative z-10 w-full h-full flex transition-all duration-700 ease-out ${
           info.imageOnLeft ? 'flex-row-reverse' : ''
@@ -846,6 +1119,7 @@ function InfoOverlayComponent({
           </div>
         </div>
       </div>
+      )}
 
       {/* Leaderboard panel - slides in from right when shown */}
       {showLeaderboard && isBillingSlide && sessionCode && (

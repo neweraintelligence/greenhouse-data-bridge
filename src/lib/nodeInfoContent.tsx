@@ -421,6 +421,89 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 };
 
 // ============================================================================
+// USE CASE TRANSITION SLIDES ("Up Next")
+// ============================================================================
+
+// Define the presentation order of use cases
+export const useCasePresentationOrder = ['shipping', 'incidents', 'quality'];
+
+// Use case details mapping
+const useCaseDetails: Record<string, { name: string; description: string }> = {
+  shipping: { name: 'Shipping & Receiving', description: 'Reconcile shipments, match Bills of Lading, invoices, and delivery receipts' },
+  incidents: { name: 'Incident / Maintenance Intake', description: 'AI-powered incident detection with severity-based routing' },
+  quality: { name: 'Quality & Compliance', description: 'Process COAs, lab reports, and compliance documents against standards' },
+};
+
+// Get the first use case (for theory → first use case transition)
+export function getFirstUseCase(): { id: string; name: string; description: string } {
+  const firstId = useCasePresentationOrder[0];
+  return { id: firstId, ...useCaseDetails[firstId] };
+}
+
+// Get the next use case in the presentation order
+export function getNextUseCase(currentUseCaseId: string): { id: string; name: string; description: string } | null {
+  const currentIndex = useCasePresentationOrder.indexOf(currentUseCaseId);
+  if (currentIndex === -1 || currentIndex >= useCasePresentationOrder.length - 1) {
+    return null; // No next use case
+  }
+
+  const nextId = useCasePresentationOrder[currentIndex + 1];
+  return { id: nextId, ...useCaseDetails[nextId] };
+}
+
+// Transition slide content for each use case
+export const transitionNodeInfo: Record<string, NodeInfo> = {
+  // After Theory, transition to Shipping (first use case)
+  theory: {
+    id: 'upNext',
+    title: 'Up Next',
+    subtitle: 'Shipping & Receiving',
+    imageOnLeft: false,
+    description:
+      'Watch the intelligent pipeline in action — reconciling Bills of Lading, invoices, and delivery receipts in real-time.',
+    painPoint: 'Shipments arrive with multiple documents. BOLs, invoices, packing slips, delivery receipts. Someone has to manually compare them all.',
+    solution: 'AI reads every document, extracts the data, and cross-references automatically. Discrepancies flagged instantly.',
+    keyInsight: 'Let\'s see it work. You\'ll participate in the challenges along the way.',
+  },
+  // After Shipping, transition to Incidents
+  shipping: {
+    id: 'upNext',
+    title: 'Up Next',
+    subtitle: 'Incident / Maintenance Intake',
+    imageOnLeft: false,
+    description:
+      'See how the same intelligent pipeline handles incident reports — from AI-powered photo analysis to severity-based routing and automated work orders.',
+    painPoint: 'Equipment failures, safety hazards, and maintenance requests get lost in email. Response times suffer. Critical issues go unaddressed.',
+    solution: 'Mobile incident reporting with AI analysis. Automatic severity scoring. Instant routing to the right team. No more lost requests.',
+    keyInsight: 'Same data pipeline pattern, different use case. The power is in the architecture.',
+  },
+  // After Incidents, transition to Quality
+  incidents: {
+    id: 'upNext',
+    title: 'Up Next',
+    subtitle: 'Quality & Compliance',
+    imageOnLeft: false,
+    description:
+      'Watch how AI processes Certificates of Analysis and compliance documents, matching them against receiving logs and regulatory requirements.',
+    painPoint: 'COAs arrive as PDFs. Someone manually reads them, checks values against specs, and updates spreadsheets. Audit prep takes days.',
+    solution: 'AI extracts lab values, compares against specifications, flags out-of-spec results. Compliance documentation happens automatically.',
+    keyInsight: 'Document intelligence meets compliance automation. Auditors get answers in seconds.',
+  },
+  // After Quality - end of demo
+  quality: {
+    id: 'upNext',
+    title: 'That\'s the Pipeline',
+    subtitle: 'Questions & Discussion',
+    imageOnLeft: false,
+    description:
+      'You\'ve seen three use cases running through the same intelligent architecture. The pattern scales to any data reconciliation challenge.',
+    painPoint: 'Manual data matching is slow, error-prone, and doesn\'t scale. Every new workflow means more spreadsheets, more email, more delays.',
+    solution: 'One platform, many use cases. Add new data sources, new rules, new outputs — same underlying intelligence.',
+    keyInsight: 'The demo is over, but the conversation continues. What questions can we answer?',
+  },
+};
+
+// ============================================================================
 // HELPER FUNCTION
 // ============================================================================
 export function getNodeInfo(
@@ -428,6 +511,11 @@ export function getNodeInfo(
   nodeType: string,
   sourceName?: string
 ): NodeInfo | null {
+  // Handle transition slides
+  if (nodeType === 'upNext') {
+    return transitionNodeInfo[useCase] || null;
+  }
+
   const contentMap: Record<string, Record<string, NodeInfo>> = {
     shipping: shippingNodeInfo,
     training: trainingNodeInfo,

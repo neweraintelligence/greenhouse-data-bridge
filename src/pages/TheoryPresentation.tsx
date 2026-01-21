@@ -247,9 +247,10 @@ function InteractiveSvgViewer({ src, title }: { src: string; title: string }) {
 interface TheoryPresentationProps {
   embedded?: boolean;
   onClose?: () => void;
+  onProceedToCalibration?: () => void;
 }
 
-export function TheoryPresentation({ embedded: _embedded = false, onClose }: TheoryPresentationProps) {
+export function TheoryPresentation({ embedded: _embedded = false, onClose, onProceedToCalibration }: TheoryPresentationProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTOC, setShowTOC] = useState(false);
@@ -535,21 +536,19 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose }: The
             })}
           </div>
 
-          {/* "Hands-on Use Cases" button - only on last slide */}
+          {/* "Let's Get Started" button - only on last slide */}
           {currentIndex === totalSlides - 1 && (
             <button
-              onClick={handleClose}
-              className="mt-6 px-5 py-2.5 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 group"
+              onClick={onProceedToCalibration || handleClose}
+              className="mt-6 px-6 py-3 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-3 group"
               style={{
                 fontFamily: 'var(--font-display)',
-                backgroundColor: 'var(--color-bmf-blue)',
+                background: 'linear-gradient(135deg, var(--color-bmf-blue), var(--color-nei-green))',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bmf-blue-dark)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bmf-blue)'}
             >
-              <span>Try It Live</span>
+              <span>Let's Get Everyone Connected</span>
               <svg
-                className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform"
+                className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

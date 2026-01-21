@@ -35,7 +35,7 @@ import type { EmailItem } from './nodes/mini-apps/OutlookMiniApp';
 import type { FileItem } from './nodes/mini-apps/OneDriveMiniApp';
 import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';
 import { getAllUseCases } from '../../lib/useCases/registry';
-import { getNodeInfo } from '../../lib/nodeInfoContent';
+import { getNodeInfo, getNextUseCase, getFirstUseCase } from '../../lib/nodeInfoContent';
 import { getNodeImage } from '../../lib/nodeImages';
 import { GlassButton } from '../design-system';
 import { Play, Pause, RotateCcw } from 'lucide-react';
@@ -45,6 +45,7 @@ import { reconcileCustomerOrders } from '../../lib/processing/reconcileCustomerO
 import { supabase } from '../../lib/supabase';
 import { debug } from '../../lib/debug';
 import type { Discrepancy } from '../../lib/processing/types';
+import { generatePDF, generateDiscrepancyCSV, generateFullDataCSV, downloadBlob, type SessionParticipation } from '../../lib/reports/exportUtilities';
 
 // Incident type for database records
 interface Incident {
@@ -68,6 +69,7 @@ import { ToastContainer } from '../Toast';
 import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
 import { ParticipantActivityLog } from './ParticipantActivityLog';
 import { TheoryPresentation } from '../../pages/TheoryPresentation';
+import { CalibrationSlide } from './CalibrationSlide';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -302,6 +304,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Theory mode state
   const [isTheoryMode, setIsTheoryMode] = useState(false);
+
+  // Calibration slide state (between theory and use cases)
+  const [showCalibration, setShowCalibration] = useState(false);
 
   // Track focused node for focus mode
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
@@ -708,6 +713,50 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [sessionCode]);
 
+  // Handle transition to next use case (from "Up Next" slide)
+  const handleTransitionToNextUseCase = useCallback(() => {
+    if (!selectedUseCase) return;
+
+    const nextUseCase = getNextUseCase(selectedUseCase.id);
+    if (!nextUseCase) {
+      // No next use case - just close the overlay
+      setInfoOverlayContent(null);
+      setInfoNodeId(null);
+      setInfoNodeType(null);
+      setInfoNodeLabel(null);
+      return;
+    }
+
+    // Find the full use case object
+    const useCaseObj = useCases.find(uc => uc.id === nextUseCase.id);
+    if (useCaseObj) {
+      // Close current overlay
+      setInfoOverlayContent(null);
+      setInfoNodeId(null);
+      setInfoNodeType(null);
+      setInfoNodeLabel(null);
+
+      // Select the next use case
+      handleUseCaseSelect(useCaseObj);
+
+      // After a short delay, start presentation mode on the first source
+      setTimeout(() => {
+        if (useCaseObj.sources.length > 0) {
+          const firstSource = useCaseObj.sources[0];
+          const firstNodeId = `source-${firstSource.name}`;
+          handleShowInfo(
+            firstSource.type,
+            firstNodeId,
+            firstSource.name,
+            0,
+            undefined,
+            undefined
+          );
+        }
+      }, 300);
+    }
+  }, [selectedUseCase, useCases, handleUseCaseSelect, handleShowInfo]);
+
   // Build intake items from sources
   const buildIntakeItems = useCallback((): IntakeItem[] => {
     if (!selectedUseCase) return [];
@@ -947,6 +996,77 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       }
     }, 2500 + Math.random() * 1000);
   }, [selectedUseCase, sessionCode]);
+
+  // Build participation data for PDF credits page
+  const buildParticipationData = useCallback(async (): Promise<SessionParticipation> => {
+    const participation: SessionParticipation = {
+      sessionCode,
+    };
+
+    try {
+      // Fetch challenge winners from billing_challenge_responses
+      const { data: challengeData } = await supabase
+        .from('billing_challenge_responses')
+        .select('participant_name, time_taken_ms, is_correct, challenge_type')
+        .eq('session_code', sessionCode)
+        .eq('is_correct', true)
+        .order('time_taken_ms', { ascending: true })
+        .limit(3);
+
+      if (challengeData && challengeData.length > 0) {
+        participation.challengeWinners = challengeData.map(entry => ({
+          name: entry.participant_name,
+          challenge: entry.challenge_type === 'billing' ? 'Billing Challenge' : 'Reconciliation Quiz',
+          time: entry.time_taken_ms / 1000, // Convert to seconds
+        }));
+      }
+
+      // Fetch scan contributors from barcode_scans
+      const { data: scanData } = await supabase
+        .from('barcode_scans')
+        .select('scanned_by, qty_scanned')
+        .eq('session_code', sessionCode);
+
+      if (scanData && scanData.length > 0) {
+        // Aggregate by scanner name
+        const scannerTotals = scanData.reduce((acc, scan) => {
+          const name = scan.scanned_by || 'Anonymous';
+          acc[name] = (acc[name] || 0) + (scan.qty_scanned || 1);
+          return acc;
+        }, {} as Record<string, number>);
+
+        participation.scanContributors = Object.entries(scannerTotals)
+          .map(([name, units]) => ({ name, unitsScanned: units }))
+          .sort((a, b) => b.unitsScanned - a.unitsScanned)
+          .slice(0, 5); // Top 5 contributors
+      }
+
+      // Calculate value generated based on discrepancies caught
+      if (discrepancies.length > 0) {
+        // Estimate $50 per unit discrepancy caught (reasonable for shipping errors)
+        const totalUnits = discrepancies.reduce((sum, d) => {
+          const match = d.details.match(/(\d+)/);
+          return sum + (match ? parseInt(match[1]) : 10);
+        }, 0);
+        participation.errorsPreventedValue = totalUnits * 50;
+
+        // Estimate 5 minutes saved per discrepancy vs manual checking
+        participation.timeSavedMinutes = discrepancies.length * 5 + 15; // Plus 15 for report generation
+      }
+
+      // Count total participants
+      const uniqueParticipants = new Set([
+        ...(challengeData?.map(c => c.participant_name) || []),
+        ...(scanData?.map(s => s.scanned_by).filter(Boolean) || []),
+      ]);
+      participation.totalParticipants = uniqueParticipants.size;
+
+    } catch (error) {
+      debug.log('Error fetching participation data:', error);
+    }
+
+    return participation;
+  }, [sessionCode, discrepancies]);
 
   // Handle processing - REAL reconciliation
   const handleProcess = useCallback(async () => {
@@ -1356,6 +1476,15 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       { id: 'communications', type: 'communications', label: 'Communications', index: -1 },
       { id: 'output', type: 'output', label: 'Reports', index: -1 }
     );
+
+    // Add "Up Next" transition slide at the end
+    const nextUseCase = getNextUseCase(selectedUseCase.id);
+    navOrder.push({
+      id: 'upNext',
+      type: 'upNext',
+      label: nextUseCase ? `Up Next: ${nextUseCase.name}` : 'Questions & Discussion',
+      index: -1,
+    });
 
     return navOrder;
   }, [selectedUseCase]);
@@ -1933,7 +2062,27 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               setShowIncidentReportModal(true);
             }
           },
-          onDownload: (file: OutputFile) => debug.log('Download:', file),
+          onDownload: async (file: OutputFile) => {
+            debug.log('Download:', file);
+
+            // Generate PDF files with participation data
+            if (file.type === 'pdf' && reconciliationReport) {
+              // Fetch participation data for credits page
+              const participation = await buildParticipationData();
+              const pdfBlob = generatePDF(reconciliationReport, participation);
+              const filename = `${file.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+              downloadBlob(pdfBlob, filename);
+            }
+
+            // Generate CSV files
+            if (file.type === 'csv' && reconciliationReport) {
+              const csvBlob = file.id.includes('discrepancy')
+                ? generateDiscrepancyCSV(reconciliationReport)
+                : generateFullDataCSV(reconciliationReport);
+              const filename = `${file.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+              downloadBlob(csvBlob, filename);
+            }
+          },
         },
         className: outputIsUnfocused ? 'node-unfocused' : outputIsFocused ? 'node-focused' : outputIsPresentationActive ? 'node-presentation-active' : '',
       });
@@ -2544,14 +2693,120 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (infoNodeId === 'output') {
       return (
         <div className="p-4">
-          <p className="text-sm text-gray-700 mb-3">Generated Reports</p>
-          {outputFiles.map(f => (
-            <div key={f.id} className="p-2 rounded-lg bg-green-50 border border-green-200 text-xs mb-2">
-              <p className="font-semibold text-gray-900">{f.name}</p>
-              <p className="text-green-700">{f.type.toUpperCase()}</p>
-              <p className="text-gray-500 text-[10px]">{f.ready ? 'Ready' : 'Processing...'}</p>
+          <p className="text-sm font-semibold text-emerald-700 mb-3">Generated Reports</p>
+          <div className="space-y-2">
+            {outputFiles.map(f => (
+              <div key={f.id} className={`p-3 rounded-xl text-xs transition-all ${
+                f.ready
+                  ? 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 shadow-sm'
+                  : 'bg-gray-100 border border-gray-200 opacity-60'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {/* File type icon */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      f.type === 'pdf' ? 'bg-red-100' : 'bg-green-100'
+                    }`}>
+                      {f.type === 'pdf' ? (
+                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{f.name}</p>
+                      <p className={`text-[10px] ${f.ready ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        {f.type.toUpperCase()} • {f.ready ? 'Ready to download' : 'Processing...'}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Action buttons */}
+                  {f.ready && (
+                    <div className="flex items-center gap-1">
+                      {/* Preview button */}
+                      <button
+                        onClick={() => {
+                          if (f.id === 'reconciliation-report' && reconciliationReport) {
+                            setShowReportModal(true);
+                          } else if (f.id === 'incident-summary' || f.id === 'incident-report') {
+                            // Trigger incident report modal
+                            const now = new Date();
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            const reportData: IncidentReportData = {
+                              reportPeriod: `${weekAgo.toLocaleDateString()} - ${now.toLocaleDateString()}`,
+                              generatedAt: now.toLocaleString(),
+                              incidents: incidents.map(inc => ({
+                                id: inc.id || `inc-${Math.random().toString(36).substr(2, 9)}`,
+                                incident_type: inc.incident_type || 'Unknown',
+                                severity: inc.severity || 3,
+                                location: inc.location || 'Unknown location',
+                                description: inc.description || 'No description provided',
+                                reported_by: inc.reported_by || 'Anonymous',
+                                reported_at: inc.reported_at || new Date().toISOString(),
+                                status: inc.status || 'Open',
+                                photo_url: inc.photo_url,
+                                ai_confidence: inc.ai_confidence,
+                                routed_to: inc.status === 'Escalated' ? 'Safety Team' : undefined,
+                              })),
+                              statistics: {
+                                total: incidents.length,
+                                critical: incidents.filter(i => (i.severity || 0) >= 4).length,
+                                moderate: incidents.filter(i => (i.severity || 0) === 3).length,
+                                minor: incidents.filter(i => (i.severity || 0) <= 2).length,
+                                resolved: incidents.filter(i => i.status === 'Resolved').length,
+                                pending: incidents.filter(i => i.status !== 'Resolved').length,
+                              },
+                            };
+                            setIncidentReport(reportData);
+                            setShowIncidentReportModal(true);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-white transition-colors group"
+                        title="Preview"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-bmf-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      {/* Download button */}
+                      <button
+                        onClick={async () => {
+                          if (f.type === 'pdf' && reconciliationReport) {
+                            const participation = await buildParticipationData();
+                            const pdfBlob = generatePDF(reconciliationReport, participation);
+                            const filename = `${f.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                            downloadBlob(pdfBlob, filename);
+                          } else if (f.type === 'csv' && reconciliationReport) {
+                            const csvBlob = f.id.includes('discrepancy')
+                              ? generateDiscrepancyCSV(reconciliationReport)
+                              : generateFullDataCSV(reconciliationReport);
+                            const filename = `${f.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+                            downloadBlob(csvBlob, filename);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-white transition-colors group"
+                        title="Download"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {outputFiles.length > 0 && outputFiles.every(f => f.ready) && (
+            <div className="mt-4 p-3 rounded-xl bg-emerald-100 border border-emerald-200 text-center">
+              <p className="text-xs text-emerald-700 font-medium">All reports ready for download</p>
             </div>
-          ))}
+          )}
         </div>
       );
     }
@@ -2682,9 +2937,41 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           </div>
           {/* TheoryPresentation on right */}
           <div className="flex-1 overflow-hidden">
-            <TheoryPresentation embedded onClose={() => setIsTheoryMode(false)} />
+            <TheoryPresentation
+              embedded
+              onClose={() => setIsTheoryMode(false)}
+              onProceedToCalibration={() => {
+                setIsTheoryMode(false);
+                setShowCalibration(true);
+              }}
+            />
           </div>
         </div>
+      )}
+
+      {/* Calibration Slide - between theory and use cases */}
+      {showCalibration && (
+        <CalibrationSlide
+          sessionCode={sessionCode}
+          onProceed={() => {
+            setShowCalibration(false);
+            // Show the "Up Next: Shipping & Receiving" transition slide
+            const theoryTransition = getNodeInfo('theory', 'upNext');
+            if (theoryTransition) {
+              setInfoOverlayContent(theoryTransition);
+              setInfoNodeId('theory-transition');
+              setInfoNodeType('upNext');
+              setInfoNodeLabel('Shipping & Receiving');
+              setInfoNodeFetchHandler(null);
+              setInfoNodeCanFetch(false);
+            }
+            // Pre-select shipping use case so nodes load in background
+            if (useCases.length > 0) {
+              const firstUseCase = useCases.find(uc => uc.id === 'shipping') || useCases[0];
+              handleUseCaseSelect(firstUseCase);
+            }
+          }}
+        />
       )}
 
       {/* Normal Flow Mode */}
@@ -2788,6 +3075,30 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             });
           }
         }}
+        isTransitionSlide={infoNodeType === 'upNext'}
+        nextUseCaseInfo={
+          infoNodeId === 'theory-transition'
+            ? getFirstUseCase()
+            : (selectedUseCase ? getNextUseCase(selectedUseCase.id) : null)
+        }
+        onStartNextUseCase={
+          infoNodeId === 'theory-transition'
+            ? () => {
+                // Theory transition: start the first source slide of shipping
+                if (selectedUseCase && selectedUseCase.sources.length > 0) {
+                  const firstSource = selectedUseCase.sources[0];
+                  handleShowInfo(
+                    firstSource.type,
+                    `source-${firstSource.name}`,
+                    firstSource.name,
+                    0,
+                    undefined,
+                    'pending'
+                  );
+                }
+              }
+            : handleTransitionToNextUseCase
+        }
       />
 
       {/* Discrepancy List Modal */}
@@ -2856,8 +3167,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         />
       )}
 
-      {/* Floating AI Assistant */}
-      {selectedUseCase && (
+      {/* Floating AI Assistant - Only visible on output/final slide */}
+      {selectedUseCase && infoNodeId === 'output' && (
         <FloatingAIAssistant
           context={{
             useCase: selectedUseCase.id,
@@ -2869,6 +3180,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             })),
             extractedData: sourceData,
           }}
+          reconciliationReport={reconciliationReport}
         />
       )}
 
