@@ -65,11 +65,28 @@ export function MobileJoinSession() {
     setError(null);
 
     try {
+      const trimmedName = name.trim();
+
+      // Check if participant already exists in this session
+      const { data: existing } = await supabase
+        .from('session_participants')
+        .select('id')
+        .eq('session_code', sessionCode)
+        .eq('participant_name', trimmedName)
+        .maybeSingle();
+
+      if (existing) {
+        // Already joined - just show success
+        setHasJoined(true);
+        return;
+      }
+
+      // New participant - insert
       const { error: insertError } = await supabase
         .from('session_participants')
         .insert({
           session_code: sessionCode,
-          participant_name: name.trim(),
+          participant_name: trimmedName,
         });
 
       if (insertError) {
