@@ -6,6 +6,7 @@ import { MobileUpload } from './pages/MobileUpload';
 import { MobileDataEntry } from './pages/MobileDataEntry';
 import { MobileScanner } from './pages/MobileScanner';
 import { PrintLabels } from './pages/PrintLabels';
+import { DockTablet } from './pages/DockTablet';
 import { QuickIdentity } from './pages/QuickIdentity';
 import { ReceiptSigningForm } from './pages/ReceiptSigningForm';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/mobile-entry/:sessionCode" element={<MobileDataEntry />} />
           <Route path="/scan/:sessionCode" element={<MobileScanner />} />
           <Route path="/print-labels/:sessionCode" element={<PrintLabels />} />
+          <Route path="/dock/:sessionCode" element={<DockTablet />} />
           <Route path="/identity" element={<QuickIdentity />} />
           <Route path="/sign-receipt/:sessionCode/:shipmentId" element={<ReceiptSigningForm />} />
           <Route path="*" element={<Navigate to="/" replace />} />
