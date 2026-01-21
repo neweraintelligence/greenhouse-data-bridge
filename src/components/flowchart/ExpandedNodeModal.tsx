@@ -171,9 +171,23 @@ export function ExpandedNodeModal({
           )}
 
           {nodeType === 'barcode' && sessionCode && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500">View barcode scans and shipping labels. Switch between tabs to see scan history or generate labels.</p>
-              <BarcodeScanMiniApp sessionCode={sessionCode} expanded />
+            <div className="relative min-h-[500px]">
+              {/* Full modal background - shipping box image */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ opacity: 0.4 }}
+              >
+                <img
+                  src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
+                  alt=""
+                  className="w-full h-full object-contain object-center"
+                />
+              </div>
+              {/* Content on top */}
+              <div className="relative z-10 space-y-4">
+                <p className="text-sm text-gray-500">View barcode scans and shipping labels. Switch between tabs to see scan history or generate labels.</p>
+                <BarcodeScanMiniApp sessionCode={sessionCode} expanded />
+              </div>
             </div>
           )}
         </div>
