@@ -17,7 +17,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     flowContext: {
       inbound: {
         label: 'RECEIVING',
-        description: 'RECEIVING MODE: When your vendor ships goods to you, they send an email notification. "500 flats of petunias heading your way on Tuesday."',
+        description: 'RECEIVING MODE: When your vendor ships goods to you, they send an email notification. "500 flats of Beefsteak Tomatoes heading your way on Tuesday."',
         painPoint: 'Vendor emails buried. Truck shows up at your dock — surprise! Your team isn\'t ready.',
         solution: 'Vendor shipment emails captured automatically. Receiving team gets advance notice.',
         keyInsight: 'Prepare your dock crew. Know what\'s arriving before it gets there.',
