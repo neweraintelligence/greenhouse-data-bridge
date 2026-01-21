@@ -472,6 +472,25 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose }: The
               );
             })}
           </div>
+
+          {/* "Hands-on Use Cases" button - only on last slide */}
+          {currentIndex === totalSlides - 1 && (
+            <button
+              onClick={handleClose}
+              className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              <span>Hands-on Use Cases</span>
+              <svg
+                className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* Vertical divider */}
