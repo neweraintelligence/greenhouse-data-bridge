@@ -2953,6 +2953,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       {showCalibration && (
         <CalibrationSlide
           sessionCode={sessionCode}
+          onBack={() => {
+            setShowCalibration(false);
+            setIsTheoryMode(true);
+          }}
           onProceed={() => {
             setShowCalibration(false);
             // Show the "Up Next: Shipping & Receiving" transition slide

@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard';
 import { MobileUpload } from './pages/MobileUpload';
 import { MobileDataEntry } from './pages/MobileDataEntry';
 import { MobileScanner } from './pages/MobileScanner';
+import { MobileJoinSession } from './pages/MobileJoinSession';
 import { PrintLabels } from './pages/PrintLabels';
 import { DockTablet } from './pages/DockTablet';
 import { QuickIdentity } from './pages/QuickIdentity';
@@ -28,6 +29,7 @@ function App() {
           <Route path="/identity" element={<QuickIdentity />} />
           <Route path="/sign-receipt/:sessionCode/:shipmentId" element={<ReceiptSigningForm />} />
           <Route path="/theory" element={<TheoryPresentation />} />
+          <Route path="/join/:sessionCode" element={<MobileJoinSession />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -1,6 +1,6 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Users, CheckCircle2, Smartphone, Play, Sparkles, ArrowRight, Zap } from 'lucide-react';
+import { Users, CheckCircle2, Smartphone, Play, Sparkles, ArrowRight, Zap, ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Participant {
@@ -12,11 +12,28 @@ interface Participant {
 interface CalibrationSlideProps {
   sessionCode: string;
   onProceed: () => void;
+  onBack?: () => void;
 }
 
-function CalibrationSlideComponent({ sessionCode, onProceed }: CalibrationSlideProps) {
+function CalibrationSlideComponent({ sessionCode, onProceed, onBack }: CalibrationSlideProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [recentJoin, setRecentJoin] = useState<string | null>(null);
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      onProceed();
+    } else if (e.key === 'ArrowLeft' && onBack) {
+      e.preventDefault();
+      onBack();
+    }
+  }, [onProceed, onBack]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   // Fetch existing participants and subscribe to new ones
   useEffect(() => {
@@ -118,37 +135,56 @@ function CalibrationSlideComponent({ sessionCode, onProceed }: CalibrationSlideP
                 <ol className="space-y-3">
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-bmf-blue text-white text-sm font-semibold flex items-center justify-center">1</span>
-                    <span className="text-gray-600">Open your phone camera</span>
+                    <span className="text-gray-600">Scan the QR code with your phone</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-bmf-blue text-white text-sm font-semibold flex items-center justify-center">2</span>
-                    <span className="text-gray-600">Point at the QR code</span>
+                    <span className="text-gray-600">Enter your name</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-bmf-blue text-white text-sm font-semibold flex items-center justify-center">3</span>
-                    <span className="text-gray-600">Tap the link that appears</span>
+                    <span className="text-gray-600">Tap "Join Session"</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-nei-green text-white text-sm font-semibold flex items-center justify-center">
                       <CheckCircle2 className="w-4 h-4" />
                     </span>
-                    <span className="text-gray-600">You're in! Your name will appear here</span>
+                    <span className="text-gray-600">Your name appears here - you're in!</span>
                   </li>
                 </ol>
               </div>
             </div>
           </div>
 
-          {/* Proceed Button */}
-          <button
-            onClick={onProceed}
-            className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            <span>Let's Begin</span>
-            <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-1 transition-transform" />
-          </button>
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 font-medium shadow-sm hover:bg-gray-50 transition-all"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+            )}
+            <button
+              onClick={onProceed}
+              className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span>Let's Begin</span>
+              <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          {/* Keyboard hint */}
+          <p className="mt-4 text-sm text-gray-400 flex items-center gap-2">
+            <span className="px-2 py-0.5 bg-gray-200 rounded text-xs font-mono">→</span>
+            <span>or</span>
+            <span className="px-2 py-0.5 bg-gray-200 rounded text-xs font-mono">Space</span>
+            <span>to continue</span>
+          </p>
         </div>
 
         {/* Right side - Live Participant Feed */}
