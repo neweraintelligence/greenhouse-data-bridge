@@ -342,26 +342,29 @@ export function IncidentPhotoReporter({
               <Image className="w-4 h-4" />
               Or select from gallery
             </p>
-            <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden bg-gray-100">
+            {/* Debug: show photo count */}
+            <p className="text-xs text-gray-500 mb-2">Found {photos.length} photos</p>
+            <div className="grid grid-cols-3 gap-2 rounded-xl overflow-hidden">
               {photos.map((photo) => (
                 <button
                   key={photo.name}
                   onClick={() => handleSelectPhoto(photo.publicUrl)}
-                  className="relative aspect-square overflow-hidden group bg-gray-200"
+                  className="relative aspect-square rounded-lg overflow-hidden bg-gray-200 border-2 border-gray-300"
                 >
                   <img
                     src={photo.publicUrl}
                     alt={photo.name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    className="w-full h-full object-cover"
+                    style={{ display: 'block' }}
                     onError={(e) => {
-                      // Show placeholder on error
+                      console.error('Image failed to load:', photo.publicUrl);
                       const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.parentElement?.classList.add('bg-gray-300');
+                      target.style.opacity = '0';
                     }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Hover overlay - using transparent instead of black */}
+                  <div className="absolute inset-0 bg-transparent hover:bg-black/20 transition-all flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                       <Check className="w-5 h-5 text-bmf-blue" />
                     </div>
                   </div>
