@@ -650,6 +650,101 @@ export function MobileDataEntry() {
           </div>
         );
 
+      case 'incident_dashboard':
+        return (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Incident Dashboard</h3>
+            <p className="text-gray-600 mb-4">
+              View the incident report on the presenter's screen.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-amber-800">
+                <strong>What you'll see:</strong>
+              </p>
+              <ul className="text-sm text-amber-700 mt-2 space-y-1">
+                <li>• Weekly incident summary with photos</li>
+                <li>• Incidents by severity (Critical, Moderate, Minor)</li>
+                <li>• AI analysis and routing decisions</li>
+                <li>• Resolution status and trends</li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      case 'reconciliation_report':
+        return (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Reconciliation Report</h3>
+            <p className="text-gray-600 mb-4">
+              View the reconciliation report on the presenter's screen.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-blue-800">
+                <strong>Report includes:</strong>
+              </p>
+              <ul className="text-sm text-blue-700 mt-2 space-y-1">
+                <li>• Executive summary of processing results</li>
+                <li>• Statistics on matched vs discrepant shipments</li>
+                <li>• Detailed discrepancy breakdown</li>
+                <li>• AI-generated recommendations</li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      case 'training_compliance':
+        return (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ClipboardCheck className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Compliance Report</h3>
+            <p className="text-gray-600 mb-4">
+              View the training compliance report on the presenter's screen.
+            </p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-green-800">
+                <strong>Report includes:</strong>
+              </p>
+              <ul className="text-sm text-green-700 mt-2 space-y-1">
+                <li>• Training completion rates by department</li>
+                <li>• Overdue acknowledgements</li>
+                <li>• Compliance status breakdown</li>
+                <li>• Upcoming training deadlines</li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      case 'training_quiz':
+        return (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Database className="w-8 h-8 text-indigo-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Compliance Check</h3>
+            <p className="text-gray-600 mb-4">
+              This step verifies training records against employee roster.
+            </p>
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-indigo-800">
+                <strong>What happens:</strong>
+              </p>
+              <ul className="text-sm text-indigo-700 mt-2 space-y-1">
+                <li>• Employee records matched against training acknowledgements</li>
+                <li>• Discrepancies flagged for review</li>
+                <li>• Automated reminder generation</li>
+              </ul>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -687,6 +782,14 @@ export function MobileDataEntry() {
         return { title: 'Data Accuracy Quiz', icon: Database };
       case 'barcode_scans':
         return { title: 'Scan Barcodes', icon: ScanBarcode };
+      case 'incident_dashboard':
+        return { title: 'Incident Dashboard', icon: FileText };
+      case 'reconciliation_report':
+        return { title: 'Reconciliation Report', icon: FileText };
+      case 'training_compliance':
+        return { title: 'Compliance Report', icon: ClipboardCheck };
+      case 'training_quiz':
+        return { title: 'Compliance Check', icon: Database };
       default:
         return { title: 'Add Data', icon: Plus };
     }

@@ -63,6 +63,7 @@ interface Incident {
 import { generateEscalationEmail } from '../../lib/ai/geminiService';
 import { generateReconciliationReport, type ReconciliationReport } from '../../lib/ai/reportGenerator';
 import { ReportModal } from '../reports/ReportModal';
+import { IncidentReportModal, type IncidentReportData } from '../reports/IncidentReportModal';
 import { ToastContainer } from '../Toast';
 import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
 import { ParticipantActivityLog } from './ParticipantActivityLog';
@@ -362,6 +363,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const [outputFiles, setOutputFiles] = useState<OutputFile[]>([]);
   const [reconciliationReport, setReconciliationReport] = useState<ReconciliationReport | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showIncidentReportModal, setShowIncidentReportModal] = useState(false);
+  const [incidentReport, setIncidentReport] = useState<IncidentReportData | null>(null);
 
   // Track expanded node for modal view
   const [expandedNode, setExpandedNode] = useState<{
@@ -1872,6 +1875,42 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onPreview: (file: OutputFile) => {
             if (file.id === 'reconciliation-report' && reconciliationReport) {
               setShowReportModal(true);
+            } else if (file.id === 'incident-summary' || file.id === 'incident-report') {
+              // Generate incident report from current incidents data
+              const now = new Date();
+              const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+              const reportData: IncidentReportData = {
+                reportPeriod: `${weekAgo.toLocaleDateString()} - ${now.toLocaleDateString()}`,
+                generatedAt: now.toLocaleString(),
+                incidents: incidents.map(inc => ({
+                  id: inc.id || `inc-${Math.random().toString(36).substr(2, 9)}`,
+                  incident_type: inc.incident_type || 'Unknown',
+                  severity: inc.severity || 3,
+                  location: inc.location || 'Unknown location',
+                  description: inc.description || 'No description provided',
+                  reported_by: inc.reported_by || 'Anonymous',
+                  reported_at: inc.reported_at || new Date().toISOString(),
+                  status: inc.status || 'Open',
+                  photo_url: inc.photo_url,
+                  ai_confidence: inc.ai_confidence,
+                  routed_to: inc.status === 'Escalated' ? 'Safety Team' : undefined,
+                })),
+                statistics: {
+                  total: incidents.length,
+                  critical: incidents.filter(i => (i.severity || 0) >= 4).length,
+                  moderate: incidents.filter(i => (i.severity || 0) === 3).length,
+                  minor: incidents.filter(i => (i.severity || 0) <= 2).length,
+                  resolved: incidents.filter(i => i.status === 'Resolved').length,
+                  pending: incidents.filter(i => i.status !== 'Resolved').length,
+                },
+                trends: incidents.length > 0 ? {
+                  direction: 'stable',
+                  percentChange: 0,
+                  comparedTo: 'previous week',
+                } : undefined,
+              };
+              setIncidentReport(reportData);
+              setShowIncidentReportModal(true);
             }
           },
           onDownload: (file: OutputFile) => debug.log('Download:', file),
@@ -2744,6 +2783,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         <ReportModal
           report={reconciliationReport}
           onClose={() => setShowReportModal(false)}
+        />
+      )}
+
+      {/* Incident Report Modal */}
+      {showIncidentReportModal && incidentReport && (
+        <IncidentReportModal
+          report={incidentReport}
+          onClose={() => setShowIncidentReportModal(false)}
         />
       )}
 
