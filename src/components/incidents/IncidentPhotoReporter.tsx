@@ -417,11 +417,22 @@ export function IncidentPhotoReporter({
           </div>
 
           {/* Photo preview */}
-          <div className="relative rounded-xl overflow-hidden">
+          <div className="relative rounded-xl overflow-hidden bg-gray-100 min-h-[200px]">
             <img
               src={photoToDisplay}
               alt="Selected incident"
               className="w-full"
+              onLoad={(e) => {
+                // Ensure image is visible
+                const target = e.target as HTMLImageElement;
+                target.style.opacity = '1';
+              }}
+              onError={(e) => {
+                console.error('Failed to load preview image:', photoToDisplay);
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+              style={{ opacity: 1 }}
             />
           </div>
 
