@@ -292,10 +292,14 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                     </div>
 
                     {/* Carousel with navigation */}
-                    <div className="relative flex items-center gap-4 py-4">
+                    <div className="relative flex items-center gap-4 py-2">
                       {/* Left arrow */}
                       <button
-                        onClick={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setCarouselIndex(Math.max(0, carouselIndex - 1));
+                        }}
                         disabled={carouselIndex === 0}
                         className={`p-3 rounded-full transition-all ${
                           carouselIndex === 0
@@ -311,20 +315,20 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                         className={`bg-white rounded-2xl border-2 ${statusBorder} shadow-lg overflow-hidden w-[280px]`}
                       >
                       {/* Label header */}
-                      <div className="bg-gray-900 text-white px-4 py-3 text-center">
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Big Marble Farms</p>
-                        <p className="font-mono font-bold text-lg mt-0.5">{currentShipment.shipment_id}</p>
+                      <div className="bg-gray-900 text-white px-3 py-2 text-center">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Big Marble Farms</p>
+                        <p className="font-mono font-bold text-base">{currentShipment.shipment_id}</p>
                       </div>
 
                       {/* Product info */}
-                      <div className="px-4 py-3 border-b border-gray-100 text-center bg-gray-50">
-                        <p className="font-semibold text-gray-800 text-base leading-tight">{currentShipment.product_name}</p>
-                        <p className="font-mono text-sm text-gray-500 mt-1">{currentShipment.sku}</p>
+                      <div className="px-3 py-2 border-b border-gray-100 text-center bg-gray-50">
+                        <p className="font-semibold text-gray-800 text-sm leading-tight">{currentShipment.product_name}</p>
+                        <p className="font-mono text-xs text-gray-500 mt-0.5">{currentShipment.sku}</p>
                       </div>
 
                       {/* Large QR Code - Scannable */}
-                      <div className="flex items-center justify-center p-6 bg-white">
-                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-center p-4 bg-white">
+                        <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100">
                           <QRCodeSVG
                             value={qrData}
                             size={180}
@@ -335,25 +339,25 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                       </div>
 
                       {/* Quantity and status footer */}
-                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                      <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide">Quantity</p>
-                            <p className="font-bold text-2xl text-gray-800">{currentShipment.expected_qty}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Qty</p>
+                            <p className="font-bold text-xl text-gray-800">{currentShipment.expected_qty}</p>
                           </div>
                           {currentShipment.isReceived ? (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
-                              <CheckCheck className="w-4 h-4" />
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                              <CheckCheck className="w-3.5 h-3.5" />
                               Received
                             </span>
                           ) : currentShipment.isScanned ? (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-amber-100 text-amber-700">
-                              <Check className="w-4 h-4" />
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                              <Check className="w-3.5 h-3.5" />
                               Scanned
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-500">
-                              <Package className="w-4 h-4" />
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                              <Package className="w-3.5 h-3.5" />
                               Pending
                             </span>
                           )}
@@ -363,7 +367,11 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
 
                       {/* Right arrow */}
                       <button
-                        onClick={() => setCarouselIndex(Math.min(shipments.length - 1, carouselIndex + 1))}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setCarouselIndex(Math.min(shipments.length - 1, carouselIndex + 1));
+                        }}
                         disabled={carouselIndex === shipments.length - 1}
                         className={`p-3 rounded-full transition-all ${
                           carouselIndex === shipments.length - 1
@@ -377,11 +385,14 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                   </div>
 
                   {/* Dot indicators */}
-                  <div className="flex items-center gap-2 mt-4">
+                  <div className="flex items-center gap-2 mt-2">
                     {shipments.map((s, i) => (
                       <button
                         key={s.shipment_id}
-                        onClick={() => setCarouselIndex(i)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCarouselIndex(i);
+                        }}
                         className={`w-2.5 h-2.5 rounded-full transition-all ${
                           i === carouselIndex
                             ? 'bg-gray-800 scale-110'

@@ -16,6 +16,10 @@ export function MobileScanner() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
 
+  // Debounce tracking to prevent duplicate scans
+  const recentlyScannedRef = useRef<Set<string>>(new Set());
+  const processingRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     // Check for identity - require participant to identify themselves
     const storedIdentity = sessionStorage.getItem('user_identity');
@@ -60,8 +64,19 @@ export function MobileScanner() {
             // Parse QR data
             const data = JSON.parse(decodedText);
 
+            // Debounce: Skip if we recently scanned this exact code or are currently processing it
+            const scanKey = `${data.sessionCode}-${data.shipmentId}`;
+            if (recentlyScannedRef.current.has(scanKey) || processingRef.current.has(scanKey)) {
+              debug.log('Skipping duplicate scan:', scanKey);
+              return;
+            }
+
+            // Mark as currently processing
+            processingRef.current.add(scanKey);
+
             // Validate it's for this session
             if (data.sessionCode !== sessionCode) {
+              processingRef.current.delete(scanKey);
               addScanResult(data.shipmentId || 'Unknown', data.productName || 'Unknown Product', 0, 'error', 'Wrong session - scan from your own screen');
               return;
             }
@@ -75,6 +90,9 @@ export function MobileScanner() {
               .single();
 
             if (!expected) {
+              processingRef.current.delete(scanKey);
+              recentlyScannedRef.current.add(scanKey);
+              setTimeout(() => recentlyScannedRef.current.delete(scanKey), 3000);
               addScanResult(data.shipmentId, data.productName, data.qty, 'error', '⚠️ UNEXPECTED SHIPMENT - Not in order list');
 
               // Log as escalation
@@ -90,6 +108,9 @@ export function MobileScanner() {
             }
 
             if (expected.expected_sku !== data.sku) {
+              processingRef.current.delete(scanKey);
+              recentlyScannedRef.current.add(scanKey);
+              setTimeout(() => recentlyScannedRef.current.delete(scanKey), 3000);
               addScanResult(data.shipmentId, data.productName, data.qty, 'error', `❌ WRONG PRODUCT! Expected ${expected.expected_sku}, got ${data.sku}`);
 
               // Log as escalation
@@ -113,6 +134,9 @@ export function MobileScanner() {
               .single();
 
             if (existingScan) {
+              processingRef.current.delete(scanKey);
+              recentlyScannedRef.current.add(scanKey);
+              setTimeout(() => recentlyScannedRef.current.delete(scanKey), 3000);
               const scannedTime = new Date(existingScan.scanned_at).toLocaleTimeString();
               addScanResult(
                 data.shipmentId,
@@ -137,16 +161,16 @@ export function MobileScanner() {
               scanned_by: scannerName,
             });
 
+            // Clean up processing state and add to recently scanned
+            processingRef.current.delete(scanKey);
+            recentlyScannedRef.current.add(scanKey);
+            setTimeout(() => recentlyScannedRef.current.delete(scanKey), 5000); // 5 second cooldown
+
             if (insertError) {
               addScanResult(data.shipmentId, data.productName, data.qty, 'error', 'Failed to save scan');
             } else {
               addScanResult(data.shipmentId, data.productName, data.qty, 'success', `✓ Validated! ${data.qty} units of ${data.sku}`);
             }
-
-            // Brief pause before allowing next scan
-            setTimeout(() => {
-              // Ready for next scan
-            }, 500);
 
           } catch (err) {
             debug.error('Error processing scan:', err);
