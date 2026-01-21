@@ -303,12 +303,12 @@ function InfoOverlayComponent({
     }
   }, [info, onClose, onNext, onPrevious, hasNext, hasPrevious, isPeeking]);
 
-  // Reset direction when info changes - default to inbound
+  // Reset state when slide changes - using nodeLabel and imageUrl as more reliable triggers
   useEffect(() => {
     setActiveDirection('inbound');
     setShowNodePreview(false);
     setPreviewExpanded(false);
-  }, [info]);
+  }, [nodeLabel, imageUrl]);
 
   // Handle drag start
   const handleDragStart = (e: React.MouseEvent) => {
@@ -696,9 +696,14 @@ function InfoOverlayComponent({
           <div className="absolute inset-0 overflow-hidden">
             {imageUrl ? (
               <img
+                key={imageUrl}
                 src={imageUrl}
                 alt="Visual representation"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Hide broken images
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-center text-gray-300">
