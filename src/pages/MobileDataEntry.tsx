@@ -9,7 +9,7 @@ import { ReviewQueueMobile } from '../components/review/ReviewQueueMobile';
 import { ReconciliationQuizMobile } from '../components/reconciliation/ReconciliationQuizMobile';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'incident_dashboard' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz' | 'reconciliation_report' | 'training_compliance' | 'training_quiz';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'incident_dashboard' | 'incident_info' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz' | 'reconciliation_report' | 'training_compliance' | 'training_quiz';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -674,6 +674,32 @@ export function MobileDataEntry() {
           </div>
         );
 
+      case 'incident_info':
+        return (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-orange-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Viewing: {nodeName}</h3>
+            <p className="text-gray-600 mb-4">
+              This step is displayed on the presenter's screen.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-blue-800">
+                <strong>No action needed from you!</strong>
+              </p>
+              <p className="text-sm text-blue-700 mt-2">
+                Watch the main screen to see how the system processes incidents, routes them to the right teams, and generates notifications.
+              </p>
+            </div>
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-500">
+                Want to report an incident? Go back to the <strong>Incident Report Form</strong> slide.
+              </p>
+            </div>
+          </div>
+        );
+
       case 'reconciliation_report':
         return (
           <div className="text-center py-8">
@@ -784,6 +810,8 @@ export function MobileDataEntry() {
         return { title: 'Scan Barcodes', icon: ScanBarcode };
       case 'incident_dashboard':
         return { title: 'Incident Dashboard', icon: FileText };
+      case 'incident_info':
+        return { title: 'Incident Process', icon: AlertTriangle };
       case 'reconciliation_report':
         return { title: 'Reconciliation Report', icon: FileText };
       case 'training_compliance':

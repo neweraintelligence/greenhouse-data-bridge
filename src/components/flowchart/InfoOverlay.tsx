@@ -16,16 +16,28 @@ function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
 
   // INCIDENTS USE CASE
   if (useCaseLower === 'incidents') {
-    // Output node -> incident dashboard/report view (only the actual output/dashboard node)
-    if (label.includes('dashboard') || label.includes('output') || label.includes('results')) {
+    // Output node -> incident dashboard/report view
+    if (label.includes('dashboard') || label.includes('output') || label.includes('results') || label.includes('reports')) {
       return 'incident_dashboard';
     }
     // Review queue for ambiguous incidents
-    if (label.includes('review queue') || label.includes('human review')) {
+    if (label.includes('review queue') || label.includes('human review') || label.includes('review')) {
       return 'incident_review';
     }
-    // Everything else in incidents -> incident photo reporter (including "Incident Report Form")
-    return 'incidents';
+    // Escalation / Communications / ETL / Processing -> informational only (no participant action)
+    if (label.includes('escalation') || label.includes('router') ||
+        label.includes('communication') || label.includes('email') ||
+        label.includes('etl') || label.includes('normalization') ||
+        label.includes('data engine') || label.includes('processing') || label.includes('ai vision') ||
+        label.includes('business rules') || label.includes('raci')) {
+      return 'incident_info'; // Informational slide - no participant action
+    }
+    // Only Incident Report Form and Intake Folder -> photo reporter for submitting incidents
+    if (label.includes('incident report') || label.includes('intake') || label.includes('queue')) {
+      return 'incidents';
+    }
+    // Default fallback for incidents - informational
+    return 'incident_info';
   }
 
   // TRAINING USE CASE
