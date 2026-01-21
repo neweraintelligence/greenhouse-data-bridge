@@ -509,18 +509,31 @@ function InfoOverlayComponent({
             </button>
           )}
 
-          {/* Competition button - trophy icon with amber color for billing/reconciliation challenges */}
+          {/* Competition button - trophy icon with amber color and shimmer for billing/reconciliation challenges */}
           {sessionCode && !isInformationalSlide && isCompetitionSlide && (
             <div
               onMouseEnter={() => setShowJoinQR(true)}
               onMouseLeave={() => setShowJoinQR(false)}
             >
               <button
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium shadow-lg transition-all"
+                className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 hover:from-amber-600 hover:via-yellow-500 hover:to-orange-600 text-white font-medium shadow-lg transition-all overflow-hidden"
               >
-                <Trophy className="w-4 h-4" />
-                <span className="text-sm">Compete</span>
+                {/* Metallic shimmer overlay */}
+                <span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12"
+                  style={{
+                    animation: 'shimmer 2.5s infinite',
+                  }}
+                />
+                <Trophy className="w-4 h-4 relative z-10 drop-shadow-sm" />
+                <span className="text-sm relative z-10 drop-shadow-sm">Compete</span>
               </button>
+              <style>{`
+                @keyframes shimmer {
+                  0% { transform: translateX(-200%) skewX(-12deg); }
+                  100% { transform: translateX(200%) skewX(-12deg); }
+                }
+              `}</style>
 
               {/* QR Code Tooltip */}
               {showJoinQR && (
