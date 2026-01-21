@@ -548,7 +548,7 @@ function InfoOverlayComponent({
                     />
                     <div className="text-center">
                       <p className="text-sm font-semibold text-gray-900">Scan to Compete</p>
-                      <p className="text-xs text-gray-500 mt-1">Race against AI!</p>
+                      <p className="text-xs text-gray-500 mt-1">How fast can you spot it?</p>
                     </div>
                   </div>
                 </div>
