@@ -34,6 +34,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE DOCUMENT CHAOS',
     subtitle: 'The Hidden Cost of Manual Processing',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/problem-intro.png',
     content: {
       headline: 'Every business runs on documents. Most are still processed by hand.',
       bullets: [
@@ -59,6 +60,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE REAL NUMBERS',
     subtitle: 'What Manual Processing Actually Costs',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/problem-cost.png',
     content: {
       headline: 'Manual document processing is expensive. Most companies don\'t realize how much.',
       stats: [
@@ -84,6 +86,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'WHY TRADITIONAL OCR ISN\'T ENOUGH',
     subtitle: 'Reading Text vs Understanding Documents',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/problem-data-silos.png',
     content: {
       headline: 'OCR reads text. It doesn\'t understand what it\'s reading.',
       bullets: [
@@ -112,6 +115,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'INTELLIGENT DOCUMENT PROCESSING',
     subtitle: 'AI That Actually Understands Documents',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/idp-definition.png',
     content: {
       headline: 'IDP combines OCR with AI to not just read, but comprehend documents.',
       bullets: [
@@ -153,6 +157,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE LLM REVOLUTION',
     subtitle: 'Large Language Models Changed Everything',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/idp-beyond-ocr.png',
     content: {
       headline: 'In 2023, document AI got dramatically smarter.',
       bullets: [
@@ -177,6 +182,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'WHAT WE CAN PROCESS',
     subtitle: 'Any Document, Any Format',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/idp-how-it-works.png',
     content: {
       headline: 'Modern IDP handles the full document zoo.',
       bullets: [
@@ -199,6 +205,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'CONFIDENCE SCORING',
     subtitle: 'AI Knows When It\'s Uncertain',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/business-accuracy.png',
     content: {
       headline: 'The critical difference: AI tells you how sure it is.',
       bullets: [
@@ -224,6 +231,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'HUMAN-IN-THE-LOOP',
     subtitle: 'When AI Defers to Human Expertise',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/business-accuracy.png',
     content: {
       headline: 'The best AI systems know when to ask for help.',
       bullets: [
@@ -252,6 +260,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE ADOPTION WAVE',
     subtitle: 'Enterprise AI Has Gone Mainstream',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/business-scale.png',
     content: {
       headline: '2025: Document AI is no longer experimental.',
       stats: [
@@ -276,6 +285,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE ROI REALITY',
     subtitle: 'What Companies Actually See',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/business-roi.png',
     content: {
       headline: 'Document AI pays for itself. Fast.',
       stats: [
@@ -301,6 +311,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'REAL SUCCESS STORIES',
     subtitle: 'Named Companies, Verified Results',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/business-scale.png',
     content: {
       headline: 'These aren\'t hypotheticals. These are published case studies.',
       bullets: [
@@ -322,6 +333,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE "TOUCHLESS" INVOICE',
     subtitle: 'When Automation Just Works',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/applications-invoices.png',
     content: {
       headline: 'The goal: invoices that process themselves.',
       bullets: [
@@ -347,6 +359,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'COST VS BENEFIT ANALYSIS',
     subtitle: 'Understanding the Investment',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/business-roi.png',
     content: {
       headline: 'What it costs vs what you save.',
       bullets: [
@@ -376,6 +389,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'SHIPPING & RECEIVING',
     subtitle: 'The Three-Way Match',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/applications-invoices.png',
     content: {
       headline: 'Reconciling what was ordered, shipped, and received.',
       bullets: [
@@ -397,6 +411,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'INTELLIGENT ESCALATION',
     subtitle: 'When AI Finds Problems, The Right People Know',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/applications-compliance.png',
     content: {
       headline: 'Automatic routing based on severity and type.',
       bullets: [
@@ -418,6 +433,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE DATA FLOW',
     subtitle: 'From Scattered Sources to Unified Insights',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/applications-greenhouse.png',
     content: {
       headline: 'Multiple systems feeding one intelligent data lake.',
       bullets: [
@@ -485,6 +501,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'GETTING STARTED',
     subtitle: 'A Practical Implementation Path',
     imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/next-pilot.png',
     content: {
       headline: 'You don\'t have to automate everything at once.',
       bullets: [
@@ -510,6 +527,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'SEE IT IN ACTION',
     subtitle: 'Live Demo: Document Processing Pipeline',
     imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/next-cta.png',
     content: {
       headline: 'Theory is good. Let\'s see it work.',
       bullets: [
