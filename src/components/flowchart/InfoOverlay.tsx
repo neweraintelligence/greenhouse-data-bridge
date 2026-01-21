@@ -291,6 +291,10 @@ function InfoOverlayComponent({
   // Also check nodeType directly for robustness
   const isReconciliationSlide = nodeType === 'processing' || (nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'reconciliation_quiz');
 
+  // Check if this is an informational slide that needs no participant action
+  // For these slides, we hide the Join button and QR code
+  const isInformationalSlide = nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'incident_info';
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -483,8 +487,8 @@ function InfoOverlayComponent({
             </button>
           )}
 
-          {/* Join button - requires sessionCode for QR code */}
-          {sessionCode && (
+          {/* Join button - requires sessionCode for QR code, hidden for informational slides */}
+          {sessionCode && !isInformationalSlide && (
             <div
               onMouseEnter={() => setShowJoinQR(true)}
               onMouseLeave={() => setShowJoinQR(false)}
