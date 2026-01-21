@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
 import { ScanBarcode, Tag, Check, CheckCheck, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../../lib/supabase';
@@ -62,6 +62,31 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
   ]);
   const [loading, setLoading] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Keyboard navigation for carousel when expanded
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!expanded || activeTab !== 'labels') return;
+
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      e.stopPropagation();
+      setCarouselIndex((prev) => Math.max(0, prev - 1));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      e.stopPropagation();
+      setCarouselIndex((prev) => Math.min(shipments.length - 1, prev + 1));
+    }
+  }, [expanded, activeTab, shipments.length]);
+
+  useEffect(() => {
+    if (!expanded) return;
+
+    // Add listener with capture phase to intercept before other handlers
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [expanded, handleKeyDown]);
 
   // Fetch shipments and scan status
   useEffect(() => {

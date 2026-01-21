@@ -3,18 +3,57 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, LayoutDashboard, Presentation, Printer, Copy, Check } from 'lucide-react';
 import { useSessionStore } from '../store/sessionStore';
 import { FlowCanvas } from '../components/flowchart/FlowCanvas';
+import { ScanToast, useScanNotifications } from '../components/ScanToast';
+import { supabase } from '../lib/supabase';
 
 export function Flowchart() {
   const navigate = useNavigate();
   const { session, clearSession } = useSessionStore();
   const [startPresentation, setStartPresentation] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { notifications, addNotification, dismissNotification } = useScanNotifications();
 
   useEffect(() => {
     if (!session) {
       navigate('/');
     }
   }, [session, navigate]);
+
+  // Subscribe to barcode scans for toast notifications
+  useEffect(() => {
+    if (!session) return;
+
+    const channel = supabase
+      .channel(`scan-toasts-${session.code}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'barcode_scans',
+          filter: `session_code=eq.${session.code}`,
+        },
+        (payload) => {
+          const scan = payload.new as {
+            shipment_id: string;
+            scanned_by: string;
+            sku: string;
+            qty_scanned: number;
+          };
+          addNotification(
+            'success',
+            scan.shipment_id,
+            scan.scanned_by || 'Unknown',
+            `Scanned ${scan.qty_scanned} units of ${scan.sku}`
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [session, addNotification]);
 
   const handleLogout = () => {
     clearSession();
@@ -32,6 +71,8 @@ export function Flowchart() {
 
   return (
     <div className="min-h-screen bg-stone-100">
+      {/* Toast notifications - highest z-index to appear above modals */}
+      <ScanToast notifications={notifications} onDismiss={dismissNotification} />
       {/* Header - clean and minimal */}
       <header className="bg-white/90 backdrop-blur-md border-b border-stone-200 px-8 py-3 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
