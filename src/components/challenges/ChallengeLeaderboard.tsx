@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Clock, CheckCircle2, XCircle, Users, Bot } from 'lucide-react';
+import { Trophy, Clock, CheckCircle2, XCircle, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ReconciliationReveal } from './ReconciliationReveal';
 
@@ -221,10 +221,7 @@ export function ChallengeLeaderboard({ sessionCode }: ChallengeLeaderboardProps)
 
               {/* AI Comparison */}
               <div className="mt-4 p-4 rounded-lg border border-gray-200 bg-gray-50">
-                <div className="flex items-center gap-2 mb-3">
-                  <Bot className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">AI Comparison</span>
-                </div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">AI Comparison</p>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Avg human time:</span>
@@ -243,10 +240,9 @@ export function ChallengeLeaderboard({ sessionCode }: ChallengeLeaderboardProps)
 
                 <button
                   onClick={() => setShowFullReveal(true)}
-                  className="mt-3 w-full py-2 px-3 rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                  className="mt-3 w-full py-2 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition-colors"
                 >
-                  <Bot className="w-4 h-4" />
-                  Show Full AI Analysis
+                  View AI Analysis
                 </button>
               </div>
             </div>
