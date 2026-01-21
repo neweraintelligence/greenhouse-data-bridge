@@ -277,25 +277,39 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                     </span>
                   </div>
 
-                  {/* Carousel with navigation */}
-                  <div className="flex items-center gap-4">
-                    {/* Left arrow */}
-                    <button
-                      onClick={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
-                      disabled={carouselIndex === 0}
-                      className={`p-3 rounded-full transition-all ${
-                        carouselIndex === 0
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-                      }`}
-                    >
-                      <ChevronLeft className="w-6 h-6" />
-                    </button>
-
-                    {/* Large portrait label card */}
+                  {/* Carousel with box background */}
+                  <div className="relative">
+                    {/* Faded shipping box background */}
                     <div
-                      className={`bg-white rounded-2xl border-2 ${statusBorder} shadow-lg overflow-hidden w-[280px]`}
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      style={{ opacity: 0.15 }}
                     >
+                      <img
+                        src="/demo_pack/use_case_images/clean_shipping_box_side_profile.png"
+                        alt=""
+                        className="w-[500px] h-auto object-contain"
+                      />
+                    </div>
+
+                    {/* Carousel with navigation */}
+                    <div className="relative flex items-center gap-4 py-4">
+                      {/* Left arrow */}
+                      <button
+                        onClick={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
+                        disabled={carouselIndex === 0}
+                        className={`p-3 rounded-full transition-all ${
+                          carouselIndex === 0
+                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                        }`}
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+
+                      {/* Large portrait label card */}
+                      <div
+                        className={`bg-white rounded-2xl border-2 ${statusBorder} shadow-lg overflow-hidden w-[280px]`}
+                      >
                       {/* Label header */}
                       <div className="bg-gray-900 text-white px-4 py-3 text-center">
                         <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Big Marble Farms</p>
@@ -347,18 +361,19 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expande
                       </div>
                     </div>
 
-                    {/* Right arrow */}
-                    <button
-                      onClick={() => setCarouselIndex(Math.min(shipments.length - 1, carouselIndex + 1))}
-                      disabled={carouselIndex === shipments.length - 1}
-                      className={`p-3 rounded-full transition-all ${
-                        carouselIndex === shipments.length - 1
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-                      }`}
-                    >
-                      <ChevronRight className="w-6 h-6" />
-                    </button>
+                      {/* Right arrow */}
+                      <button
+                        onClick={() => setCarouselIndex(Math.min(shipments.length - 1, carouselIndex + 1))}
+                        disabled={carouselIndex === shipments.length - 1}
+                        className={`p-3 rounded-full transition-all ${
+                          carouselIndex === shipments.length - 1
+                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                        }`}
+                      >
+                        <ChevronRight className="w-6 h-6" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Dot indicators */}
