@@ -5,11 +5,19 @@ import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
 import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
 
 // Helper function to map node labels to Supabase source table names
-function getSourceTypeFromNode(nodeLabel: string): string {
+function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
   const label = nodeLabel.toLowerCase();
+
+  // Incidents use case - check first since multiple nodes map to incidents
+  if (label.includes('incident') || label.includes('business rules') || label.includes('raci') ||
+      label.includes('severity') || label.includes('routing') || label.includes('ai vision') ||
+      label.includes('incident report') || label.includes('incident photo') || label.includes('incident queue') ||
+      label.includes('incident dashboard') || label.includes('escalation') || useCase === 'incidents') {
+    return 'incidents';
+  }
+
   if (label.includes('shipment') || label.includes('expected')) return 'shipments_expected';
   if (label.includes('training') || label.includes('roster')) return 'training_roster';
-  if (label.includes('incident')) return 'incidents';
   if (label.includes('customer') || label.includes('order')) return 'customer_orders';
   if (label.includes('quality')) return 'quality_issues';
   if (label.includes('email') || label.includes('outlook') || label.includes('mail') || label.includes('communication')) return 'communications';

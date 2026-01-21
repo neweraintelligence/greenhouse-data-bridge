@@ -394,6 +394,30 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
     solution: 'Automatic notifications. The RACI defines who gets emailed at each severity level. No manual forwarding needed.',
     keyInsight: 'Mock emails in the demo: safety@bigmarblefarms.com, maintenance.lead@bigmarblefarms.com. See exactly who would be notified.',
   },
+
+  etl: {
+    id: 'etl',
+    title: 'DATA NORMALIZATION',
+    subtitle: 'Standardizing Incident Data',
+    imageOnLeft: true,
+    description:
+      'Incident reports come in different formats: typed descriptions, voice memos transcribed, photos with metadata. This stage standardizes everything: location codes normalized, timestamps in consistent format, severity terms mapped to 1-5 scale.',
+    painPoint: 'Today: "Zone 3 Row 12" vs "Z3-R12" vs "greenhouse 3, row twelve" — same location, three different ways to write it. Hard to track patterns.',
+    solution: 'Automatic normalization. All locations mapped to standard codes. All severities mapped to 1-5. Consistent data enables pattern detection.',
+    keyInsight: 'Clean data in = accurate AI analysis out. Normalization is invisible but critical.',
+  },
+
+  communications: {
+    id: 'communications',
+    title: 'AUTOMATED NOTIFICATIONS',
+    subtitle: 'Closing the Loop',
+    imageOnLeft: false,
+    description:
+      'After AI analysis and routing decisions, the system drafts and queues notifications. Safety issues trigger immediate alerts. Maintenance requests generate work orders. All communications logged for audit trail.',
+    painPoint: 'Today: detection happens, then someone has to manually email the right people. Delays happen. Sometimes nobody gets notified at all.',
+    solution: 'Instant, automatic notifications based on RACI matrix. Right person, right urgency, every time. Complete audit trail of who was notified when.',
+    keyInsight: 'The loop isn\'t closed until the right people know about it. This ensures nothing falls through the cracks.',
+  },
 };
 
 // ============================================================================
