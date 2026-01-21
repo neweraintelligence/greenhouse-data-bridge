@@ -1,244 +1,193 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 500" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 480" style="background: #faf9f7;">
   <defs>
-    <!-- Gradients -->
-    <linearGradient id="captureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="classifyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="extractGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="validateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="integrateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
-    </linearGradient>
-
-    <!-- Glow filter -->
-    <filter id="glow3" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <!-- Subtle shadows -->
+    <filter id="softShadow3" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.08"/>
     </filter>
 
-    <!-- Arrow marker -->
-    <marker id="arrow3" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#64748b" />
-    </marker>
-    <marker id="arrowOrange" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#f97316" />
-    </marker>
-    <marker id="arrowPurple" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#8b5cf6" />
-    </marker>
-    <marker id="arrowBlue" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#3b82f6" />
-    </marker>
-    <marker id="arrowTeal" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#14b8a6" />
+    <!-- Arrow markers -->
+    <marker id="arrowStep" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
     </marker>
   </defs>
 
   <!-- Title -->
-  <text x="700" y="40" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">THE IDP WORKFLOW</text>
-  <text x="700" y="65" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">From Paper to Actionable Data in Five Steps</text>
+  <text x="700" y="38" fill="#1e293b" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" text-anchor="middle" letter-spacing="-0.02em">The IDP Workflow</text>
+  <text x="700" y="60" fill="#64748b" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">From paper document to actionable data in five steps</text>
 
-  <!-- Step Numbers Circle -->
-  <g transform="translate(100, 120)">
-    <circle cx="40" cy="40" r="30" fill="url(#captureGrad)" filter="url(#glow3)" />
-    <text x="40" y="48" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">1</text>
+  <!-- Step Numbers -->
+  <g transform="translate(115, 85)">
+    <circle cx="30" cy="30" r="24" fill="white" stroke="#f97316" stroke-width="2" filter="url(#softShadow3)" />
+    <text x="30" y="37" fill="#f97316" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">1</text>
   </g>
-  <g transform="translate(340, 120)">
-    <circle cx="40" cy="40" r="30" fill="url(#classifyGrad)" filter="url(#glow3)" />
-    <text x="40" y="48" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">2</text>
+  <g transform="translate(355, 85)">
+    <circle cx="30" cy="30" r="24" fill="white" stroke="#8b5cf6" stroke-width="2" filter="url(#softShadow3)" />
+    <text x="30" y="37" fill="#8b5cf6" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">2</text>
   </g>
-  <g transform="translate(580, 120)">
-    <circle cx="40" cy="40" r="30" fill="url(#extractGrad)" filter="url(#glow3)" />
-    <text x="40" y="48" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">3</text>
+  <g transform="translate(595, 85)">
+    <circle cx="30" cy="30" r="24" fill="white" stroke="#3b82f6" stroke-width="2" filter="url(#softShadow3)" />
+    <text x="30" y="37" fill="#3b82f6" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">3</text>
   </g>
-  <g transform="translate(820, 120)">
-    <circle cx="40" cy="40" r="30" fill="url(#validateGrad)" filter="url(#glow3)" />
-    <text x="40" y="48" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">4</text>
+  <g transform="translate(835, 85)">
+    <circle cx="30" cy="30" r="24" fill="white" stroke="#0d9488" stroke-width="2" filter="url(#softShadow3)" />
+    <text x="30" y="37" fill="#0d9488" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">4</text>
   </g>
-  <g transform="translate(1060, 120)">
-    <circle cx="40" cy="40" r="30" fill="url(#integrateGrad)" filter="url(#glow3)" />
-    <text x="40" y="48" fill="white" font-family="system-ui, sans-serif" font-size="24" font-weight="700" text-anchor="middle">5</text>
+  <g transform="translate(1075, 85)">
+    <circle cx="30" cy="30" r="24" fill="white" stroke="#22c55e" stroke-width="2" filter="url(#softShadow3)" />
+    <text x="30" y="37" fill="#22c55e" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">5</text>
   </g>
 
   <!-- Connecting arrows between numbers -->
-  <path d="M 180 160 L 330 160" stroke="#f97316" stroke-width="3" fill="none" marker-end="url(#arrowOrange)" />
-  <path d="M 420 160 L 570 160" stroke="#8b5cf6" stroke-width="3" fill="none" marker-end="url(#arrowPurple)" />
-  <path d="M 660 160 L 810 160" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrowBlue)" />
-  <path d="M 900 160 L 1050 160" stroke="#14b8a6" stroke-width="3" fill="none" marker-end="url(#arrowTeal)" />
+  <path d="M 195 115 L 330 115" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 435 115 L 570 115" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 675 115 L 810 115" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 915 115 L 1050 115" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
 
   <!-- Step 1: CAPTURE -->
-  <g transform="translate(50, 210)">
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="#1e293b" stroke="#f97316" stroke-width="2" />
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="url(#captureGrad)" opacity="0.1" />
-    <text x="90" y="35" fill="#f97316" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">CAPTURE</text>
-    <line x1="20" y1="50" x2="160" y2="50" stroke="#475569" stroke-width="1" />
+  <g transform="translate(50, 155)">
+    <rect x="0" y="0" width="190" height="260" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#softShadow3)" />
+    <rect x="0" y="0" width="190" height="44" rx="12" fill="#fff7ed" />
+    <text x="95" y="28" fill="#f97316" font-family="system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">CAPTURE</text>
+    <line x1="0" y1="44" x2="190" y2="44" stroke="#e2e8f0" stroke-width="1" />
 
-    <!-- Input methods icons/text -->
-    <text x="90" y="75" fill="white" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Document Arrives</text>
+    <text x="95" y="70" fill="#64748b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Document Arrives Via</text>
 
-    <rect x="20" y="90" width="140" height="25" rx="6" fill="#475569" />
-    <text x="90" y="107" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Email Attachment</text>
+    <rect x="15" y="85" width="160" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <text x="95" y="106" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Email Attachment</text>
 
-    <rect x="20" y="120" width="140" height="25" rx="6" fill="#475569" />
-    <text x="90" y="137" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Scanner / Mobile</text>
+    <rect x="15" y="125" width="160" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <text x="95" y="146" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Scanner / Mobile Photo</text>
 
-    <rect x="20" y="150" width="140" height="25" rx="6" fill="#475569" />
-    <text x="90" y="167" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Web Upload</text>
+    <rect x="15" y="165" width="160" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <text x="95" y="186" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Web Upload Portal</text>
 
-    <rect x="20" y="180" width="140" height="25" rx="6" fill="#475569" />
-    <text x="90" y="197" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Fax / Print</text>
+    <rect x="15" y="205" width="160" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <text x="95" y="226" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Fax / Print Queue</text>
   </g>
 
   <!-- Step 2: CLASSIFY -->
-  <g transform="translate(290, 210)">
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" />
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="url(#classifyGrad)" opacity="0.1" />
-    <text x="90" y="35" fill="#8b5cf6" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">CLASSIFY</text>
-    <line x1="20" y1="50" x2="160" y2="50" stroke="#475569" stroke-width="1" />
+  <g transform="translate(290, 155)">
+    <rect x="0" y="0" width="190" height="260" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#softShadow3)" />
+    <rect x="0" y="0" width="190" height="44" rx="12" fill="#f5f3ff" />
+    <text x="95" y="28" fill="#8b5cf6" font-family="system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">CLASSIFY</text>
+    <line x1="0" y1="44" x2="190" y2="44" stroke="#e2e8f0" stroke-width="1" />
 
-    <text x="90" y="75" fill="white" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">AI Identifies Type</text>
+    <text x="95" y="70" fill="#64748b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">AI Identifies Document Type</text>
 
-    <rect x="20" y="90" width="140" height="25" rx="6" fill="#8b5cf6" opacity="0.3" />
-    <text x="90" y="107" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Invoice</text>
+    <rect x="15" y="85" width="160" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1" />
+    <text x="95" y="106" fill="#7c3aed" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">Invoice</text>
 
-    <rect x="20" y="120" width="140" height="25" rx="6" fill="#8b5cf6" opacity="0.3" />
-    <text x="90" y="137" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Bill of Lading</text>
+    <rect x="15" y="125" width="160" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1" />
+    <text x="95" y="146" fill="#7c3aed" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">Bill of Lading</text>
 
-    <rect x="20" y="150" width="140" height="25" rx="6" fill="#8b5cf6" opacity="0.3" />
-    <text x="90" y="167" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Delivery Receipt</text>
+    <rect x="15" y="165" width="160" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1" />
+    <text x="95" y="186" fill="#7c3aed" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">Delivery Receipt</text>
 
-    <rect x="20" y="180" width="140" height="25" rx="6" fill="#8b5cf6" opacity="0.3" />
-    <text x="90" y="197" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Contract / Other</text>
+    <rect x="15" y="205" width="160" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1" />
+    <text x="95" y="226" fill="#7c3aed" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">Contract / Other</text>
   </g>
 
   <!-- Step 3: EXTRACT -->
-  <g transform="translate(530, 210)">
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="url(#extractGrad)" opacity="0.1" />
-    <text x="90" y="35" fill="#3b82f6" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">EXTRACT</text>
-    <line x1="20" y1="50" x2="160" y2="50" stroke="#475569" stroke-width="1" />
+  <g transform="translate(530, 155)">
+    <rect x="0" y="0" width="190" height="260" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#softShadow3)" />
+    <rect x="0" y="0" width="190" height="44" rx="12" fill="#eff6ff" />
+    <text x="95" y="28" fill="#3b82f6" font-family="system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">EXTRACT</text>
+    <line x1="0" y1="44" x2="190" y2="44" stroke="#e2e8f0" stroke-width="1" />
 
-    <text x="90" y="75" fill="white" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">AI Pulls Key Fields</text>
+    <text x="95" y="70" fill="#64748b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">AI Pulls Key Fields</text>
 
-    <g transform="translate(20, 90)">
-      <rect x="0" y="0" width="65" height="40" rx="6" fill="#3b82f6" opacity="0.3" />
-      <text x="32" y="17" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="8" text-anchor="middle">Vendor</text>
-      <text x="32" y="32" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="600" text-anchor="middle">Acme Co</text>
+    <g transform="translate(15, 85)">
+      <rect x="0" y="0" width="75" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+      <text x="37" y="20" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Vendor</text>
+      <text x="37" y="38" fill="#1e40af" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Acme Co</text>
     </g>
-    <g transform="translate(95, 90)">
-      <rect x="0" y="0" width="65" height="40" rx="6" fill="#3b82f6" opacity="0.3" />
-      <text x="32" y="17" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="8" text-anchor="middle">Total</text>
-      <text x="32" y="32" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="600" text-anchor="middle">$4,500</text>
+    <g transform="translate(100, 85)">
+      <rect x="0" y="0" width="75" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+      <text x="37" y="20" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Total</text>
+      <text x="37" y="38" fill="#1e40af" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">$4,500</text>
     </g>
-    <g transform="translate(20, 140)">
-      <rect x="0" y="0" width="65" height="40" rx="6" fill="#3b82f6" opacity="0.3" />
-      <text x="32" y="17" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="8" text-anchor="middle">Due Date</text>
-      <text x="32" y="32" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="600" text-anchor="middle">Jan 15</text>
+    <g transform="translate(15, 143)">
+      <rect x="0" y="0" width="75" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+      <text x="37" y="20" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Due Date</text>
+      <text x="37" y="38" fill="#1e40af" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Jan 15</text>
     </g>
-    <g transform="translate(95, 140)">
-      <rect x="0" y="0" width="65" height="40" rx="6" fill="#3b82f6" opacity="0.3" />
-      <text x="32" y="17" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="8" text-anchor="middle">PO #</text>
-      <text x="32" y="32" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="600" text-anchor="middle">12345</text>
+    <g transform="translate(100, 143)">
+      <rect x="0" y="0" width="75" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+      <text x="37" y="20" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">PO #</text>
+      <text x="37" y="38" fill="#1e40af" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">12345</text>
     </g>
 
-    <text x="90" y="205" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">+ Line Items, Quantities...</text>
+    <text x="95" y="220" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">+ Line Items, Quantities...</text>
   </g>
 
   <!-- Step 4: VALIDATE -->
-  <g transform="translate(770, 210)">
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="#1e293b" stroke="#14b8a6" stroke-width="2" />
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="url(#validateGrad)" opacity="0.1" />
-    <text x="90" y="35" fill="#14b8a6" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">VALIDATE</text>
-    <line x1="20" y1="50" x2="160" y2="50" stroke="#475569" stroke-width="1" />
+  <g transform="translate(770, 155)">
+    <rect x="0" y="0" width="190" height="260" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#softShadow3)" />
+    <rect x="0" y="0" width="190" height="44" rx="12" fill="#f0fdfa" />
+    <text x="95" y="28" fill="#0d9488" font-family="system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">VALIDATE</text>
+    <line x1="0" y1="44" x2="190" y2="44" stroke="#e2e8f0" stroke-width="1" />
 
-    <text x="90" y="75" fill="white" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Cross-Check Rules</text>
+    <text x="95" y="70" fill="#64748b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Cross-Check Business Rules</text>
 
-    <g transform="translate(20, 90)">
-      <circle cx="12" cy="12" r="10" fill="#22c55e" />
-      <text x="12" y="16" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x2713;</text>
-      <text x="30" y="16" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="start">PO exists in system</text>
+    <g transform="translate(15, 85)">
+      <circle cx="14" cy="14" r="12" fill="#dcfce7" stroke="#86efac" stroke-width="1" />
+      <text x="14" y="19" fill="#16a34a" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">&#x2713;</text>
+      <text x="35" y="18" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="start">PO exists in system</text>
     </g>
 
-    <g transform="translate(20, 120)">
-      <circle cx="12" cy="12" r="10" fill="#22c55e" />
-      <text x="12" y="16" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x2713;</text>
-      <text x="30" y="16" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="start">Qty matches order</text>
+    <g transform="translate(15, 120)">
+      <circle cx="14" cy="14" r="12" fill="#dcfce7" stroke="#86efac" stroke-width="1" />
+      <text x="14" y="19" fill="#16a34a" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">&#x2713;</text>
+      <text x="35" y="18" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="start">Qty matches order</text>
     </g>
 
-    <g transform="translate(20, 150)">
-      <circle cx="12" cy="12" r="10" fill="#f59e0b" />
-      <text x="12" y="16" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">!</text>
-      <text x="30" y="16" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="start">Price differs by 2%</text>
+    <g transform="translate(15, 155)">
+      <circle cx="14" cy="14" r="12" fill="#fef3c7" stroke="#fcd34d" stroke-width="1" />
+      <text x="14" y="18" fill="#d97706" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">!</text>
+      <text x="35" y="18" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="start">Price differs by 2%</text>
     </g>
 
-    <g transform="translate(20, 180)">
-      <circle cx="12" cy="12" r="10" fill="#22c55e" />
-      <text x="12" y="16" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x2713;</text>
-      <text x="30" y="16" fill="white" font-family="system-ui, sans-serif" font-size="10" text-anchor="start">Vendor is approved</text>
+    <g transform="translate(15, 190)">
+      <circle cx="14" cy="14" r="12" fill="#dcfce7" stroke="#86efac" stroke-width="1" />
+      <text x="14" y="19" fill="#16a34a" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">&#x2713;</text>
+      <text x="35" y="18" fill="#475569" font-family="system-ui, sans-serif" font-size="11" text-anchor="start">Vendor is approved</text>
     </g>
 
-    <text x="90" y="215" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Confidence: 94%</text>
+    <rect x="15" y="220" width="160" height="24" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1" />
+    <text x="95" y="237" fill="#166534" font-family="system-ui, sans-serif" font-size="10" font-weight="500" text-anchor="middle">Confidence: 94%</text>
   </g>
 
   <!-- Step 5: INTEGRATE -->
-  <g transform="translate(1010, 210)">
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="#1e293b" stroke="#22c55e" stroke-width="2" />
-    <rect x="0" y="0" width="180" height="220" rx="16" fill="url(#integrateGrad)" opacity="0.1" />
-    <text x="90" y="35" fill="#22c55e" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">INTEGRATE</text>
-    <line x1="20" y1="50" x2="160" y2="50" stroke="#475569" stroke-width="1" />
+  <g transform="translate(1010, 155)">
+    <rect x="0" y="0" width="190" height="260" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#softShadow3)" />
+    <rect x="0" y="0" width="190" height="44" rx="12" fill="#f0fdf4" />
+    <text x="95" y="28" fill="#22c55e" font-family="system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">INTEGRATE</text>
+    <line x1="0" y1="44" x2="190" y2="44" stroke="#e2e8f0" stroke-width="1" />
 
-    <text x="90" y="75" fill="white" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Take Action</text>
+    <text x="95" y="70" fill="#64748b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Take Automated Action</text>
 
-    <rect x="20" y="90" width="140" height="30" rx="8" fill="#22c55e" />
-    <text x="90" y="110" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Post to ERP</text>
+    <rect x="15" y="85" width="160" height="36" rx="6" fill="#22c55e" />
+    <text x="95" y="109" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="500" text-anchor="middle">Post to ERP</text>
 
-    <rect x="20" y="130" width="140" height="30" rx="8" fill="#22c55e" opacity="0.8" />
-    <text x="90" y="150" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Trigger Workflow</text>
+    <rect x="15" y="130" width="160" height="36" rx="6" fill="#4ade80" />
+    <text x="95" y="154" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="500" text-anchor="middle">Trigger Workflow</text>
 
-    <rect x="20" y="170" width="140" height="30" rx="8" fill="#22c55e" opacity="0.6" />
-    <text x="90" y="190" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Send Notifications</text>
+    <rect x="15" y="175" width="160" height="36" rx="6" fill="#86efac" />
+    <text x="95" y="199" fill="#166534" font-family="system-ui, sans-serif" font-size="12" font-weight="500" text-anchor="middle">Send Notifications</text>
 
-    <text x="90" y="220" fill="#f59e0b" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Flag exceptions for review</text>
+    <rect x="15" y="220" width="160" height="24" rx="4" fill="#fef3c7" stroke="#fcd34d" stroke-width="1" />
+    <text x="95" y="237" fill="#d97706" font-family="system-ui, sans-serif" font-size="10" font-weight="500" text-anchor="middle">Flag exceptions for review</text>
   </g>
 
   <!-- Connecting arrows between cards -->
-  <path d="M 230 320 L 280 320" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow3)" />
-  <path d="M 470 320 L 520 320" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow3)" />
-  <path d="M 710 320 L 760 320" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow3)" />
-  <path d="M 950 320 L 1000 320" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow3)" />
-
-  <!-- Animated data particles -->
-  <circle r="5" fill="#f97316" opacity="0.9">
-    <animateMotion dur="4s" repeatCount="indefinite" path="M 230,320 Q 350,280 470,320 Q 590,360 710,320 Q 830,280 950,320 L 1100,320" />
-    <animate attributeName="opacity" values="1;0.3;1" dur="4s" repeatCount="indefinite" />
-  </circle>
-  <circle r="4" fill="#8b5cf6" opacity="0.8">
-    <animateMotion dur="5s" repeatCount="indefinite" begin="1s" path="M 230,320 Q 350,280 470,320 Q 590,360 710,320 Q 830,280 950,320 L 1100,320" />
-    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="5s" repeatCount="indefinite" begin="1s" />
-  </circle>
-  <circle r="3" fill="#22c55e" opacity="0.7">
-    <animateMotion dur="4.5s" repeatCount="indefinite" begin="2s" path="M 230,320 Q 350,280 470,320 Q 590,360 710,320 Q 830,280 950,320 L 1100,320" />
-    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="4.5s" repeatCount="indefinite" begin="2s" />
-  </circle>
+  <path d="M 240 285 L 280 285" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 480 285 L 520 285" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 720 285 L 760 285" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
+  <path d="M 960 285 L 1000 285" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrowStep)" />
 
   <!-- Bottom summary bar -->
-  <rect x="50" y="455" width="1300" height="35" rx="8" fill="#22c55e" opacity="0.15" stroke="#22c55e" stroke-width="1" />
-  <text x="700" y="478" fill="#22c55e" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
-    RESULT: Seconds per document | 97%+ accuracy | Zero manual data entry | Full audit trail
+  <rect x="50" y="430" width="1300" height="36" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1" />
+  <text x="700" y="454" fill="#166534" font-family="system-ui, sans-serif" font-size="12" font-weight="500" text-anchor="middle">
+    Result: Seconds per document | 97%+ extraction accuracy | Zero manual data entry | Full audit trail
   </text>
 </svg>

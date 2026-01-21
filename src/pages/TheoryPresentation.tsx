@@ -84,100 +84,162 @@ function InteractiveSvgViewer({ src, title }: { src: string; title: string }) {
     }
   };
 
-  const viewerContent = (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden bg-slate-900 rounded-xl ${
-        isFullscreen ? 'fixed inset-4 z-[10200]' : 'w-full h-full'
-      }`}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-    >
-      {/* SVG Container */}
+  // Inline viewer (non-fullscreen mode)
+  if (!isFullscreen) {
+    return (
       <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-          transformOrigin: 'center center',
-          transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-        }}
+        ref={containerRef}
+        className="relative overflow-hidden bg-stone-100 rounded-xl w-full h-full"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       >
-        <object
-          data={src}
-          type="image/svg+xml"
-          className="w-full h-full"
-          aria-label={title}
+        {/* SVG Container */}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transformOrigin: 'center center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+          }}
         >
-          <img src={src} alt={title} className="w-full h-full object-contain" />
-        </object>
+          <object
+            data={src}
+            type="image/svg+xml"
+            className="w-full h-full"
+            aria-label={title}
+          >
+            <img src={src} alt={title} className="w-full h-full object-contain" />
+          </object>
+        </div>
+
+        {/* Controls */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-gray-800/60 backdrop-blur-sm rounded-full px-4 py-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+            className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-4 h-4 text-white" />
+          </button>
+          <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+            {Math.round(scale * 100)}%
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+            className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-4 h-4 text-white" />
+          </button>
+          <div className="w-px h-4 bg-white/30 mx-1" />
+          <button
+            onClick={(e) => { e.stopPropagation(); resetView(); }}
+            className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+            title="Reset View"
+          >
+            <Move className="w-4 h-4 text-white" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+            className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+            title="Fullscreen"
+          >
+            <Maximize2 className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Hint */}
+        <div className="absolute top-4 left-4 text-gray-500 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
+          Scroll to zoom • Drag to pan
+        </div>
       </div>
+    );
+  }
 
-      {/* Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-        <button
-          onClick={(e) => { e.stopPropagation(); zoomOut(); }}
-          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-          title="Zoom Out"
-        >
-          <ZoomOut className="w-4 h-4 text-white" />
-        </button>
-        <span className="text-white text-xs font-mono min-w-[3rem] text-center">
-          {Math.round(scale * 100)}%
-        </span>
-        <button
-          onClick={(e) => { e.stopPropagation(); zoomIn(); }}
-          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-          title="Zoom In"
-        >
-          <ZoomIn className="w-4 h-4 text-white" />
-        </button>
-        <div className="w-px h-4 bg-white/30 mx-1" />
-        <button
-          onClick={(e) => { e.stopPropagation(); resetView(); }}
-          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-          title="Reset View"
-        >
-          <Move className="w-4 h-4 text-white" />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
-          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-        >
-          <Maximize2 className="w-4 h-4 text-white" />
-        </button>
-      </div>
-
-      {/* Fullscreen close button */}
-      {isFullscreen && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
-          className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
-      )}
-
-      {/* Hint */}
-      <div className="absolute top-4 left-4 text-white/50 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
-        Scroll to zoom • Drag to pan
-      </div>
-    </div>
-  );
-
+  // Fullscreen mode - render backdrop first, then content on top
   return (
     <>
-      {viewerContent}
-      {/* Fullscreen backdrop */}
-      {isFullscreen && (
+      {/* Backdrop - must be first for proper stacking */}
+      <div
+        className="fixed inset-0 bg-black/90 z-[10500]"
+        onClick={() => setIsFullscreen(false)}
+      />
+
+      {/* Fullscreen content - on top of backdrop */}
+      <div
+        ref={containerRef}
+        className="fixed inset-8 z-[10501] overflow-hidden bg-stone-50 rounded-2xl shadow-2xl"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
+        {/* SVG Container */}
         <div
-          className="fixed inset-0 bg-black/80 z-[10199]"
-          onClick={() => setIsFullscreen(false)}
-        />
-      )}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transformOrigin: 'center center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+          }}
+        >
+          <object
+            data={src}
+            type="image/svg+xml"
+            className="w-full h-full"
+            aria-label={title}
+          >
+            <img src={src} alt={title} className="w-full h-full object-contain" />
+          </object>
+        </div>
+
+        {/* Controls */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-gray-800/70 backdrop-blur-sm rounded-full px-5 py-2.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+            className="p-2 rounded-full hover:bg-white/20 transition-colors"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-5 h-5 text-white" />
+          </button>
+          <span className="text-white text-sm font-mono min-w-[4rem] text-center">
+            {Math.round(scale * 100)}%
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+            className="p-2 rounded-full hover:bg-white/20 transition-colors"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-5 h-5 text-white" />
+          </button>
+          <div className="w-px h-5 bg-white/30 mx-2" />
+          <button
+            onClick={(e) => { e.stopPropagation(); resetView(); }}
+            className="p-2 rounded-full hover:bg-white/20 transition-colors"
+            title="Reset View"
+          >
+            <Move className="w-5 h-5 text-white" />
+          </button>
+        </div>
+
+        {/* Close button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+          className="absolute top-4 right-4 p-3 rounded-full bg-gray-800/70 hover:bg-gray-800/90 transition-colors"
+          title="Close (Esc)"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
+
+        {/* Hint */}
+        <div className="absolute top-4 left-4 text-gray-500 text-sm" style={{ fontFamily: 'var(--font-body)' }}>
+          Scroll to zoom • Drag to pan • Click outside to close
+        </div>
+      </div>
     </>
   );
 }
