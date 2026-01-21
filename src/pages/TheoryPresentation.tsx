@@ -539,12 +539,17 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose }: The
           {currentIndex === totalSlides - 1 && (
             <button
               onClick={handleClose}
-              className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
-              style={{ fontFamily: 'var(--font-display)' }}
+              className="mt-6 px-5 py-2.5 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 group"
+              style={{
+                fontFamily: 'var(--font-display)',
+                backgroundColor: 'var(--color-bmf-blue)',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bmf-blue-dark)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bmf-blue)'}
             >
-              <span>Hands-on Use Cases</span>
+              <span>Try It Live</span>
               <svg
-                className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
+                className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
