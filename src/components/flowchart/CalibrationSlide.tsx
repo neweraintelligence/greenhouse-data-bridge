@@ -142,12 +142,12 @@ function CalibrationSlideComponent({ sessionCode, onProceed }: CalibrationSlideP
           {/* Proceed Button */}
           <button
             onClick={onProceed}
-            className="group inline-flex items-center justify-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+            className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
-            <span>Everyone's Ready - Let's Begin</span>
-            <ArrowRight className="w-5 h-5 opacity-70 group-hover:translate-x-2 transition-transform" />
+            <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span>Let's Begin</span>
+            <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
