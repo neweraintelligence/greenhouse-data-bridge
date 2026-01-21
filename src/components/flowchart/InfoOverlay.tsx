@@ -61,11 +61,23 @@ function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
     if (label.includes('scan') || label.includes('barcode') || label.includes('dock verification')) {
       return 'barcode_scans';
     }
-    // Communications
+    // Invoice PDF / OneDrive -> billing challenge (invoice verification)
+    if (label.includes('invoice') || label.includes('billing') || label.includes('onedrive')) {
+      return 'billing_challenge';
+    }
+    // BOL notification email -> communications (not shipments_expected)
+    if (label.includes('bill of lading') || label.includes('bol') || label.includes('lading')) {
+      return 'communications';
+    }
+    // Communications / follow-up
     if (label.includes('email') || label.includes('outlook') || label.includes('communication') || label.includes('follow-up')) {
       return 'communications';
     }
-    // Default for shipping
+    // Expected Shipments (Excel) - first slide
+    if (label.includes('expected') || label.includes('shipment') || label.includes('excel') || label.includes('order')) {
+      return 'shipments_expected';
+    }
+    // Default for shipping - but this shouldn't happen now
     return 'shipments_expected';
   }
 
