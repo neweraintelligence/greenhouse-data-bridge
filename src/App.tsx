@@ -9,6 +9,7 @@ import { PrintLabels } from './pages/PrintLabels';
 import { DockTablet } from './pages/DockTablet';
 import { QuickIdentity } from './pages/QuickIdentity';
 import { ReceiptSigningForm } from './pages/ReceiptSigningForm';
+import { TheoryPresentation } from './pages/TheoryPresentation';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/dock/:sessionCode" element={<DockTablet />} />
           <Route path="/identity" element={<QuickIdentity />} />
           <Route path="/sign-receipt/:sessionCode/:shipmentId" element={<ReceiptSigningForm />} />
+          <Route path="/theory" element={<TheoryPresentation />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

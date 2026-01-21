@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <!-- Section Labels -->
+  <text x="90" y="40" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">SOURCES</text>
+  <text x="340" y="40" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">ETL PIPELINE</text>
+  <text x="560" y="40" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">DATA LAKE</text>
+  <text x="820" y="40" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">AI LAYER</text>
+  <text x="1060" y="40" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">USERS</text>
+
+  <!-- Source Nodes -->
+  <g transform="translate(30, 70)">
+    <!-- ERP -->
+    <rect x="0" y="0" width="120" height="50" rx="12" fill="url(#blueGrad)" filter="url(#glow)" />
+    <text x="60" y="22" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">ERP System</text>
+    <text x="60" y="38" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Orders, Inventory</text>
+  </g>
+
+  <g transform="translate(30, 135)">
+    <!-- Climate -->
+    <rect x="0" y="0" width="120" height="50" rx="12" fill="url(#greenGrad)" filter="url(#glow)" />
+    <text x="60" y="22" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Climate Systems</text>
+    <text x="60" y="38" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Priva, IUNU</text>
+  </g>
+
+  <g transform="translate(30, 200)">
+    <!-- Labor -->
+    <rect x="0" y="0" width="120" height="50" rx="12" fill="url(#purpleGrad)" filter="url(#glow)" />
+    <text x="60" y="22" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Labor Tracking</text>
+    <text x="60" y="38" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Priva FS Labour</text>
+  </g>
+
+  <g transform="translate(30, 265)">
+    <!-- Documents -->
+    <rect x="0" y="0" width="120" height="50" rx="12" fill="url(#orangeGrad)" filter="url(#glow)" />
+    <text x="60" y="22" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Documents</text>
+    <text x="60" y="38" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Invoices, BOLs</text>
+  </g>
+
+  <g transform="translate(30, 330)">
+    <!-- Sensors -->
+    <rect x="0" y="0" width="120" height="50" rx="12" fill="url(#tealGrad)" filter="url(#glow)" />
+    <text x="60" y="22" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">IoT Sensors</text>
+    <text x="60" y="38" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Digital Counts</text>
+  </g>
+
+  <!-- Connection lines from sources to ETL -->
+  <path d="M 150 95 Q 200 95 250 175" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6" />
+  <path d="M 150 160 Q 200 160 250 185" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6" />
+  <path d="M 150 225 L 250 200" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6" />
+  <path d="M 150 290 Q 200 290 250 215" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6" />
+  <path d="M 150 355 Q 200 355 250 225" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6" />
+
+  <!-- ETL Pipeline Node -->
+  <g transform="translate(260, 150)">
+    <rect x="0" y="0" width="160" height="100" rx="16" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
+    <rect x="0" y="0" width="160" height="100" rx="16" fill="url(#blueGrad)" opacity="0.15" />
+    <text x="80" y="35" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">ETL Pipeline</text>
+    <text x="80" y="55" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Clean &amp; Transform</text>
+    <text x="80" y="70" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Normalize &amp; Validate</text>
+    <text x="80" y="85" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle">Standardize Formats</text>
+  </g>
+
+  <!-- Arrow ETL to Data Lake -->
+  <path d="M 420 200 L 480 200" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- Data Lake Node (Central) -->
+  <g transform="translate(480, 120)">
+    <ellipse cx="80" cy="80" rx="75" ry="60" fill="#1e293b" stroke="#22c55e" stroke-width="3" />
+    <ellipse cx="80" cy="80" rx="75" ry="60" fill="url(#greenGrad)" opacity="0.2" />
+    <text x="80" y="70" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Unified</text>
+    <text x="80" y="88" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Data Lake</text>
+    <text x="80" y="110" fill="rgba(255,255,255,0.5)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Single Source of Truth</text>
+  </g>
+
+  <!-- Arrows from Data Lake to AI Layer -->
+  <path d="M 635 160 Q 680 140 720 140" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 635 200 L 720 200" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 635 240 Q 680 260 720 260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- AI Layer Outputs -->
+  <g transform="translate(730, 100)">
+    <!-- Dashboards -->
+    <rect x="0" y="0" width="140" height="45" rx="10" fill="url(#purpleGrad)" filter="url(#glow)" />
+    <text x="70" y="20" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Dashboards</text>
+    <text x="70" y="35" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Real-time KPIs</text>
+  </g>
+
+  <g transform="translate(730, 165)">
+    <!-- Conversational AI -->
+    <rect x="0" y="0" width="140" height="45" rx="10" fill="url(#blueGrad)" filter="url(#glow)" />
+    <text x="70" y="20" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">AI Analytics</text>
+    <text x="70" y="35" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Natural Language</text>
+  </g>
+
+  <g transform="translate(730, 230)">
+    <!-- Forecasts -->
+    <rect x="0" y="0" width="140" height="45" rx="10" fill="url(#tealGrad)" filter="url(#glow)" />
+    <text x="70" y="20" fill="white" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Predictions</text>
+    <text x="70" y="35" fill="rgba(255,255,255,0.7)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Forecasts &amp; Alerts</text>
+  </g>
+
+  <!-- Arrows to Users -->
+  <path d="M 870 122 L 940 105" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 870 187 L 940 165" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 870 252 L 940 260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 870 187 L 940 225" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 870 252 L 940 320" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- User Groups -->
+  <g transform="translate(950, 70)">
+    <rect x="0" y="0" width="160" height="50" rx="12" fill="#1e293b" stroke="#f97316" stroke-width="2" />
+    <text x="80" y="22" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Leadership</text>
+    <text x="80" y="38" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Strategic decisions</text>
+  </g>
+
+  <g transform="translate(950, 140)">
+    <rect x="0" y="0" width="160" height="50" rx="12" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" />
+    <text x="80" y="22" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Operations</text>
+    <text x="80" y="38" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Daily management</text>
+  </g>
+
+  <g transform="translate(950, 210)">
+    <rect x="0" y="0" width="160" height="50" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
+    <text x="80" y="22" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Finance</text>
+    <text x="80" y="38" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Cost &amp; revenue</text>
+  </g>
+
+  <g transform="translate(950, 290)">
+    <rect x="0" y="0" width="160" height="50" rx="12" fill="#1e293b" stroke="#22c55e" stroke-width="2" />
+    <text x="80" y="22" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Growers</text>
+    <text x="80" y="38" fill="rgba(255,255,255,0.6)" font-family="system-ui, sans-serif" font-size="9" text-anchor="middle">Crop &amp; yield insights</text>
+  </g>
+
+  <!-- Decorative data flow particles -->
+  <circle cx="200" cy="95" r="3" fill="#3b82f6" opacity="0.8">
+    <animate attributeName="cx" values="150;250" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="200" cy="200" r="3" fill="#22c55e" opacity="0.8">
+    <animate attributeName="cx" values="150;250" dur="1.5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="200" cy="290" r="3" fill="#f97316" opacity="0.8">
+    <animate attributeName="cx" values="150;250" dur="2.5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2.5s" repeatCount="indefinite" />
+  </circle>
+</svg>

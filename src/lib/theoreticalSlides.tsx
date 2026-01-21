@@ -18,6 +18,8 @@ export interface TheoreticalSlide {
   };
   speakerNotes?: string;
   imagePath?: string;
+  // For interactive SVG slides
+  interactiveSvg?: string;
   imagePrompt: string; // For generating slide images
 }
 
@@ -43,7 +45,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
       ],
       stats: [
         { value: '80%', label: 'of business data is unstructured' },
-        { value: '7+ min', label: 'average time to process one document manually' },
+        { value: '15 min', label: 'Deliveroo spent per invoice before automation' },
         { value: '4%', label: 'human error rate in data entry' },
       ],
     },
@@ -61,9 +63,9 @@ export const theoreticalSlides: TheoreticalSlide[] = [
       headline: 'Manual document processing is expensive. Most companies don\'t realize how much.',
       stats: [
         { value: '$15-25', label: 'cost to manually process one invoice' },
-        { value: '25 days', label: 'average invoice processing cycle' },
+        { value: '90 min', label: 'Landmark Group spent per purchase order' },
         { value: '3.6%', label: 'of invoices contain errors' },
-        { value: '2-3 hrs', label: 'to resolve each dispute' },
+        { value: '16 days', label: 'Deutsche Bank loan processing time (before)' },
       ],
       bullets: [
         'Finance teams spend 60% of time on data entry, not analysis',
@@ -93,7 +95,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
       ],
       stats: [
         { value: '60%', label: 'OCR accuracy on handwritten content' },
-        { value: '95-98%', label: 'IDP accuracy on standard digital documents' },
+        { value: '97.6%', label: 'Deliveroo\'s IDP accuracy after implementation' },
       ],
     },
     speakerNotes: 'This is the "aha" moment. Traditional OCR is like hiring someone who can read but doesn\'t speak the language. IDP is like hiring a fluent accountant.',
@@ -130,6 +132,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE IDP WORKFLOW',
     subtitle: 'From Paper to Actionable Data',
     imageOnLeft: true,
+    interactiveSvg: '/demo_pack/theoretical/idp-workflow-flowchart.svg',
     content: {
       headline: 'Five steps from document arrival to business action.',
       bullets: [
@@ -140,7 +143,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         '5. INTEGRATE: Push clean data to ERP, trigger workflows, flag exceptions',
       ],
     },
-    speakerNotes: 'This is the "how it works" slide. Keep it simple - five steps. The magic is in steps 2-4 where AI replaces human judgment.',
+    speakerNotes: 'This is the "how it works" slide. Keep it simple - five steps. The magic is in steps 2-4 where AI replaces human judgment. Use the interactive diagram to walk through each step visually.',
     imagePrompt: 'Horizontal workflow diagram rendered as a 3D isometric illustration. Five connected stages showing: (1) envelope/scanner, (2) AI sorting documents into categories, (3) magnifying glass extracting data fields, (4) checkmark validation badge, (5) connected ERP system icon. Soft shadows, clean white background, blue accent colors. Documents have realistic paper texture. Style: modern tech illustration with depth, blend of realistic and iconographic.',
   },
 
@@ -160,8 +163,8 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'Can explain WHY it extracted what it extracted',
       ],
       quote: {
-        text: 'Recent advancements in AI have led to transformative change in IDP technology, opening up new possibilities for automating documents that could not be automated before.',
-        attribution: 'Industry Analysis, 2025',
+        text: 'Wolt processes invoices in 9+ languages across 11 countries with the same team size, handling 30% annual volume growth without adding staff.',
+        attribution: 'Wolt (DoorDash subsidiary)',
       },
     },
     speakerNotes: 'This is the "why now" slide. LLMs are the breakthrough. Before: you needed thousands of examples to train. Now: AI understands from context.',
@@ -206,8 +209,8 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'Over time, the system learns from corrections',
       ],
       stats: [
-        { value: '95-98%', label: 'accuracy on standard digital documents' },
-        { value: '70-85%', label: 'accuracy on handwritten/scanned docs' },
+        { value: '93.4%', label: 'Adyen\'s average extraction accuracy' },
+        { value: '82.4%', label: 'Thermo Fisher initial accuracy (targeting 85%+)' },
         { value: '99%+', label: 'with human review on flagged items' },
       ],
     },
@@ -231,8 +234,8 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'Exceptions handled by experts, routine handled by AI',
       ],
       quote: {
-        text: 'IDP can reduce error rates by over 52%, dramatically reducing mistakes in data extraction and entry.',
-        attribution: 'Docsumo, 2025',
+        text: 'Thermo Fisher achieved 53% straight-through processing - over half of their 824,000 annual invoices need zero human intervention.',
+        attribution: 'Thermo Fisher Scientific',
       },
     },
     speakerNotes: 'Emphasize: this isn\'t "AI replacing humans." It\'s AI handling the boring stuff so humans focus on exceptions and decisions.',
@@ -276,40 +279,40 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     content: {
       headline: 'Document AI pays for itself. Fast.',
       stats: [
-        { value: '200-300%', label: 'average first-year ROI' },
-        { value: '$3.70', label: 'return for every $1 invested in AI' },
-        { value: '4x', label: 'faster document processing' },
-        { value: '12-18 mo', label: 'typical payback period' },
+        { value: '€17M', label: 'Coca-Cola Europacific Partners annual savings' },
+        { value: '23x', label: 'Deliveroo efficiency increase' },
+        { value: '70%', label: 'Thermo Fisher processing time reduction' },
+        { value: '5-12 mo', label: 'Inelo ROI payback period' },
       ],
       bullets: [
-        'One financial firm saved $2.9M annually after IDP adoption',
-        'Logistics company: 7 minutes per document → 30 seconds (90%+ reduction)',
-        'Insurance claims processing cut by 60%',
-        '26-55% productivity gains reported across industries',
+        'Coca-Cola CCEP: 580,000 hours recovered (278 working years equivalent)',
+        'JPMorgan: 360,000 hours of loan analysis now done in seconds',
+        'Deliveroo: Invoice processing from 15 minutes to 45 seconds',
+        'First Abu Dhabi Bank: 80,000 hours saved annually on identity verification',
       ],
     },
-    speakerNotes: 'Numbers people can take to their CFO. "200-300% ROI in year one." That gets budget approved.',
+    speakerNotes: 'These are real companies with published results. The ROI is proven across industries.',
     imagePrompt: 'Financial ROI visualization with before/after comparison. Left side shows a stopwatch at 7 minutes with dollar signs draining away. Right side shows 30 seconds with dollar signs accumulating in a digital vault. Central percentage showing "90% TIME SAVINGS". Professional business graphics with green growth indicators. Coins and currency elements mixed with digital data streams. Style: infographic meets photorealism, clean corporate aesthetic.',
   },
 
   {
     id: 'industry-cases',
     section: 'Business Impact',
-    title: 'INDUSTRY SUCCESS STORIES',
-    subtitle: 'Real Results Across Sectors',
+    title: 'REAL SUCCESS STORIES',
+    subtitle: 'Named Companies, Verified Results',
     imageOnLeft: false,
     content: {
-      headline: 'Every industry has document processing. Every industry benefits.',
+      headline: 'These aren\'t hypotheticals. These are published case studies.',
       bullets: [
-        'FINANCE: 88% prioritizing document automation in 2025',
-        'LOGISTICS: 70%+ adopting for customs and shipment tracking',
-        'INSURANCE: 67% implementing for underwriting and claims',
-        'HEALTHCARE: EHR data extraction reducing admin burden',
-        'MANUFACTURING: Quality certificates and supplier documents',
-        'AGRICULTURE: Compliance records, COAs, worker documentation',
+        'COCA-COLA EUROPACIFIC: €800M in orders processed, 99% faster than manual',
+        'JPMORGAN CHASE: COiN platform processes loan agreements in seconds vs 360K hours/year',
+        'DEUTSCHE BANK: Loan processing from 16 days to 24 hours (93% reduction)',
+        'LANDMARK GROUP: Purchase orders from 90 min to 4 min (96% reduction)',
+        'ADYEN: 23 countries, any language, with just 7 FTEs in accounts payable',
+        'WOLT: 60% automation, 11 countries, 9+ languages, same headcount',
       ],
     },
-    speakerNotes: 'Make it relevant to the room. Greenhouse/agriculture tie-in: compliance records, foreign worker docs, vendor invoices.',
+    speakerNotes: 'Name-drop these companies. They\'re household names or industry leaders. This builds credibility.',
     imagePrompt: 'Six-panel industry mosaic. Each panel shows a different industry scenario: (1) Finance - trading floor with document screens, (2) Logistics - warehouse with shipping manifests, (3) Insurance - claims adjuster with forms, (4) Healthcare - medical records, (5) Manufacturing - quality control with certificates, (6) Agriculture - greenhouse with compliance documents. All connected by glowing data lines in center. Style: documentary photography montage with digital connection overlay.',
   },
 
@@ -317,7 +320,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     id: 'touchless-invoice',
     section: 'Business Impact',
     title: 'THE "TOUCHLESS" INVOICE',
-    subtitle: '50% of Invoices Processed Without Human Touch by 2025',
+    subtitle: 'When Automation Just Works',
     imageOnLeft: true,
     content: {
       headline: 'The goal: invoices that process themselves.',
@@ -330,8 +333,8 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'Human only sees exceptions',
       ],
       quote: {
-        text: '50% of B2B invoices globally will be automated by 2025.',
-        attribution: 'Industry Forecast',
+        text: 'Thermo Fisher Scientific processes 824,000 invoices annually with 53% requiring zero human intervention.',
+        attribution: 'Thermo Fisher Scientific via UiPath',
       },
     },
     speakerNotes: 'This is the end state. "Touchless" doesn\'t mean humans disappear - it means they focus on value-add work.',
@@ -347,16 +350,16 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     content: {
       headline: 'What it costs vs what you save.',
       bullets: [
-        'INITIAL: Software licensing, integration, training',
+        'INITIAL: Software licensing, integration, training (12 weeks typical design)',
         'ONGOING: Subscriptions, maintenance, updates',
         'TANGIBLE BENEFITS: Labor savings, faster processing, fewer errors',
         'INTANGIBLE: Competitive advantage, employee satisfaction, audit readiness',
         'HIDDEN SAVINGS: Dispute resolution, late payment fees, compliance penalties',
       ],
       stats: [
-        { value: '12-18', label: 'months typical payback' },
+        { value: '5-12', label: 'months typical payback (Inelo)' },
         { value: '72%', label: 'of leaders see positive Gen AI returns' },
-        { value: '88%', label: 'expect AI budget increases next year' },
+        { value: '20.5%', label: 'Adyen error reduction' },
       ],
     },
     speakerNotes: 'Be honest about costs. But frame it: "The question isn\'t whether you can afford to do this. It\'s whether you can afford NOT to."',
@@ -364,7 +367,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
   },
 
   // ============================================================================
-  // SECTION 4: PRACTICAL APPLICATIONS (5 minutes, 3 slides)
+  // SECTION 4: PRACTICAL APPLICATIONS (5 minutes, 5 slides - includes SVG diagrams)
   // ============================================================================
 
   {
@@ -410,7 +413,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
   },
 
   {
-    id: 'data-flow',
+    id: 'data-flow-overview',
     section: 'Applications',
     title: 'THE DATA FLOW',
     subtitle: 'From Scattered Sources to Unified Insights',
@@ -425,9 +428,51 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'USERS: Leadership sees KPIs, operations gets alerts, growers get predictions',
       ],
     },
-    speakerNotes: 'This is the "big picture" slide. Documents are one input. But they connect to everything else.',
-    imagePath: '/demo_pack/theoretical/data-flow-diagram.svg', // Reference to SVG
+    speakerNotes: 'This is the "big picture" slide. Documents are one input. But they connect to everything else. Next slides show the detailed architecture.',
     imagePrompt: 'Horizontal data flow architecture diagram. Left: multiple source icons (database, email, sensor, spreadsheet) labeled "Sources". Middle: funnel/pipeline labeled "ETL" transforming into clean data streams. Center: large glowing "Data Lake" represented as a circular pool of organized data. Right: three output streams leading to dashboard screens, conversation bubble (AI chat), and prediction graph. Clean tech illustration style with blue/purple color scheme. Style: isometric tech architecture with glowing data elements.',
+  },
+
+  {
+    id: 'architecture-detailed',
+    section: 'Applications',
+    title: 'DATA ARCHITECTURE',
+    subtitle: 'The Technical Pipeline',
+    imageOnLeft: false,
+    content: {
+      headline: 'A complete view of how data flows from capture to insight.',
+      bullets: [
+        'Sources → ETL Pipeline → Data Lake → AI Layer → Users',
+        'Each stage adds value and removes noise',
+        'Real-time processing for operational data',
+        'Batch processing for analytics and reporting',
+        'Zoom and explore the diagram to understand each component',
+      ],
+    },
+    speakerNotes: 'This is an interactive diagram. You can zoom in and out to explore the architecture. Use it as a visual aid while explaining.',
+    interactiveSvg: '/demo_pack/theoretical/data-flow-diagram.svg',
+    imagePrompt: 'Technical architecture diagram showing data pipeline stages.',
+  },
+
+  {
+    id: 'kpi-transformation',
+    section: 'Applications',
+    title: 'KPI TRANSFORMATION',
+    subtitle: 'From Daily Scramble to Real-Time Intelligence',
+    imageOnLeft: true,
+    content: {
+      headline: 'The before and after of operational visibility.',
+      bullets: [
+        'BEFORE: Scattered spreadsheets, manual reconciliation, delayed insights',
+        'AFTER: Unified data lake, automated processing, same-day visibility',
+        'Leadership gets strategic dashboards',
+        'Operations gets actionable alerts',
+        'Growers get predictive insights',
+        'Zero manual reconciliation required',
+      ],
+    },
+    speakerNotes: 'This shows the transformation from current state to future state. Zoom in to explore the specific data sources and outputs.',
+    interactiveSvg: '/demo_pack/theoretical/kpi-scramble-future.svg',
+    imagePrompt: 'Before/after comparison of KPI management showing transformation from chaos to clarity.',
   },
 
   // ============================================================================
@@ -450,6 +495,10 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         'PHASE 5: Integrate with downstream systems (ERP, workflows)',
         'Timeline: 3-6 months to production value',
       ],
+      quote: {
+        text: 'Thermo Fisher designed their solution in just 12 weeks and achieved 70% reduction in processing time.',
+        attribution: 'Thermo Fisher Scientific',
+      },
     },
     speakerNotes: 'Make it achievable. "Start small, prove value, expand." Don\'t overwhelm with a 2-year transformation project.',
     imagePrompt: 'Roadmap visualization as a winding path/road from "Today" to "Full Automation". Five milestone markers along the path showing phases. First milestone is larger and highlighted ("Start Here"). Path moves through stylized landscape representing business transformation - from chaotic paper stacks at start to organized digital systems at end. Aerial perspective with warm lighting. Style: stylized 3D map illustration with realistic textures.',
@@ -496,18 +545,78 @@ export const sectionOrder = [
 ];
 
 // ============================================================================
-// STATS SUMMARY (for quick reference)
+// STATS SUMMARY (for quick reference) - Updated with real company data
 // ============================================================================
 export const keyStats = {
   marketSize: '$17.8B by 2032 (from $1.5B in 2022)',
   adoptionRate: '78% of enterprises use AI (up from 55% a year ago)',
-  roi: '200-300% average first-year ROI',
-  processingSpeed: '4x faster with IDP vs manual',
-  accuracy: '95-98% on standard digital documents',
-  errorReduction: '52% fewer errors with IDP',
-  touchlessInvoices: '50% of B2B invoices automated by 2025',
-  paybackPeriod: '12-18 months typical',
+  cocaCola: '€17M savings, 580K hours recovered',
+  jpmorgan: '360K hours of work now done in seconds',
+  deliveroo: '23x efficiency increase, 97.6% accuracy',
+  thermoFisher: '70% time reduction, 53% straight-through processing',
+  deutscheBank: '16 days to 24 hours (93% reduction)',
+  landmark: '90 min to 4 min per purchase order',
 };
+
+// ============================================================================
+// COMPANY TESTIMONIALS (for citations)
+// ============================================================================
+export const companyTestimonials = [
+  {
+    company: 'Coca-Cola Europacific Partners',
+    industry: 'Beverage / Consumer Goods',
+    result: '€17M savings, 580,000 hours recovered, 99% faster order processing',
+    source: 'SS&C Blue Prism',
+  },
+  {
+    company: 'JPMorgan Chase',
+    industry: 'Banking',
+    result: '360,000 hours of loan analysis now done in seconds (COiN Platform)',
+    source: 'Industry publications',
+  },
+  {
+    company: 'Deliveroo',
+    industry: 'Food Delivery',
+    result: '23x efficiency increase, 97.6% accuracy, 15 min to 45 sec per invoice',
+    source: 'Rossum',
+  },
+  {
+    company: 'Thermo Fisher Scientific',
+    industry: 'Life Sciences',
+    result: '70% time reduction, 53% straight-through processing, 824K invoices/year',
+    source: 'UiPath',
+  },
+  {
+    company: 'Deutsche Bank',
+    industry: 'Banking',
+    result: 'Loan processing from 16 days to 24 hours',
+    source: 'Journal of Banking and Financial Technology',
+  },
+  {
+    company: 'First Abu Dhabi Bank',
+    industry: 'Banking',
+    result: '88% efficiency increase, 80,000 hours saved on identity verification',
+    source: 'UiPath',
+  },
+  {
+    company: 'Landmark Group',
+    industry: 'Retail',
+    result: 'Purchase orders from 90 min to 4 min, 40-50K hours saved/year',
+    source: 'UiPath',
+  },
+  {
+    company: 'Wolt',
+    industry: 'Food/Retail Delivery',
+    result: '60% automation, 11 countries, 9+ languages, 30% volume growth with same headcount',
+    source: 'Rossum',
+  },
+  {
+    company: 'Adyen',
+    industry: 'Fintech',
+    result: '20.5% error reduction, 93.4% accuracy, 23 countries with 7 FTEs',
+    source: 'Rossum',
+  },
+];
 
 // ============================================================================
 // SOURCES (for citations)
@@ -515,9 +624,10 @@ export const keyStats = {
 export const sources = [
   { title: 'Document Processing Statistics 2025', url: 'https://sensetask.com/blog/document-processing-statistics-2025/' },
   { title: 'IDP Market Report 2025', url: 'https://www.docsumo.com/blogs/intelligent-document-processing/intelligent-document-processing-market-report-2025' },
-  { title: 'Enterprise AI Adoption Statistics', url: 'https://www.secondtalent.com/resources/ai-adoption-in-enterprise-statistics/' },
-  { title: 'AI Statistics & Trends 2025', url: 'https://www.fullview.io/blog/ai-statistics' },
-  { title: 'State of Enterprise AI 2025 (OpenAI)', url: 'https://cdn.openai.com/pdf/7ef17d82-96bf-4dd1-9df2-228f7f377a29/the-state-of-enterprise-ai_2025-report.pdf' },
-  { title: 'IDP Use Cases 2025', url: 'https://www.lindy.ai/blog/intelligent-document-processing-use-cases' },
-  { title: 'What is IDP (AWS)', url: 'https://aws.amazon.com/what-is/intelligent-document-processing/' },
+  { title: 'Coca-Cola CCEP Case Study', url: 'https://www.blueprism.com/resources/case-studies/coca-cola-partners-intelligent-automation-transformation/' },
+  { title: 'Thermo Fisher Case Study', url: 'https://www.uipath.com/resources/automation-case-studies/document-understanding-reduces-thermo-fisher-scientific-invoice-process' },
+  { title: 'Deliveroo Case Study', url: 'https://rossum.ai/customer-stories/deliveroo/' },
+  { title: 'First Abu Dhabi Bank Case Study', url: 'https://www.uipath.com/resources/automation-case-studies/first-abu-dhabi-bank-fab' },
+  { title: 'Wolt Case Study', url: 'https://rossum.ai/customer-stories/wolt/' },
+  { title: 'Adyen Case Study', url: 'https://rossum.ai/customer-stories/adyen/' },
 ];

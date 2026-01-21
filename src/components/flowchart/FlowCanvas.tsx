@@ -67,6 +67,7 @@ import { IncidentReportModal, type IncidentReportData } from '../reports/Inciden
 import { ToastContainer } from '../Toast';
 import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
 import { ParticipantActivityLog } from './ParticipantActivityLog';
+import { TheoryPresentation } from '../../pages/TheoryPresentation';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nodeTypes: Record<string, any> = {
@@ -298,6 +299,9 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Selected use case
   const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null);
   const [hasInitialFit, setHasInitialFit] = useState(false);
+
+  // Theory mode state
+  const [isTheoryMode, setIsTheoryMode] = useState(false);
 
   // Track focused node for focus mode
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
@@ -620,8 +624,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     setIsSimulating(prev => !prev);
   }, []);
 
+  // Handle theory section selection
+  const handleSelectTheory = useCallback(() => {
+    setIsTheoryMode(true);
+    setSelectedUseCase(null);
+    // Clear other state
+    setSourceData({});
+    setProcessingStatus('idle');
+    setProcessingProgress(0);
+    setFocusedNodeId(null);
+    setPresentationActiveNode(null);
+    setIncidents([]);
+  }, []);
+
   // Handle use case selection
   const handleUseCaseSelect = useCallback(async (useCase: UseCase) => {
+    setIsTheoryMode(false); // Exit theory mode when selecting a use case
     setSelectedUseCase(useCase);
     // Initialize source statuses for the selected use case
     setSourceStatuses(Object.fromEntries(useCase.sources.map((s) => [s.name, 'pending'])));
@@ -1652,6 +1670,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         useCases,
         selectedUseCase,
         onSelect: handleUseCaseSelect,
+        onSelectTheory: handleSelectTheory,
+        isTheoryMode,
       },
       // No className - selector never gets focused or unfocused styling
     });
@@ -2607,7 +2627,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   return (
     <div className="relative w-full h-[calc(100vh-140px)] min-h-[600px]">
       {/* Control buttons - floating */}
-      {selectedUseCase && (
+      {selectedUseCase && !isTheoryMode && (
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
           {hasPositionOverrides && (
             <GlassButton
@@ -2630,7 +2650,46 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         </div>
       )}
 
-      <ReactFlow
+      {/* Theory Mode: Show TheoryPresentation inline */}
+      {isTheoryMode && (
+        <div className="absolute inset-0 flex">
+          {/* Selector panel on left */}
+          <div className="w-[280px] p-4 bg-stone-100/50 border-r border-stone-200">
+            <div className="mb-4 px-1">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Sections
+              </h3>
+            </div>
+            <div className="bg-white rounded-xl border-2 border-purple-500 shadow-md p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800">Document Processing AI</p>
+                  <p className="text-xs text-gray-500">Theory Section</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsTheoryMode(false)}
+                className="mt-4 w-full text-xs text-purple-600 hover:text-purple-700 underline"
+              >
+                Switch to Use Cases
+              </button>
+            </div>
+          </div>
+          {/* TheoryPresentation on right */}
+          <div className="flex-1 overflow-hidden">
+            <TheoryPresentation embedded onClose={() => setIsTheoryMode(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Normal Flow Mode */}
+      {!isTheoryMode && (
+        <ReactFlow
         nodes={buildNodes()}
         edges={buildEdges()}
         nodeTypes={nodeTypes}
@@ -2656,6 +2715,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           className="!bg-white/80 !backdrop-blur-sm !border-stone-200 !rounded-lg !shadow-sm [&>button]:!bg-white [&>button]:!border-stone-200 [&>button]:!text-stone-600 [&>button:hover]:!bg-stone-50"
         />
       </ReactFlow>
+      )}
 
       {/* Expanded node modal */}
       {expandedNode && (
