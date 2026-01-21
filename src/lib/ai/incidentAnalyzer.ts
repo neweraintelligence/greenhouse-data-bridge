@@ -41,7 +41,8 @@ export interface RoutingDecision {
  * Determines if it's a real incident, false positive, or ambiguous
  */
 export async function analyzeIncidentPhoto(
-  imageData: string // Base64 encoded image
+  imageData: string, // Base64 encoded image
+  filename?: string // Optional filename for context-aware mock analysis
 ): Promise<IncidentAnalysisResult> {
   const client = getClient();
 
@@ -102,8 +103,8 @@ Be conservative with severity ratings:
 Return ONLY valid JSON, no markdown formatting.`;
 
   if (!client) {
-    // Return mock analysis for demo
-    return generateMockIncidentAnalysis(imageData);
+    // Return mock analysis for demo - use filename for context-aware results
+    return generateMockIncidentAnalysis(imageData, filename);
   }
 
   try {
@@ -136,84 +137,200 @@ Return ONLY valid JSON, no markdown formatting.`;
     throw new Error('Could not parse incident analysis response');
   } catch (error) {
     console.error('Error analyzing incident photo:', error);
-    return generateMockIncidentAnalysis(imageData);
+    return generateMockIncidentAnalysis(imageData, filename);
   }
 }
 
+// Filename-to-analysis mapping for context-aware mock results
+const PHOTO_ANALYSIS_MAP: Record<string, IncidentAnalysisResult> = {
+  // Real incidents - Plant Health
+  'powdery-mildew.jpg': {
+    isIncident: true,
+    confidence: 94,
+    incident_type: 'Plant Health',
+    severity: 4,
+    location: 'Zone 2, Growing benches',
+    description: 'Powdery mildew infection detected on leaf surfaces. White, powdery fungal growth visible across multiple plants. This fungal disease spreads rapidly in greenhouse conditions and requires immediate treatment.',
+    needsEscalation: true,
+  },
+  'aphid-infestation.jpg': {
+    isIncident: true,
+    confidence: 95,
+    incident_type: 'Pest',
+    severity: 5,
+    location: 'Zone 2, Growing benches',
+    description: 'Significant aphid infestation visible on multiple plants. Population appears out of control despite IPM program. Immediate intervention required to prevent crop loss and spread to adjacent zones.',
+    needsEscalation: true,
+  },
+  'nutrient-deficiency.jpg': {
+    isIncident: true,
+    confidence: 65,
+    incident_type: 'Plant Health',
+    severity: 3,
+    location: 'Zone 1, Bench 5',
+    description: 'Unusual leaf discoloration detected. Could indicate nutrient deficiency (nitrogen or iron) or early-stage disease. Pattern is ambiguous without lab testing.',
+    needsEscalation: true,
+    ambiguityNote: 'Needs soil and tissue analysis by growing team. Check fertigation records for this zone.',
+  },
+
+  // Real incidents - Equipment
+  'irrigation-leak.jpg': {
+    isIncident: true,
+    confidence: 91,
+    incident_type: 'Equipment',
+    severity: 3,
+    location: 'Zone 3, Row 8',
+    description: 'Active irrigation leak detected at drip line connection. Water pooling visible on growing medium. Could lead to overwatering damage and water waste if not repaired.',
+    needsEscalation: false,
+  },
+  'led-failure.jpg': {
+    isIncident: true,
+    confidence: 93,
+    incident_type: 'Equipment',
+    severity: 3,
+    location: 'Zone 4, Overhead lighting array',
+    description: 'LED grow light fixture showing partial failure. Multiple diodes not illuminating, creating uneven light distribution. Affected plants may show growth irregularities.',
+    needsEscalation: false,
+  },
+  'maintenance-tag-overdue.jpg': {
+    isIncident: true,
+    confidence: 88,
+    incident_type: 'Equipment',
+    severity: 2,
+    location: 'Equipment Room',
+    description: 'Equipment maintenance tag indicates overdue inspection. Preventive maintenance schedule not followed. Review equipment maintenance logs and schedule inspection.',
+    needsEscalation: false,
+  },
+  'fertigation-error.jpg': {
+    isIncident: true,
+    confidence: 90,
+    incident_type: 'Equipment',
+    severity: 4,
+    location: 'Fertigation control room',
+    description: 'Fertigation system showing error state on control panel. Nutrient dosing may be compromised affecting crop nutrition. Requires immediate technician review.',
+    needsEscalation: true,
+  },
+  'conveyor-damage.jpg': {
+    isIncident: true,
+    confidence: 92,
+    incident_type: 'Equipment',
+    severity: 4,
+    location: 'Pack House, Conveyor line A',
+    description: 'Conveyor belt appears jammed with visible mechanical damage. Motor housing shows signs of overheating. This poses a safety risk and is preventing normal packing operations.',
+    needsEscalation: true,
+  },
+  'forklift-leak.jpg': {
+    isIncident: true,
+    confidence: 94,
+    incident_type: 'Equipment',
+    severity: 4,
+    location: 'Warehouse, Forklift bay',
+    description: 'Forklift showing hydraulic fluid leak. Visible puddle beneath lift mechanism indicates seal failure. Equipment must be taken out of service immediately to prevent slip hazards and further damage.',
+    needsEscalation: true,
+  },
+
+  // Real incidents - Structural
+  'dock-door-seal-damage.jpg': {
+    isIncident: true,
+    confidence: 87,
+    incident_type: 'Structural',
+    severity: 3,
+    location: 'Shipping Dock, Door 2',
+    description: 'Loading dock door seal shows significant wear and damage. Gap visible that could allow pest entry and temperature loss. Schedule seal replacement within 48 hours.',
+    needsEscalation: false,
+  },
+
+  // Real incidents - Quality
+  'quality-issue-box.jpg': {
+    isIncident: true,
+    confidence: 89,
+    incident_type: 'Quality',
+    severity: 3,
+    location: 'Pack House, QC Station',
+    description: 'Quality control issue detected with packaged product. Visible defects or damage in packaging that does not meet quality standards. Requires supervisor review before shipping.',
+    needsEscalation: false,
+  },
+
+  // False positives
+  'dropped-glove.jpg': {
+    isIncident: false,
+    confidence: 96,
+    incident_type: 'N/A',
+    severity: 1,
+    location: 'Pack House',
+    description: 'Image shows a dropped work glove on the floor. This is personal protective equipment that was misplaced, not a safety hazard or operational issue.',
+    needsEscalation: false,
+    dismissalReason: 'False positive - dropped PPE (glove) that should simply be picked up. Not an incident requiring formal reporting.',
+  },
+  'normal-packing.jpg': {
+    isIncident: false,
+    confidence: 98,
+    incident_type: 'N/A',
+    severity: 1,
+    location: 'Pack House',
+    description: 'Image shows normal packing operations in progress. Workers following proper procedures with appropriate PPE. No issues detected.',
+    needsEscalation: false,
+    dismissalReason: 'False positive - this shows normal, safe operations. No incident to report.',
+  },
+};
+
+// Fallback scenarios when filename doesn't match
+const FALLBACK_SCENARIOS: IncidentAnalysisResult[] = [
+  {
+    isIncident: true,
+    confidence: 85,
+    incident_type: 'Equipment',
+    severity: 3,
+    location: 'Unknown location',
+    description: 'Potential equipment or operational issue detected. Image shows conditions that may require maintenance attention. Recommend on-site inspection to confirm.',
+    needsEscalation: false,
+  },
+  {
+    isIncident: true,
+    confidence: 78,
+    incident_type: 'Safety',
+    severity: 3,
+    location: 'Unknown location',
+    description: 'Possible safety concern identified. Conditions shown may present a hazard. On-site verification recommended to assess severity.',
+    needsEscalation: true,
+    ambiguityNote: 'Image quality or angle makes definitive assessment difficult. Send maintenance team to verify.',
+  },
+  {
+    isIncident: true,
+    confidence: 82,
+    incident_type: 'Environmental',
+    severity: 3,
+    location: 'Unknown location',
+    description: 'Environmental concern detected. Conditions may affect crop health or facility operations. Further investigation recommended.',
+    needsEscalation: false,
+  },
+];
+
 // Generate mock analysis when API is unavailable
-function generateMockIncidentAnalysis(imageData: string): IncidentAnalysisResult {
-  // Use image size/hash as a simple way to vary results
-  const hash = imageData.length % 7;
+function generateMockIncidentAnalysis(imageData: string, filename?: string): IncidentAnalysisResult {
+  // If we have a filename, try to match it to known demo photos
+  if (filename) {
+    const normalizedFilename = filename.toLowerCase();
 
-  const scenarios: IncidentAnalysisResult[] = [
-    {
-      isIncident: true,
-      confidence: 92,
-      incident_type: 'Equipment',
-      severity: 4,
-      location: 'Zone 3, Row 12',
-      description: 'Conveyor belt appears jammed with visible mechanical damage. Motor housing shows signs of overheating. This poses a safety risk and is preventing normal operations.',
-      needsEscalation: true,
-    },
-    {
-      isIncident: true,
-      confidence: 88,
-      incident_type: 'Safety',
-      severity: 3,
-      location: 'Packing area near entrance',
-      description: 'Water accumulation on floor creating slip hazard. Source appears to be condensation drip from overhead pipe. Area needs immediate attention and signage.',
-      needsEscalation: false,
-    },
-    {
-      isIncident: true,
-      confidence: 95,
-      incident_type: 'Pest',
-      severity: 5,
-      location: 'Zone 2, Growing benches',
-      description: 'Significant aphid infestation visible on multiple tomato plants. Population appears out of control despite IPM program. Immediate intervention required to prevent crop loss.',
-      needsEscalation: true,
-    },
-    {
-      isIncident: false,
-      confidence: 98,
-      incident_type: 'N/A',
-      severity: 1,
-      location: 'Packing station',
-      description: 'Image shows a dropped pen on clean floor surface. This is not a safety hazard or operational issue. No action needed.',
-      needsEscalation: false,
-      dismissalReason: 'False positive - harmless office supply on floor. Not an incident requiring reporting.',
-    },
-    {
-      isIncident: true,
-      confidence: 65,
-      incident_type: 'Quality',
-      severity: 3,
-      location: 'Zone 1, Bench 5',
-      description: 'Dark staining visible on plant leaves and growing medium. Could be fungal issue (Botrytis) or residue from fertilizer application. Unclear without closer inspection and testing.',
-      needsEscalation: true,
-      ambiguityNote: 'Needs closer inspection by growing team. If fungal, requires immediate isolation and treatment per SOP.',
-    },
-    {
-      isIncident: true,
-      confidence: 90,
-      incident_type: 'Environmental',
-      severity: 4,
-      location: 'Zone 4, HVAC Unit B',
-      description: 'HVAC unit showing visible ice buildup and condensation. Temperature monitoring in this zone likely compromised. Requires immediate maintenance to prevent crop stress.',
-      needsEscalation: true,
-    },
-    {
-      isIncident: true,
-      confidence: 87,
-      incident_type: 'Structural',
-      severity: 3,
-      location: 'Greenhouse panel near Zone 2',
-      description: 'Cracked greenhouse glazing panel with visible gap. This could lead to heat loss, pest entry, and water infiltration. Should be replaced within 48 hours.',
-      needsEscalation: false,
-    },
-  ];
+    // Check for exact match first
+    if (PHOTO_ANALYSIS_MAP[normalizedFilename]) {
+      console.log('Mock analysis: matched filename', normalizedFilename);
+      return PHOTO_ANALYSIS_MAP[normalizedFilename];
+    }
 
-  return scenarios[hash];
+    // Check for partial match (in case of path variations)
+    for (const [key, value] of Object.entries(PHOTO_ANALYSIS_MAP)) {
+      if (normalizedFilename.includes(key.replace('.jpg', '')) || key.includes(normalizedFilename.replace('.jpg', ''))) {
+        console.log('Mock analysis: partial match', key, 'for', normalizedFilename);
+        return value;
+      }
+    }
+  }
+
+  // Fallback to hash-based selection for unknown photos
+  console.log('Mock analysis: using fallback for unknown photo', filename);
+  const hash = imageData.length % FALLBACK_SCENARIOS.length;
+  return FALLBACK_SCENARIOS[hash];
 }
 
 /**

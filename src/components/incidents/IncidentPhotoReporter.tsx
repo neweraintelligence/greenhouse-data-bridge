@@ -98,17 +98,21 @@ export function IncidentPhotoReporter({
     setError(null);
 
     try {
-      // If it's a URL, fetch it and convert to base64
+      // Extract filename from URL for context-aware mock analysis
+      const filename = photoUrl.split('/').pop() || '';
+
+      // If it's a URL (absolute or relative), fetch it and convert to base64
       let photoData: string;
-      if (photoUrl.startsWith('http')) {
+      if (photoUrl.startsWith('http') || photoUrl.startsWith('/')) {
         const response = await fetch(photoUrl);
         const blob = await response.blob();
         photoData = await blobToBase64(blob);
       } else {
+        // Already base64 data (from camera capture)
         photoData = photoUrl;
       }
 
-      const result = await analyzeIncidentPhoto(photoData);
+      const result = await analyzeIncidentPhoto(photoData, filename);
       setAnalysisResult(result);
 
       if (!result.isIncident) {
