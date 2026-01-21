@@ -4,12 +4,15 @@ import { OutlookMiniApp, type EmailItem } from './nodes/mini-apps/OutlookMiniApp
 import { OneDriveMiniApp, type FileItem } from './nodes/mini-apps/OneDriveMiniApp';
 import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';
 import { PaperScanMiniApp, type ExtractedField } from './nodes/mini-apps/PaperScanMiniApp';
+import { BarcodeScanMiniApp } from './nodes/mini-apps/BarcodeScanMiniApp';
 import { GlassButton } from '../design-system';
 
 interface ExpandedNodeModalProps {
   nodeType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai';
   label: string;
   onClose: () => void;
+  // Session code for data fetching
+  sessionCode?: string;
   // Mini-app data
   emails?: EmailItem[];
   files?: FileItem[];
@@ -32,6 +35,7 @@ export function ExpandedNodeModal({
   nodeType,
   label,
   onClose,
+  sessionCode,
   emails,
   files,
   spreadsheet,
@@ -163,6 +167,13 @@ export function ExpandedNodeModal({
                 expanded
                 qrCodeUrl={qrCodeUrl}
               />
+            </div>
+          )}
+
+          {nodeType === 'barcode' && sessionCode && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">View barcode scans and shipping labels. Switch between tabs to see scan history or generate labels.</p>
+              <BarcodeScanMiniApp sessionCode={sessionCode} />
             </div>
           )}
         </div>

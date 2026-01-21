@@ -426,8 +426,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Handle expand node
   const handleExpandNode = useCallback((sourceName: string, sourceType: 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode' | 'camera' | 'ai') => {
-    // Only expand for supported types
-    if (sourceType === 'barcode') return;
+    // Skip unsupported types (camera, ai)
+    if (sourceType === 'camera' || sourceType === 'ai') return;
     setExpandedNode({ id: sourceName, type: sourceType, label: sourceName });
   }, []);
 
@@ -2723,6 +2723,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           nodeType={expandedNode.type}
           label={expandedNode.label}
           onClose={() => setExpandedNode(null)}
+          sessionCode={sessionCode}
           emails={getExpandedSourceData().emails}
           files={getExpandedSourceData().files}
           spreadsheet={getExpandedSourceData().spreadsheet}
@@ -2782,7 +2783,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           if (infoNodeType && infoNodeLabel) {
             setExpandedNode({
               id: infoNodeLabel,
-              type: infoNodeType as 'outlook' | 'onedrive' | 'excel' | 'paper',
+              type: infoNodeType as 'outlook' | 'onedrive' | 'excel' | 'paper' | 'barcode',
               label: infoNodeLabel,
             });
           }
