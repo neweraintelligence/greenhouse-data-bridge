@@ -5,31 +5,89 @@ import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
 import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
 
 // Helper function to map node labels to Supabase source table names
+// Uses both node label AND use case context to determine correct routing
 function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
   const label = nodeLabel.toLowerCase();
+  const useCaseLower = useCase?.toLowerCase() || '';
 
-  // Incidents use case - check first since multiple nodes map to incidents
-  if (label.includes('incident') || label.includes('business rules') || label.includes('raci') ||
-      label.includes('severity') || label.includes('routing') || label.includes('ai vision') ||
-      label.includes('incident report') || label.includes('incident photo') || label.includes('incident queue') ||
-      label.includes('incident dashboard') || label.includes('escalation') || useCase === 'incidents') {
+  // ==========================================
+  // USE CASE SPECIFIC ROUTING (check first)
+  // ==========================================
+
+  // INCIDENTS USE CASE
+  if (useCaseLower === 'incidents') {
+    // Output node -> incident dashboard/report view
+    if (label.includes('dashboard') || label.includes('output') || label.includes('results') || label.includes('report')) {
+      return 'incident_dashboard';
+    }
+    // Review queue for ambiguous incidents
+    if (label.includes('review') || label.includes('human')) {
+      return 'incident_review';
+    }
+    // Everything else in incidents -> incident photo reporter
+    return 'incidents';
+  }
+
+  // TRAINING USE CASE
+  if (useCaseLower === 'training') {
+    // Output node -> training compliance report
+    if (label.includes('compliance') || label.includes('output') || label.includes('report')) {
+      return 'training_compliance';
+    }
+    // Processing/check node -> training quiz
+    if (label.includes('check') || label.includes('processing') || label.includes('compliance')) {
+      return 'training_quiz';
+    }
+    // Everything else in training -> training roster
+    return 'training_roster';
+  }
+
+  // SHIPPING USE CASE (or default)
+  if (useCaseLower === 'shipping' || useCaseLower === 'receiving' || useCaseLower === '' || !useCase) {
+    // Output node -> reconciliation report view
+    if (label.includes('output') || label.includes('results') || label.includes('report')) {
+      return 'reconciliation_report';
+    }
+    // Review queue - human-in-the-loop for AI-flagged discrepancies
+    if (label.includes('review queue') || label.includes('human review') || label.includes('exception') || label.includes('needs review')) {
+      return 'review_queue';
+    }
+    // Reconciliation quiz - accuracy challenge on merged/normalized data
+    if (label.includes('data engine') || label.includes('reconciled data') || label.includes('reconciliation engine') ||
+        label.includes('comparing') || label.includes('merged') || label.includes('normalized') || label.includes('combined data')) {
+      return 'reconciliation_quiz';
+    }
+    // Barcode scanning
+    if (label.includes('scan') || label.includes('barcode') || label.includes('dock verification')) {
+      return 'barcode_scans';
+    }
+    // Communications
+    if (label.includes('email') || label.includes('outlook') || label.includes('communication') || label.includes('follow-up')) {
+      return 'communications';
+    }
+    // Default for shipping
+    return 'shipments_expected';
+  }
+
+  // ==========================================
+  // GENERIC LABEL-BASED ROUTING (fallback)
+  // ==========================================
+
+  // Incident-specific keywords (if useCase wasn't specified but label indicates incidents)
+  if (label.includes('incident') || label.includes('raci') || label.includes('ai vision') ||
+      label.includes('severity') || label.includes('maintenance')) {
     return 'incidents';
   }
 
   if (label.includes('shipment') || label.includes('expected')) return 'shipments_expected';
-  if (label.includes('training') || label.includes('roster')) return 'training_roster';
+  if (label.includes('training') || label.includes('roster') || label.includes('acknowledgement')) return 'training_roster';
   if (label.includes('customer') || label.includes('order')) return 'customer_orders';
   if (label.includes('quality')) return 'quality_issues';
   if (label.includes('email') || label.includes('outlook') || label.includes('mail') || label.includes('communication')) return 'communications';
   if (label.includes('scan') || label.includes('barcode')) return 'barcode_scans';
-  // Review queue - human-in-the-loop for AI-flagged discrepancies
-  if (label.includes('review queue') || label.includes('human review') || label.includes('exception') || label.includes('needs review')) return 'review_queue';
-  // Reconciliation quiz - accuracy challenge on merged/normalized data
-  if (label.includes('data engine') || label.includes('reconciled data') || label.includes('reconciliation engine')) return 'reconciliation_quiz';
-  if (label.includes('reconcil') && (label.includes('data') || label.includes('view') || label.includes('accuracy') || label.includes('quiz'))) return 'reconciliation_quiz';
-  if (label.includes('merged') || label.includes('normalized') || label.includes('combined data')) return 'reconciliation_quiz';
-  if (label.includes('billing') || label.includes('invoice') || label.includes('reconcil') || label.includes('document') || label.includes('discrepan')) return 'billing_challenge';
-  // Default fallback
+  if (label.includes('billing') || label.includes('invoice') || label.includes('document')) return 'billing_challenge';
+
+  // Ultimate fallback
   return 'shipments_expected';
 }
 
@@ -155,6 +213,8 @@ interface InfoOverlayProps {
   onMaximize?: () => void;
   // Session code for QR code generation
   sessionCode?: string;
+  // Use case for proper QR code routing
+  useCase?: string;
 }
 
 function InfoOverlayComponent({
@@ -172,6 +232,7 @@ function InfoOverlayComponent({
   nodeLabel,
   onMaximize,
   sessionCode,
+  useCase,
 }: InfoOverlayProps) {
 
 
@@ -200,11 +261,11 @@ function InfoOverlayComponent({
   const [showReconciliationData, setShowReconciliationData] = useState(false);
 
   // Check if this is a billing challenge slide
-  const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel) === 'billing_challenge';
+  const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'billing_challenge';
 
   // Check if this is a reconciliation quiz slide (processing node = Data Engine)
   // Also check nodeType directly for robustness
-  const isReconciliationSlide = nodeType === 'processing' || (nodeLabel && getSourceTypeFromNode(nodeLabel) === 'reconciliation_quiz');
+  const isReconciliationSlide = nodeType === 'processing' || (nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'reconciliation_quiz');
 
 
   useEffect(() => {
@@ -416,7 +477,7 @@ function InfoOverlayComponent({
                 <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
-                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel)}&node=${encodeURIComponent(nodeLabel)}`}
+                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${getSourceTypeFromNode(nodeLabel, useCase)}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
                       size={180}
                       level="M"
                       includeMargin

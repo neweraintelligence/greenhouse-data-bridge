@@ -2705,6 +2705,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         nodeType={infoNodeType || undefined}
         nodeLabel={infoNodeLabel || undefined}
         sessionCode={sessionCode}
+        useCase={selectedUseCase?.id}
         onMaximize={() => {
           // Trigger full modal (same as clicking node in flowchart mode)
           if (infoNodeType && infoNodeLabel) {

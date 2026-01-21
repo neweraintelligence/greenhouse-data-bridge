@@ -9,7 +9,7 @@ import { ReviewQueueMobile } from '../components/review/ReviewQueueMobile';
 import { ReconciliationQuizMobile } from '../components/reconciliation/ReconciliationQuizMobile';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'incident_dashboard' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz' | 'reconciliation_report' | 'training_compliance' | 'training_quiz';
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();

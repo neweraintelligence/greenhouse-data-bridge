@@ -151,7 +151,7 @@ export const shippingNodeInfo: Record<string, NodeInfo> = {
     imageOnLeft: true,
     description:
       'The system takes the order, the invoice, the shipment notification, the barcode scans, and the signed receipt — and compares them all. Where they match, great. Where they don\'t, it flags the issue.',
-    painPoint: 'Today: Nadine spends 3 hours every week manually comparing spreadsheets. Tired eyes miss rows. Errors slip through.',
+    painPoint: 'Today: Someone on your team spends 3 hours every week manually comparing spreadsheets. Tired eyes miss rows. Errors slip through.',
     solution: 'System does it in 30 seconds. Perfect accuracy. "Order says 500, scans show 480 — here\'s the problem."',
     keyInsight: 'This is the tedious comparison work that humans hate doing — automated.',
   },

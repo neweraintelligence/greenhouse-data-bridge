@@ -28,10 +28,13 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
   incidents: {
     outlook: '/demo_pack/use_case_images/32_incident_report_realistic.png',
     paper: '/demo_pack/use_case_images/33_incident_photo_realistic.png',
-    excel: '/demo_pack/use_case_images/34_incident_calendar_realistic.png',
+    excel: '/demo_pack/use_case_images/38_incident_raci_matrix_realistic.png',
     processing: '/demo_pack/use_case_images/35_incident_routing_realistic.png',
     intake: '/demo_pack/use_case_images/36_incident_queue_realistic.png',
     output: '/demo_pack/use_case_images/37_incident_dashboard_realistic.png',
+    reviewQueue: '/demo_pack/use_case_images/39_incident_review_queue_realistic.png',
+    escalation: '/demo_pack/use_case_images/40_incident_escalation_emails_realistic.png',
+    etl: '/demo_pack/use_case_images/41_incident_data_normalization_realistic.png',
   },
   // Customer Orders - reuse shipping images for similar workflows
   'customer-orders': {
