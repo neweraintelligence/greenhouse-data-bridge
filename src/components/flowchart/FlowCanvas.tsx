@@ -27,7 +27,7 @@ import { OutlookMiniApp } from './nodes/mini-apps/OutlookMiniApp';
 import { OneDriveMiniApp } from './nodes/mini-apps/OneDriveMiniApp';
 import { ExcelMiniApp } from './nodes/mini-apps/ExcelMiniApp';
 import { PaperScanMiniApp } from './nodes/mini-apps/PaperScanMiniApp';
-import { ScanBarcode } from 'lucide-react';
+import { BarcodeScanMiniApp } from './nodes/mini-apps/BarcodeScanMiniApp';
 import type { IntakeItem } from './nodes/IntakeNode';
 import type { OutputFile } from './nodes/OutputNode';
 import type { UseCase } from '../../lib/useCases/types';
@@ -2546,38 +2546,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     const data = sourceData[source.name] || {};
     debug.log('Building preview for:', source.type, 'with data:', data, 'use case:', selectedUseCase.id);
 
-    // Barcode always has preview (hardcoded data) - check first
+    // Barcode preview - use BarcodeScanMiniApp with scan log and shipping labels toggle
     if (source.type === 'barcode') {
-      debug.log('Rendering barcode preview - always available');
-      return (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mb-2">
-            <ScanBarcode className="w-3 h-3" />
-            <span>Recent scans</span>
-          </div>
-          <div className="space-y-1 max-h-[300px] overflow-y-auto">
-            {[
-              { code: 'SHP-2025-0001', time: '10:42 AM', type: 'Shipment', sku: 'SKU-3382' },
-              { code: 'PLT-8847-A', time: '10:38 AM', type: 'Pallet', sku: 'SKU-1247' },
-              { code: 'SHP-2025-0002', time: '10:35 AM', type: 'Shipment', sku: 'SKU-5891' },
-              { code: 'BOX-44521', time: '10:31 AM', type: 'Box', sku: 'SKU-7733' },
-            ].map((entry, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <code className="font-mono text-violet-600 font-semibold text-[11px]">{entry.code}</code>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600">
-                      {entry.type}
-                    </span>
-                  </div>
-                  <code className="font-mono text-gray-500 text-[10px]">{entry.sku}</code>
-                </div>
-                <span className="text-gray-400 text-[10px]">{entry.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
+      debug.log('Rendering barcode preview with labels toggle');
+      return <BarcodeScanMiniApp sessionCode={sessionCode} />;
     }
 
     // Always show preview - with demo data or "awaiting" state

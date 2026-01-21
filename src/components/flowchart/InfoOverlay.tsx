@@ -16,26 +16,26 @@ function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
 
   // INCIDENTS USE CASE
   if (useCaseLower === 'incidents') {
-    // Output node -> incident dashboard/report view
-    if (label.includes('dashboard') || label.includes('output') || label.includes('results') || label.includes('report')) {
+    // Output node -> incident dashboard/report view (only the actual output/dashboard node)
+    if (label.includes('dashboard') || label.includes('output') || label.includes('results')) {
       return 'incident_dashboard';
     }
     // Review queue for ambiguous incidents
-    if (label.includes('review') || label.includes('human')) {
+    if (label.includes('review queue') || label.includes('human review')) {
       return 'incident_review';
     }
-    // Everything else in incidents -> incident photo reporter
+    // Everything else in incidents -> incident photo reporter (including "Incident Report Form")
     return 'incidents';
   }
 
   // TRAINING USE CASE
   if (useCaseLower === 'training') {
-    // Output node -> training compliance report
-    if (label.includes('compliance') || label.includes('output') || label.includes('report')) {
+    // Output node -> training compliance report (only actual output node)
+    if (label.includes('output') || label.includes('results')) {
       return 'training_compliance';
     }
     // Processing/check node -> training quiz
-    if (label.includes('check') || label.includes('processing') || label.includes('compliance')) {
+    if (label.includes('check') || label.includes('processing')) {
       return 'training_quiz';
     }
     // Everything else in training -> training roster
@@ -44,8 +44,8 @@ function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
 
   // SHIPPING USE CASE (or default)
   if (useCaseLower === 'shipping' || useCaseLower === 'receiving' || useCaseLower === '' || !useCase) {
-    // Output node -> reconciliation report view
-    if (label.includes('output') || label.includes('results') || label.includes('report')) {
+    // Output node -> reconciliation report view (only actual output node)
+    if (label.includes('output') || label.includes('results')) {
       return 'reconciliation_report';
     }
     // Review queue - human-in-the-loop for AI-flagged discrepancies

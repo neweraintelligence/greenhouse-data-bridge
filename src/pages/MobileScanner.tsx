@@ -10,6 +10,7 @@ export function MobileScanner() {
   const navigate = useNavigate();
   const [identity, setIdentity] = useState<{ name: string; role: string } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [cameraStarting, setCameraStarting] = useState(false);
   const [scannedItems, setScannedItems] = useState<Array<{shipmentId: string; productName: string; qty: number; status: 'success' | 'error'; message: string}>>([]);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -39,6 +40,13 @@ export function MobileScanner() {
 
   const startScanning = async () => {
     if (!scannerRef.current) return;
+
+    // Show loading state immediately - this also ensures the qr-reader div is visible
+    setCameraStarting(true);
+    setError(null);
+
+    // Small delay to ensure the div is rendered and visible before starting scanner
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
       await scannerRef.current.start(
@@ -153,11 +161,12 @@ export function MobileScanner() {
 
       setIsScanning(true);
       setCameraReady(true);
-      setError(null);
+      setCameraStarting(false);
     } catch (err) {
       debug.criticalError('Scanner start failed', err);
-      setError('Camera access denied or not available');
+      setError('Camera access denied or not available. Please allow camera access and try again.');
       setCameraReady(false);
+      setCameraStarting(false);
     }
   };
 
@@ -213,9 +222,32 @@ export function MobileScanner() {
 
       {/* Scanner area */}
       <div className="bg-white rounded-2xl p-6 mb-4 shadow-lg">
-        <div id="qr-reader" className={`${isScanning ? 'block' : 'hidden'}`} />
+        {/*
+          IMPORTANT: The qr-reader div must be visible with dimensions when scanner.start() is called.
+          We show it when camera is starting OR when actively scanning.
+          The div needs explicit dimensions for the html5-qrcode library to work properly.
+        */}
+        <div
+          id="qr-reader"
+          className="w-full rounded-xl overflow-hidden"
+          style={{
+            display: (cameraStarting || isScanning) ? 'block' : 'none',
+            minHeight: '300px',
+            backgroundColor: '#000',
+          }}
+        />
 
-        {!cameraReady && (
+        {/* Loading state while camera initializes */}
+        {cameraStarting && !isScanning && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-12 h-12 border-4 border-bmf-blue/30 border-t-bmf-blue rounded-full animate-spin mb-4" />
+            <p className="text-gray-600">Starting camera...</p>
+            <p className="text-xs text-gray-400 mt-2">Please allow camera access when prompted</p>
+          </div>
+        )}
+
+        {/* Initial state - show Start Camera button */}
+        {!cameraReady && !cameraStarting && (
           <div className="text-center py-12">
             <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 mb-6">Ready to scan shipping labels</p>
@@ -230,9 +262,17 @@ export function MobileScanner() {
         )}
 
         {error && (
-          <div className="p-4 rounded-xl bg-red-100 border border-red-300 text-red-700 flex items-start gap-3">
+          <div className="p-4 rounded-xl bg-red-100 border border-red-300 text-red-700 flex items-start gap-3 mt-4">
             <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p className="text-sm">{error}</p>
+            <div>
+              <p className="text-sm font-medium">{error}</p>
+              <button
+                onClick={startScanning}
+                className="mt-2 text-sm underline text-red-700 hover:text-red-800"
+              >
+                Try again
+              </button>
+            </div>
           </div>
         )}
 
