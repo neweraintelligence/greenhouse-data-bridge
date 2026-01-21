@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react';
-import { ScanBarcode, Tag, Check, CheckCheck, Package } from 'lucide-react';
+import { ScanBarcode, Tag, Check, CheckCheck, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../../lib/supabase';
 
@@ -23,6 +23,8 @@ interface BarcodeScanMiniAppProps {
   sessionCode: string;
   // Optional: pre-loaded scan data
   scans?: ScanEntry[];
+  // When true, renders in expanded/maximized layout
+  expanded?: boolean;
 }
 
 // Map SKU to product name
@@ -48,7 +50,7 @@ function getProductName(sku: string): string {
   return productMap[sku] || sku;
 }
 
-function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: BarcodeScanMiniAppProps) {
+function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans, expanded = false }: BarcodeScanMiniAppProps) {
   const [activeTab, setActiveTab] = useState<'scans' | 'labels'>('scans');
   const [shipments, setShipments] = useState<ShipmentLabel[]>([]);
   const [scans, setScans] = useState<ScanEntry[]>(initialScans || [
@@ -58,6 +60,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: Barco
     { code: 'BOX-44521', time: '10:31 AM', type: 'Box', sku: 'SKU-7733' },
   ]);
   const [loading, setLoading] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   // Fetch shipments and scan status
   useEffect(() => {
@@ -230,10 +233,157 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: Barco
               <p>No shipments found</p>
               <p className="text-[10px]">Add expected shipments first</p>
             </div>
+          ) : expanded ? (
+            /* EXPANDED VIEW: Carousel with one large label at a time */
+            (() => {
+              const scannedCount = shipments.filter(s => s.isScanned || s.isReceived).length;
+              const remainingCount = shipments.length - scannedCount;
+              const currentShipment = shipments[carouselIndex];
+
+              if (!currentShipment) return null;
+
+              const qrData = JSON.stringify({
+                sessionCode,
+                shipmentId: currentShipment.shipment_id,
+                sku: currentShipment.sku,
+                productName: currentShipment.product_name,
+                qty: currentShipment.expected_qty,
+                timestamp: new Date().toISOString(),
+              });
+
+              const statusBorder = currentShipment.isReceived
+                ? 'border-emerald-400'
+                : currentShipment.isScanned
+                ? 'border-amber-400'
+                : 'border-gray-300';
+
+              return (
+                <div className="flex flex-col items-center">
+                  {/* Progress summary bar */}
+                  <div className="w-full flex items-center justify-between mb-4 px-2">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+                        <CheckCheck className="w-4 h-4" />
+                        {scannedCount} scanned
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span className="flex items-center gap-1.5 text-sm text-gray-500 font-medium">
+                        <Package className="w-4 h-4" />
+                        {remainingCount} remaining
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-400">
+                      {carouselIndex + 1} of {shipments.length}
+                    </span>
+                  </div>
+
+                  {/* Carousel with navigation */}
+                  <div className="flex items-center gap-4">
+                    {/* Left arrow */}
+                    <button
+                      onClick={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
+                      disabled={carouselIndex === 0}
+                      className={`p-3 rounded-full transition-all ${
+                        carouselIndex === 0
+                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                      }`}
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+
+                    {/* Large portrait label card */}
+                    <div
+                      className={`bg-white rounded-2xl border-2 ${statusBorder} shadow-lg overflow-hidden w-[280px]`}
+                    >
+                      {/* Label header */}
+                      <div className="bg-gray-900 text-white px-4 py-3 text-center">
+                        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Big Marble Farms</p>
+                        <p className="font-mono font-bold text-lg mt-0.5">{currentShipment.shipment_id}</p>
+                      </div>
+
+                      {/* Product info */}
+                      <div className="px-4 py-3 border-b border-gray-100 text-center bg-gray-50">
+                        <p className="font-semibold text-gray-800 text-base leading-tight">{currentShipment.product_name}</p>
+                        <p className="font-mono text-sm text-gray-500 mt-1">{currentShipment.sku}</p>
+                      </div>
+
+                      {/* Large QR Code - Scannable */}
+                      <div className="flex items-center justify-center p-6 bg-white">
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                          <QRCodeSVG
+                            value={qrData}
+                            size={180}
+                            level="M"
+                            includeMargin={false}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Quantity and status footer */}
+                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Quantity</p>
+                            <p className="font-bold text-2xl text-gray-800">{currentShipment.expected_qty}</p>
+                          </div>
+                          {currentShipment.isReceived ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
+                              <CheckCheck className="w-4 h-4" />
+                              Received
+                            </span>
+                          ) : currentShipment.isScanned ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-amber-100 text-amber-700">
+                              <Check className="w-4 h-4" />
+                              Scanned
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-500">
+                              <Package className="w-4 h-4" />
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right arrow */}
+                    <button
+                      onClick={() => setCarouselIndex(Math.min(shipments.length - 1, carouselIndex + 1))}
+                      disabled={carouselIndex === shipments.length - 1}
+                      className={`p-3 rounded-full transition-all ${
+                        carouselIndex === shipments.length - 1
+                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                      }`}
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Dot indicators */}
+                  <div className="flex items-center gap-2 mt-4">
+                    {shipments.map((s, i) => (
+                      <button
+                        key={s.shipment_id}
+                        onClick={() => setCarouselIndex(i)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          i === carouselIndex
+                            ? 'bg-gray-800 scale-110'
+                            : s.isReceived || s.isScanned
+                            ? 'bg-emerald-400'
+                            : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()
           ) : (
+            /* COMPACT VIEW: Original small inline cards */
             <div className="space-y-2 max-h-[350px] overflow-y-auto">
               {shipments.map((shipment) => {
-                // QR code encodes shipment data
                 const qrData = JSON.stringify({
                   sessionCode,
                   shipmentId: shipment.shipment_id,
@@ -243,7 +393,6 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: Barco
                   timestamp: new Date().toISOString(),
                 });
 
-                // Status styling
                 const statusClass = shipment.isReceived
                   ? 'border-emerald-300 bg-emerald-50'
                   : shipment.isScanned
@@ -272,7 +421,6 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: Barco
                           <span className="font-mono font-semibold text-[11px] text-gray-800">
                             {shipment.shipment_id}
                           </span>
-                          {/* Status badge */}
                           {shipment.isReceived ? (
                             <span className="flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-semibold bg-emerald-500 text-white">
                               <CheckCheck className="w-2.5 h-2.5" />
@@ -300,7 +448,7 @@ function BarcodeScanMiniAppComponent({ sessionCode, scans: initialScans }: Barco
           )}
 
           {/* Help text */}
-          <p className="text-[9px] text-gray-400 text-center pt-1">
+          <p className={`text-gray-400 text-center pt-1 ${expanded ? 'text-xs' : 'text-[9px]'}`}>
             Scan QR codes with phone to log shipments
           </p>
         </div>

@@ -173,7 +173,7 @@ export function ExpandedNodeModal({
           {nodeType === 'barcode' && sessionCode && (
             <div className="space-y-4">
               <p className="text-sm text-gray-500">View barcode scans and shipping labels. Switch between tabs to see scan history or generate labels.</p>
-              <BarcodeScanMiniApp sessionCode={sessionCode} />
+              <BarcodeScanMiniApp sessionCode={sessionCode} expanded />
             </div>
           )}
         </div>
