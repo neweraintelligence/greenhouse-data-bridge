@@ -46,29 +46,6 @@ registerUseCase({
 });
 
 registerUseCase({
-  id: 'training',
-  name: 'HR Training Acknowledgements',
-  description: 'Track employee training completion and compliance',
-  icon: 'GraduationCap',
-  color: 'green',
-  sources: [
-    { type: 'excel', name: 'Training Roster', icon: 'Users', description: 'Employee roster from Payworks/HR' },
-    { type: 'excel', name: 'Acknowledgements', icon: 'CheckSquare', description: 'Training acknowledgement records' },
-    { type: 'paper', name: 'Sign-off Sheet', icon: 'FileSignature', description: 'Scanned paper sign-off form' },
-    { type: 'outlook', name: 'Email Confirmations', icon: 'Mail', description: 'Training completion emails', optional: true },
-  ],
-  outputTemplates: [
-    { id: 'compliance-report', name: 'Compliance Report', fileType: 'pdf', description: 'Training completion status by employee' },
-    { id: 'overdue-acknowledgements', name: 'Overdue Acknowledgements', fileType: 'csv', description: 'Employees with missing or late acknowledgements' },
-  ],
-  dashboardQueries: [
-    { id: 'overdue-training', name: 'Overdue Training', description: 'Employees past acknowledgement deadline' },
-    { id: 'completion-by-department', name: 'Completion by Department', description: 'Training status grouped by department' },
-    { id: 'completion-trend', name: 'Completion Trend', description: 'Training completion over time' },
-  ],
-});
-
-registerUseCase({
   id: 'incidents',
   name: 'Incident / Maintenance Intake',
   description: 'AI-powered incident detection with severity-based routing',
@@ -89,35 +66,6 @@ registerUseCase({
     { id: 'sla-breaches', name: 'SLA Breaches', description: 'Incidents past response deadline' },
     { id: 'incidents-by-type', name: 'Incidents by Type', description: 'Group incidents by category' },
     { id: 'hot-zones', name: 'Hot Zones', description: 'Locations with most incidents' },
-  ],
-});
-
-// ============================================
-// NEW USE CASES FOR WORKSHOP DEMO
-// ============================================
-
-registerUseCase({
-  id: 'customer-orders',
-  name: 'Customer PO Intake',
-  description: 'Process inbound customer purchase orders, validate pricing, and check inventory availability',
-  icon: 'ClipboardList',
-  color: 'teal',
-  sources: [
-    { type: 'outlook', name: 'Customer PO Email', icon: 'Mail', description: 'Email with customer purchase order' },
-    { type: 'paper', name: 'PO Document Scan', icon: 'FileSignature', description: 'Scanned or faxed PO document' },
-    { type: 'excel', name: 'Price List', icon: 'DollarSign', description: 'Current product price list' },
-    { type: 'excel', name: 'Inventory Status', icon: 'Package', description: 'Current inventory levels', optional: true },
-  ],
-  outputTemplates: [
-    { id: 'order-confirmation', name: 'Order Confirmation', fileType: 'pdf', description: 'Confirmation sent back to customer' },
-    { id: 'order-issues', name: 'Order Issues Report', fileType: 'pdf', description: 'Pricing or availability issues to resolve' },
-    { id: 'order-export', name: 'Order Export', fileType: 'csv', description: 'Orders ready for fulfillment system' },
-  ],
-  dashboardQueries: [
-    { id: 'pending-orders', name: 'Pending Orders', description: 'Orders awaiting processing' },
-    { id: 'pricing-discrepancies', name: 'Pricing Issues', description: 'Orders with price mismatches' },
-    { id: 'stock-availability', name: 'Stock Availability', description: 'Orders affected by low inventory' },
-    { id: 'orders-by-customer', name: 'Orders by Customer', description: 'Order volume by customer' },
   ],
 });
 
