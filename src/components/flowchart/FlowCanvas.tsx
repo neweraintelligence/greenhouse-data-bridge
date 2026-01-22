@@ -866,6 +866,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const handleUseCaseSelect = useCallback(async (useCase: UseCase) => {
     setIsTheoryMode(false); // Exit theory mode when selecting a use case
     setSelectedUseCase(useCase);
+    // Reset fitView flag so React Flow re-fits to show all new nodes
+    setHasInitialFit(false);
     // Initialize source statuses for the selected use case
     setSourceStatuses(Object.fromEntries(useCase.sources.map((s) => [s.name, 'pending'])));
     // Initialize output files
