@@ -98,27 +98,39 @@ export function MobileDataEntry() {
     setError(null);
 
     try {
-      // Record participant joining
-      const { error: insertError } = await supabase.from('session_participants').insert({
-        session_code: sessionCode,
-        participant_name: participantName.trim(),
-        node_name: nodeName,
-        joined_at: new Date().toISOString(),
-      });
+      const trimmedName = participantName.trim();
+      const joinedAt = new Date().toISOString();
 
-      if (insertError) throw insertError;
+      // Check if participant already exists in this session (prevents duplicates)
+      const { data: existing } = await supabase
+        .from('session_participants')
+        .select('id')
+        .eq('session_code', sessionCode)
+        .eq('participant_name', trimmedName)
+        .maybeSingle();
+
+      if (!existing) {
+        // New participant - insert record
+        const { error: insertError } = await supabase.from('session_participants').insert({
+          session_code: sessionCode,
+          participant_name: trimmedName,
+          node_name: nodeName,
+          joined_at: joinedAt,
+        });
+
+        if (insertError) throw insertError;
+      }
 
       // Persist participant to localStorage for session continuity
       const storageKey = `bmf_participant_${sessionCode}`;
-      const joinedAt = new Date().toISOString();
       localStorage.setItem(storageKey, JSON.stringify({
-        name: participantName.trim(),
+        name: trimmedName,
         joinedAt,
       }));
 
       // Also set sessionStorage for barcode scanner compatibility
       sessionStorage.setItem('user_identity', JSON.stringify({
-        name: participantName.trim(),
+        name: trimmedName,
         role: 'Workshop Participant',
         joinedAt,
       }));
