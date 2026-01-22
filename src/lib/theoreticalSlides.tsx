@@ -24,10 +24,68 @@ export interface TheoreticalSlide {
 }
 
 // ============================================================================
-// SECTION 1: THE PROBLEM (5 minutes, 3 slides)
+// SECTION 0: INTRODUCTION (Soft opening - 3 minutes, 2 slides)
 // ============================================================================
 
 export const theoreticalSlides: TheoreticalSlide[] = [
+  {
+    id: 'doc-everywhere',
+    section: 'Introduction',
+    title: 'DOCUMENTS ARE EVERYWHERE',
+    subtitle: 'The Language of Business',
+    imageOnLeft: false,
+    imagePath: '/demo_pack/theoretical/intro-documents.png',
+    content: {
+      headline: 'Every business transaction creates a paper trail. Always has, always will.',
+      bullets: [
+        'Invoices, purchase orders, contracts, receipts',
+        'Bills of lading, delivery confirmations, compliance certificates',
+        'Emails with attachments, scanned forms, handwritten notes',
+        'PDFs, spreadsheets, images, even faxes (yes, still)',
+        'Every industry, every size company, every day',
+      ],
+      stats: [
+        { value: '80%', label: 'of business data lives in documents' },
+        { value: '2.5B', label: 'invoices processed annually in the US alone' },
+      ],
+    },
+    speakerNotes: 'Start soft. This isn\'t about problems yet - it\'s about recognizing the universal truth: documents are the lifeblood of commerce. Everyone in the room deals with this.',
+    imagePrompt: 'Elegant visualization of various business documents floating in an organized constellation. Invoices, contracts, shipping forms, receipts arranged in a harmonious pattern. Soft lighting, professional aesthetic. Documents appear organized rather than chaotic. Clean white background with subtle blue accents. Some documents show realistic details (numbers, signatures). Style: modern editorial photography with subtle digital glow.',
+  },
+
+  {
+    id: 'why-favorite',
+    section: 'Introduction',
+    title: 'THE #1 AI USE CASE',
+    subtitle: 'Why Document Processing Leads AI Adoption',
+    imageOnLeft: true,
+    imagePath: '/demo_pack/theoretical/intro-adoption.png',
+    content: {
+      headline: 'Document processing isn\'t just popular—it\'s the fastest-adopted AI application in enterprise.',
+      bullets: [
+        'Clear, measurable ROI (hours saved, errors reduced)',
+        'Low risk: AI assists humans, doesn\'t replace judgment',
+        'Universal applicability: every department has documents',
+        'Proven technology: not experimental, production-ready',
+        'Compounds over time: AI learns from every correction',
+      ],
+      stats: [
+        { value: '76%', label: 'of enterprises prioritize process automation' },
+        { value: '#1', label: 'AI use case by adoption rate' },
+      ],
+      quote: {
+        text: 'This is my favorite AI use case to talk about. It\'s not flashy like ChatGPT, but it\'s where AI delivers the most tangible value today.',
+        attribution: 'Workshop Presenter',
+      },
+    },
+    speakerNotes: 'Share your genuine enthusiasm. Explain WHY this matters to you personally. The audience connects with passion. This is the "why should I care" slide before diving into problems.',
+    imagePrompt: 'Upward trending adoption chart with document AI highlighted as the leader. Clean data visualization showing different AI use cases as bars, with document processing/IDP clearly at the top. Professional blue and green color scheme. Subtle glow on the leading bar. Background suggests enterprise/corporate setting. Numbers floating: 76%, #1. Style: modern business infographic with depth and polish.',
+  },
+
+  // ============================================================================
+  // SECTION 1: THE PROBLEM (5 minutes, 3 slides)
+  // ============================================================================
+
   {
     id: 'doc-chaos',
     section: 'The Problem',
@@ -555,6 +613,7 @@ export function getSlidesBySection(section: string): TheoreticalSlide[] {
 // HELPER: Get section order
 // ============================================================================
 export const sectionOrder = [
+  'Introduction',
   'The Problem',
   'What is IDP',
   'Business Impact',

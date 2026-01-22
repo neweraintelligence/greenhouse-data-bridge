@@ -1,9 +1,10 @@
 import { memo, useEffect, useState, useRef, useCallback } from 'react';
-import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, Database, Play, Users, ArrowRight, MessageSquareMore } from 'lucide-react';
+import { X, Warehouse, Truck, Maximize2, Minimize2, Zap, ChevronLeft, ChevronRight, Mail, FolderOpen, FileSpreadsheet, Camera, ScanBarcode, RefreshCw, Inbox, Cog, ClipboardList, AlertOctagon, Send, FileText, UserPlus, Trophy, DoorOpen, Database, Play, Users, ArrowRight, MessageSquareMore, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ChallengeLeaderboard } from '../challenges/ChallengeLeaderboard';
 import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView';
 import { supabase } from '../../lib/supabase';
+import { preloadImage, isImagePreloaded } from '../../lib/imagePreloader';
 
 // Helper function to map node labels to Supabase source table names
 // Uses both node label AND use case context to determine correct routing
@@ -295,7 +296,12 @@ function InfoOverlayComponent({
   // Challenge lobby state
   const [challengeStatus, setChallengeStatus] = useState<'lobby' | 'active' | 'finished' | null>(null);
   const [challengeParticipants, setChallengeParticipants] = useState(0);
+  const [lobbyParticipantNames, setLobbyParticipantNames] = useState<string[]>([]);
   const [isStartingChallenge, setIsStartingChallenge] = useState(false);
+
+  // Image loading state
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Check if this is a billing challenge slide
   const isBillingSlide = nodeLabel && getSourceTypeFromNode(nodeLabel, useCase) === 'billing_challenge';
@@ -365,13 +371,20 @@ function InfoOverlayComponent({
         setChallengeStatus('lobby');
       }
 
-      // Get participant count
-      const tableName = challengeType === 'billing' ? 'billing_challenge_responses' : 'billing_challenge_responses';
-      const { count } = await supabase
-        .from(tableName)
-        .select('*', { count: 'exact', head: true })
-        .eq('session_code', sessionCode);
-      setChallengeParticipants(count || 0);
+      // Get participants who joined THIS CHALLENGE via session_participants
+      // They join with the node_name matching the challenge node label
+      const { data: participants } = await supabase
+        .from('session_participants')
+        .select('participant_name')
+        .eq('session_code', sessionCode)
+        .ilike('node_name', `%${nodeLabel || ''}%`)
+        .order('joined_at', { ascending: false });
+
+      if (participants) {
+        const names = participants.map(p => p.participant_name);
+        setLobbyParticipantNames(names);
+        setChallengeParticipants(names.length);
+      }
     };
 
     fetchChallengeSession();
@@ -399,11 +412,21 @@ function InfoOverlayComponent({
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'billing_challenge_responses',
+          table: 'session_participants',
           filter: `session_code=eq.${sessionCode}`,
         },
-        () => {
-          setChallengeParticipants(prev => prev + 1);
+        (payload) => {
+          // Check if this participant joined the current challenge
+          const newParticipant = payload.new as { participant_name: string; node_name: string };
+          if (nodeLabel && newParticipant.node_name?.toLowerCase().includes(nodeLabel.toLowerCase())) {
+            setLobbyParticipantNames(prev => {
+              if (!prev.includes(newParticipant.participant_name)) {
+                return [newParticipant.participant_name, ...prev];
+              }
+              return prev;
+            });
+            setChallengeParticipants(prev => prev + 1);
+          }
         }
       )
       .subscribe();
@@ -411,7 +434,7 @@ function InfoOverlayComponent({
     return () => {
       channel.unsubscribe();
     };
-  }, [sessionCode, isCompetitionSlide, getChallengeType]);
+  }, [sessionCode, isCompetitionSlide, getChallengeType, nodeLabel]);
 
   // Start the challenge (presenter action)
   const handleStartChallenge = async () => {
@@ -503,7 +526,37 @@ function InfoOverlayComponent({
     setActiveDirection('inbound');
     setShowNodePreview(false);
     setPreviewExpanded(false);
+    // Reset image loading state
+    setImageLoaded(false);
+    setImageError(false);
   }, [nodeLabel, imageUrl]);
+
+  // Preload current image and track loading state
+  useEffect(() => {
+    if (!imageUrl) {
+      setImageLoaded(false);
+      setImageError(false);
+      return;
+    }
+
+    // Check if already preloaded
+    if (isImagePreloaded(imageUrl)) {
+      setImageLoaded(true);
+      setImageError(false);
+      return;
+    }
+
+    // Preload the image
+    preloadImage(imageUrl).then(success => {
+      if (success) {
+        setImageLoaded(true);
+        setImageError(false);
+      } else {
+        setImageLoaded(false);
+        setImageError(true);
+      }
+    });
+  }, [imageUrl]);
 
   // Handle drag start
   const handleDragStart = (e: React.MouseEvent) => {
@@ -685,7 +738,7 @@ function InfoOverlayComponent({
               {/* QR Code Tooltip with Start Button */}
               {showJoinQR && (
                 <div
-                  className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200"
+                  className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200 min-w-[280px]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex flex-col items-center gap-3">
@@ -697,26 +750,55 @@ function InfoOverlayComponent({
                       className="rounded-lg"
                     />
 
-                    {/* Participant count */}
+                    {/* Participant count header */}
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full">
                       <Users className="w-4 h-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {challengeParticipants} {challengeParticipants === 1 ? 'participant' : 'participants'}
+                        {challengeParticipants} {challengeParticipants === 1 ? 'participant' : 'participants'} ready
                       </span>
-                      {challengeStatus === 'lobby' && (
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      {challengeStatus === 'lobby' && challengeParticipants > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       )}
                     </div>
+
+                    {/* Participant names list */}
+                    {lobbyParticipantNames.length > 0 && (
+                      <div className="w-full max-h-[120px] overflow-y-auto bg-gray-50 rounded-lg p-2">
+                        <div className="space-y-1">
+                          {lobbyParticipantNames.map((name, idx) => (
+                            <div
+                              key={`${name}-${idx}`}
+                              className="flex items-center gap-2 px-2 py-1 bg-white rounded text-sm"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">
+                                {name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-gray-700 truncate">{name}</span>
+                              {idx === 0 && (
+                                <span className="ml-auto text-xs text-emerald-600 font-medium">Just joined!</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty state when no participants */}
+                    {lobbyParticipantNames.length === 0 && (
+                      <div className="w-full p-3 bg-amber-50 rounded-lg text-center">
+                        <p className="text-sm text-amber-700">Waiting for participants to scan...</p>
+                      </div>
+                    )}
 
                     {/* Start/Status button */}
                     {challengeStatus === 'lobby' && (
                       <button
                         onClick={handleStartChallenge}
                         disabled={isStartingChallenge || challengeParticipants === 0}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-full shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Play className="w-4 h-4" />
-                        <span>Start</span>
+                        <span>Start Challenge</span>
                       </button>
                     )}
 
@@ -1064,16 +1146,39 @@ function InfoOverlayComponent({
           {/* Image display - full height */}
           <div className="absolute inset-0 overflow-hidden">
             {imageUrl ? (
-              <img
-                key={imageUrl}
-                src={imageUrl}
-                alt="Visual representation"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // Hide broken images
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <>
+                {/* Loading skeleton - shows while image is loading */}
+                {!imageLoaded && !imageError && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3 text-gray-400">
+                      <Loader2 className="w-8 h-8 animate-spin" />
+                      <p className="text-sm font-medium">Loading image...</p>
+                    </div>
+                  </div>
+                )}
+                {/* Actual image - hidden until loaded */}
+                <img
+                  key={imageUrl}
+                  src={imageUrl}
+                  alt="Visual representation"
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    setImageError(true);
+                    setImageLoaded(false);
+                  }}
+                />
+                {/* Error state */}
+                {imageError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <p className="text-sm text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
+                      Image unavailable
+                    </p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-center text-gray-300">
                 <p className="text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>

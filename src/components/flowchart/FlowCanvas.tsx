@@ -66,6 +66,7 @@ import { generateReconciliationReport, type ReconciliationReport } from '../../l
 import { ReportModal } from '../reports/ReportModal';
 import { IncidentReportModal, type IncidentReportData } from '../reports/IncidentReportModal';
 import { ToastContainer } from '../Toast';
+import type { ToastType } from '../Toast';
 import { FloatingAIAssistant } from '../ai/FloatingAIAssistant';
 import { ParticipantActivityLog } from './ParticipantActivityLog';
 import { TheoryPresentation } from '../../pages/TheoryPresentation';
@@ -390,7 +391,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   const [selectedEmail, setSelectedEmail] = useState<{id: string; recipient: string; subject: string; body?: string; sent_at: string} | null>(null);
 
   // Track toasts for notifications
-  const [toasts, setToasts] = useState<Array<{id: string; type: 'success' | 'error' | 'info' | 'user-joined'; message: string}>>([]);
+  const [toasts, setToasts] = useState<Array<{id: string; type: ToastType; message: string; duration?: number}>>([]);
 
   // Auto-pipeline simulation mode
   const [isSimulating, setIsSimulating] = useState(false);
@@ -1544,10 +1545,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [canProcess, etlStatus]);
 
-  // Helper to show toast
-  const showToast = useCallback((type: 'success' | 'error' | 'info' | 'user-joined', message: string) => {
+  // Helper to show toast with context-aware types and optional duration
+  const showToast = useCallback((type: ToastType, message: string, duration?: number) => {
     const id = `toast-${Date.now()}-${Math.random()}`;
-    setToasts(prev => [...prev, { id, type, message }]);
+    // Default duration: 6 seconds for regular, 8 seconds for celebrations
+    const defaultDuration = type === 'challenge-completed' ? 8000 : 6000;
+    setToasts(prev => [...prev, { id, type, message, duration: duration || defaultDuration }]);
   }, []);
 
   const closeToast = useCallback((id: string) => {
@@ -1573,8 +1576,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           const scan = payload.new as {shipment_id: string; sku: string; qty_scanned: number; scanned_at: string; scanned_by: string};
           setLiveScans(prev => [scan, ...prev]);
 
-          // Show notification
-          showToast('success', `📦 ${scan.scanned_by} scanned ${scan.shipment_id}`);
+          // Show notification with context-aware type
+          showToast('scan-completed', `${scan.scanned_by} scanned ${scan.shipment_id} (${scan.qty_scanned} units)`);
         }
       )
       .on(
@@ -1602,7 +1605,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         },
         (payload) => {
           const receipt = payload.new as {shipment_id: string; receiver_name: string};
-          showToast('success', `✓ ${receipt.receiver_name} signed receipt for ${receipt.shipment_id}`);
+          showToast('receipt-signed', `${receipt.receiver_name} signed receipt for ${receipt.shipment_id}`);
         }
       )
       .on(
@@ -1623,7 +1626,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             expected_sku: string;
             notes: string | null;
           };
-          showToast('success', `📦 New shipment added: ${shipment.shipment_id} (${shipment.expected_qty} units from ${shipment.vendor})`);
+          showToast('data-submitted', `New shipment added: ${shipment.shipment_id} (${shipment.expected_qty} units from ${shipment.vendor})`);
 
           // Update live preview spreadsheet data
           setSourceData(prev => {
@@ -1669,7 +1672,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             training_type?: string;
             scheduled_date?: string;
           };
-          showToast('success', `📚 Training scheduled: ${training.employee_name} - ${training.training_type || 'Safety & SOP'}`);
+          showToast('data-submitted', `Training scheduled: ${training.employee_name} - ${training.training_type || 'Safety & SOP'}`);
 
           // Update live preview spreadsheet data
           setSourceData(prev => {
@@ -1707,7 +1710,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         },
         (payload) => {
           const incident = payload.new as Incident;
-          showToast('success', `⚠️ Incident reported by ${incident.reported_by}: ${incident.incident_type} (Severity ${incident.severity})`);
+          showToast('incident-submitted', `${incident.reported_by} reported ${incident.incident_type} incident (Severity ${incident.severity})`);
           // Add to incidents state for live display
           setIncidents(prev => [incident, ...prev]);
         }
@@ -1729,9 +1732,59 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             comment: string | null;
             created_at: string;
           };
-          showToast('success', `✓ ${decision.decided_by} ${decision.decision === 'accept' ? 'approved' : 'rejected'} a ${decision.item_type} item`);
+          showToast('success', `${decision.decided_by} ${decision.decision === 'accept' ? 'approved' : 'rejected'} a ${decision.item_type} item`);
           // Add to review decisions state for live display
           setReviewDecisions(prev => [decision, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'session_participants',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const participant = payload.new as {
+            participant_name: string;
+            node_name: string | null;
+          };
+          // Context-aware message based on where they joined
+          const nodeName = participant.node_name?.toLowerCase() || '';
+          if (nodeName.includes('challenge') || nodeName.includes('invoice') || nodeName.includes('reconciliation') || nodeName.includes('billing')) {
+            showToast('challenge-joined', `${participant.participant_name} joined the challenge!`);
+          } else if (nodeName.includes('incident') || nodeName.includes('report')) {
+            showToast('user-joined', `${participant.participant_name} joined to report incidents`);
+          } else if (nodeName.includes('scan') || nodeName.includes('barcode')) {
+            showToast('user-joined', `${participant.participant_name} joined to scan barcodes`);
+          } else if (nodeName) {
+            showToast('user-joined', `${participant.participant_name} joined: ${participant.node_name}`);
+          } else {
+            showToast('user-joined', `${participant.participant_name} joined the session!`);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'billing_challenge_responses',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const response = payload.new as {
+            participant_name: string;
+            is_correct: boolean;
+            time_taken_seconds: number;
+          };
+          // Show celebration for challenge completion
+          if (response.is_correct) {
+            showToast('challenge-completed', `${response.participant_name} completed the challenge in ${response.time_taken_seconds}s!`);
+          } else {
+            showToast('success', `${response.participant_name} submitted their answer`);
+          }
         }
       )
       .subscribe();

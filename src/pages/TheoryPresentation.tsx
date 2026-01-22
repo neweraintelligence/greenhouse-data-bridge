@@ -13,12 +13,14 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  Move
+  Move,
+  Sparkles
 } from 'lucide-react';
 import { theoreticalSlides, sectionOrder } from '../lib/theoreticalSlides';
 
 // Section icons mapping
 const sectionIcons: Record<string, typeof FileText> = {
+  'Introduction': Sparkles,
   'The Problem': FileText,
   'What is IDP': Lightbulb,
   'Business Impact': TrendingUp,
