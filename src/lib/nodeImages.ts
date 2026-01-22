@@ -40,8 +40,43 @@ export const nodeImageMap: Record<string, Record<string, string>> = {
     intake: '/demo_pack/use_case_images/16_data_staging_realistic.webp',
     output: '/demo_pack/use_case_images/24_results_dashboard_realistic.webp',
   },
+  // ========================================
+  // TEMPLATE USE CASES (BYO - single hero image each)
+  // ========================================
+  supplier_management: {
+    hero: '/demo_pack/use_case_images/50_supplier_management_realistic.webp',
+  },
+  customer_orders: {
+    hero: '/demo_pack/use_case_images/51_customer_orders_realistic.webp',
+  },
+  regulatory_compliance: {
+    hero: '/demo_pack/use_case_images/52_regulatory_compliance_realistic.webp',
+  },
+  equipment_maintenance: {
+    hero: '/demo_pack/use_case_images/53_equipment_maintenance_realistic.webp',
+  },
+  accounts_payable: {
+    hero: '/demo_pack/use_case_images/54_accounts_payable_realistic.webp',
+  },
+  hr_training: {
+    hero: '/demo_pack/use_case_images/55_hr_training_realistic.webp',
+  },
 };
 
+// Template use cases that only have a hero image (BYO workflows)
+const templateUseCases = new Set([
+  'supplier_management',
+  'customer_orders',
+  'regulatory_compliance',
+  'equipment_maintenance',
+  'accounts_payable',
+  'hr_training',
+]);
+
 export function getNodeImage(useCase: string, nodeType: string, _sourceName?: string): string | null {
+  // For template use cases, always return the hero image
+  if (templateUseCases.has(useCase)) {
+    return nodeImageMap[useCase]?.hero || null;
+  }
   return nodeImageMap[useCase]?.[nodeType] || null;
 }
