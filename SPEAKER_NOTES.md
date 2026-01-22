@@ -1,806 +1,932 @@
-# Document Processing AI Workshop
-## Speaker Notes for Greenhouse Operations
-
-**Total Time:** ~30 minutes theory + demo
-**Audience:** Greenhouse operators, agricultural businesses seeking automation
-**Style:** Conversational, practical, grounded in their reality
+# SPEAKER NOTES
+### Document Processing AI Workshop
 
 ---
 
-# SECTION 1: INTRODUCTION
-*Goal: Ease into the topic, establish relevance to ag operations*
-*Time: ~3 minutes (2 slides)*
+---
 
 ---
 
-## Slide 1: DOCUMENTS ARE EVERYWHERE
-**The Language of Business**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 1: DOCUMENTS ARE EVERYWHERE
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Operations** - They're drowning in paperwork instead of managing production
-- **Finance** - They're chasing invoices and receipts
-- **Compliance** - They're preparing for audits constantly
-
-### Talking points:
-
-"So before we get into the technology, let's acknowledge something we all know - documents are everywhere. And in agriculture, there's no escaping them.
-
-Think about what flows through a greenhouse operation every single day:
-
-Purchase orders for seeds, nutrients, packaging materials. Invoices from every supplier. Bills of lading when shipments arrive. Delivery receipts your team signs at the dock.
-
-Then there's the compliance side - food safety certificates, audit documentation, temperature logs, quality reports.
-
-And customer-facing - orders coming in, delivery confirmations going out, sometimes claims when something arrives damaged.
-
-80% of business data lives in these documents. Not in your ERP, not in your production system - in documents. And for a lot of greenhouse operations, these are still being processed manually.
-
-Someone's reading them, typing data into spreadsheets, hoping they didn't miss something. Meanwhile, there's a crop that needs attention."
-
-### Transition:
-"So why is this particular problem such a good fit for AI?"
+## 🎯 THE POINT:
+**Ground them in the reality they already live. Documents aren't going away — they're the lifeblood of operations.**
 
 ---
 
-## Slide 2: THE #1 AI USE CASE
-**Why Document Processing Leads AI Adoption**
+## 💬 OPEN WITH:
 
-### Who cares about this:
-- **Leadership** - They want to know this is proven, not experimental
-- **Finance** - They want clear ROI
-- **Everyone** - They want to know they're not guinea pigs
+> "Before we dive into anything technical, I want to start with something you already know — something so obvious it's almost invisible..."
 
-### Talking points:
-
-"When you look at where AI is actually delivering results in business - not hype, actual results - document processing is number one.
-
-76% of enterprises say process automation is their top AI priority. And there are reasons this makes sense for operations like yours.
-
-First - the ROI is measurable. You can count hours saved. You can count errors reduced. There's no ambiguity.
-
-Second - it's low risk. The AI assists your team, it doesn't replace their judgment. When it's unsure, it asks for help.
-
-Third - it applies across departments. Finance has invoices. Receiving has bills of lading. Compliance has certificates. Quality has lab reports. Same technology, different documents.
-
-Fourth - it's production-ready. This isn't experimental. Companies have been running this for years. The technology works.
-
-And for agricultural operations specifically - you're already dealing with tight margins, seasonal labor challenges, and increasing compliance requirements. Automating the paperwork side frees up capacity where you need it - in the greenhouse, not at a desk."
-
-### Transition:
-"Alright, let's talk about what the problem actually looks like day-to-day..."
+**Build the list:**
+- Every day, documents flow into your operation — **purchase orders, invoices, bills of lading, delivery receipts**
+- On the compliance side — **food safety certifications, audit documentation, quality reports, phytosanitary certificates**
+- Here's the stat that matters: **80% of business data doesn't live in your ERP. It lives in documents.**
+- And somewhere, right now, someone is **reading a PDF and typing numbers into a system** instead of doing the work they were actually hired for.
 
 ---
 
-# SECTION 2: THE PROBLEM
-*Goal: Make the pain real - speak to their actual daily frustrations*
-*Time: ~5 minutes (3 slides)*
+## ❓ ENGAGE THEM:
+> "Think about what flows through YOUR operation every single day. How many different document types? How many hands touch them?"
 
 ---
 
-## Slide 3: THE DOCUMENT CHAOS
-**The Hidden Cost of Manual Processing**
-
-### Who cares about this:
-- **Operations managers** - This is their daily headache
-- **Anyone who's ever searched for a document** - Everyone knows this pain
-
-### Talking points:
-
-"Let's talk about what this actually looks like. And I'd bet money this sounds familiar.
-
-Supplier invoices arrive as PDFs, emails, sometimes paper in a delivery envelope. Bills of lading are buried in email attachments or stuffed in a folder somewhere. Delivery receipts? They're in a filing cabinet - if someone actually filed them.
-
-For a greenhouse operation, you've got suppliers for seeds, for nutrients, for packaging, for equipment, for pest control products. Each one has their own invoice format. Each one has different terms.
-
-And what happens? Someone on your team - maybe it's in accounting, maybe it's an admin, maybe it's you - has to read each document. Type the data into QuickBooks or your ERP. Hope they got the numbers right.
-
-The industry average error rate for manual data entry is about 4%. That sounds small until you realize that's 4 out of every 100 documents with something wrong. And those errors cascade - wrong amounts in the system, wrong inventory counts, payment disputes.
-
-Meanwhile, there's a crop that needs scouting. There's a harvest that needs coordinating. There's actual production work that's not getting done because someone's doing data entry."
-
-### Ask them:
-"How many hours a week does your team spend on paperwork? Just think about that number."
-
-### Transition:
-"And this has real dollar costs..."
+## ➡️ TRANSITION:
+> **"Now — you might be wondering why I'm leading a technology workshop by stating the obvious. Here's why: this 'boring' problem turns out to be the PERFECT fit for AI. Let me show you why..."**
 
 ---
 
-## Slide 4: THE REAL NUMBERS
-**What Manual Processing Actually Costs**
-
-### Who cares about this:
-- **Finance** - They'll feel this in their gut
-- **Leadership** - ROI justification starts here
-- **Operations** - They know their labor costs
-
-### Talking points:
-
-"Let's put numbers to this. Because this isn't abstract.
-
-The average cost to manually process one invoice? $15 to $25. That's labor time, that's overhead, that's the cost of tracking it down when something's wrong.
-
-Now think about your operation. How many supplier invoices come through in a month? Fifty? A hundred? Two hundred?
-
-At $20 per invoice, 100 invoices a month, that's $24,000 a year. Just in processing cost. Not counting the late payment fees when something gets lost. Not counting the time spent on disputes.
-
-And here's what really gets me - finance teams typically spend 60% of their time on data entry. Not analysis, not cash flow planning, not strategic work - typing things from one place into another.
-
-In agriculture specifically, you're already running tight margins. Labor is expensive and hard to find, especially seasonally. Having skilled people do manual data entry when there's crop work to be done - that's expensive.
-
-Deliveroo - before automation - spent 15 minutes per invoice. After? 45 seconds. That's real labor back."
-
-### Transition:
-"Now some of you might be thinking - we've tried scanning documents. It didn't really work. Let me explain why..."
+---
 
 ---
 
-## Slide 5: WHY TRADITIONAL OCR ISN'T ENOUGH
-**Reading Text vs Understanding Documents**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 2: THE #1 AI USE CASE
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Anyone who's been burned by technology promises before**
-- **IT/Operations** - They've probably tried basic scanning
-
-### Talking points:
-
-"If you've tried basic document scanning before and been disappointed, you're not alone. There's a reason it didn't work well.
-
-Traditional OCR - optical character recognition - can read text. It sees characters on a page. But it doesn't understand what it's reading.
-
-It sees 1-0-0 and says 'I found the characters one, zero, zero.' But is that a quantity? A price? A lot number? A date? It has no idea.
-
-It's like hiring someone who can read letters but doesn't speak the language. They can tell you what's on the page, but they can't tell you what it means.
-
-And for agricultural documents specifically - you've got supplier invoices in different formats. You've got handwritten receiving notes. You've got quality certificates with tables and checkboxes. Traditional OCR chokes on this stuff.
-
-Handwritten content? Maybe 60% accuracy. That's almost half wrong.
-
-The difference with modern AI is understanding context. Not just 'I see characters' but 'This is an invoice from Supplier X, the total is here, the PO number is there, this matches a delivery from last Tuesday.'
-
-Deliveroo went from garbage OCR results to 97.6% accuracy with intelligent processing. That's the difference."
-
-### Transition:
-"So what actually makes modern document AI work?"
+## 🎯 THE POINT:
+**Establish credibility immediately. This isn't experimental — it's the most battle-tested AI application in enterprise.**
 
 ---
 
-# SECTION 3: WHAT IS IDP
-*Goal: Explain the technology in terms they can relate to*
-*Time: ~10 minutes (6 slides)*
+## 💬 DELIVER WITH CONVICTION:
+
+> "There's a lot of AI hype out there. Chatbots, image generators, predictions about the future of work. But when you look at where AI is actually delivering MEASURABLE results — not hype, not pilots, ACTUAL production results..."
+
+**Land the punchline:**
+> "Document processing is #1. By a wide margin. **76% of enterprises** put this at the top of their automation priorities."
+
+**Explain why it works:**
+- The ROI is **crystal clear** — you can literally count hours saved and errors eliminated
+- It's **low risk** — AI assists humans, it doesn't replace judgment on important decisions
+- It's **universal** — every department, every function has documents
+- And critically — **the technology is production-ready.** This isn't research. Companies are running this at scale, today.
 
 ---
 
-## Slide 6: INTELLIGENT DOCUMENT PROCESSING
-**AI That Actually Understands Documents**
-
-### Who cares about this:
-- **Everyone** - This is the "how does it actually work" explanation
-
-### Talking points:
-
-"IDP - Intelligent Document Processing - is basically OCR plus AI. It doesn't just read, it understands.
-
-Think of it like this. You hand a document to a new employee on their first day. They can read it, but they don't know what to do with it. They don't know your vendors, your processes, your systems.
-
-Now imagine that same employee after a year. They look at an invoice and immediately know - 'Oh, this is from Supplier X, they always put the total in the bottom right, this is for the nutrient order we placed last week, and this should be coded to the Zone 3 cost center.'
-
-That's what intelligent document processing does. It's not just reading - it's understanding context.
-
-Five steps: Classify the document type. Extract the relevant fields. Validate against your business rules. Integrate with your systems. And learn from corrections over time.
-
-For a greenhouse operation - an invoice comes in. AI identifies it's from your seed supplier. Extracts the PO number, line items, total. Matches it to the order you placed. If it all checks out, posts to your accounting system. If something's off, flags it for review.
-
-Your team only sees the exceptions."
-
-### Transition:
-"Let me walk through the workflow in more detail..."
+## ➡️ TRANSITION:
+> **"So let's get concrete. What does this problem actually LOOK like in a real operation? I'd bet money this sounds familiar..."**
 
 ---
 
-## Slide 7: THE IDP WORKFLOW
-**From Paper to Actionable Data**
-
-### Who cares about this:
-- **Operations** - They want to understand the process
-- **IT** - They're thinking about integration
-
-### Talking points:
-
-"Here's the workflow. You can zoom in on this diagram to see the details.
-
-Step one - Capture. Document arrives however it arrives. Email attachment, scanned at the dock, uploaded from a phone, pulled from a supplier portal. Doesn't matter. It's ingested.
-
-Step two - Classify. What type of document is this? Invoice, bill of lading, quality certificate, delivery receipt? AI routes it accordingly.
-
-Step three - Extract. Based on document type, AI pulls the relevant fields. For an invoice - vendor, PO number, line items, quantities, prices, total, due date. For a bill of lading - shipper, carrier, items, weights.
-
-Step four - Validate. Does this match what we have in our system? Does the PO exist? Do the quantities match what we ordered? Is this vendor approved?
-
-Step five - Integrate. Push the clean data to your ERP, your accounting system, your inventory system. Trigger workflows. Flag exceptions.
-
-The magic is in steps two through four. That's where AI replaces what used to be someone sitting at a desk typing."
-
-### Transition:
-"What made this actually work well is a recent AI breakthrough..."
+---
 
 ---
 
-## Slide 8: THE LLM REVOLUTION
-**Large Language Models Changed Everything**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 3: THE DOCUMENT CHAOS
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Leadership** - "Why now? Why not five years ago?"
-- **Tech-curious folks** - The innovation angle
-
-### Talking points:
-
-"Something changed in 2023 that made this dramatically better. Large language models.
-
-Before LLMs, you needed thousands of example documents to train a system. 'Here are 5,000 invoices from this supplier, learn the pattern.' That was expensive and slow.
-
-LLMs understand context. They understand that 'Invoice Total' and 'Amount Due' and 'Grand Total' all mean the same thing. Different words, same concept.
-
-They can handle documents they've never seen before. You get a new supplier with a weird invoice format? The AI figures it out. You don't need to train it on thousands of examples.
-
-For agricultural operations - this matters because you work with lots of different suppliers. Seed companies, nutrient suppliers, packaging vendors, equipment dealers. Each one has different paperwork. LLMs adapt to all of them.
-
-Wolt - the food delivery company - processes invoices in 9+ languages across 11 countries. Same system, same team. They're handling 30% volume growth without adding headcount.
-
-That's the LLM difference."
-
-### Transition:
-"So what kinds of documents can this actually handle?"
+## 🎯 THE POINT:
+**Make them FEEL the pain they already know. Paint a picture so vivid they're nodding along.**
 
 ---
 
-## Slide 9: WHAT WE CAN PROCESS
-**Any Document, Any Format**
+## 💬 BUILD THE FRUSTRATION:
 
-### Who cares about this:
-- **Everyone thinking about their specific documents** - "Can it do MY paperwork?"
+> "Let me paint a picture. Tell me if this sounds familiar..."
 
-### Talking points:
-
-"Pretty much anything you're dealing with.
-
-Invoices and purchase orders - any supplier format.
-
-Bills of lading and shipping documents - from any carrier.
-
-Delivery receipts - including ones with signatures and handwritten notes.
-
-Quality certificates and lab reports - pulling out test results, lot numbers, dates.
-
-Compliance documentation - food safety certs, audit paperwork, inspection reports.
-
-For greenhouse operations specifically - phytosanitary certificates, pesticide application records, harvest logs, temperature and humidity records if they're on paper.
-
-Even handwritten forms. If your team is filling out paper forms in the greenhouse and scanning them later - yes, AI can read that now. Not perfectly, but way better than it used to be.
-
-The point is - if a human can read it, AI can too. The question is just what you want to do with the data once it's extracted."
-
-### Transition:
-"But here's the key thing - AI isn't always 100% confident..."
+**Walk through the chaos:**
+- Invoices arrive as **PDFs attached to emails, sometimes scanned paper, sometimes faxes** — yes, faxes still exist
+- Bills of lading are **buried in someone's inbox**, maybe forwarded, maybe not
+- Delivery receipts? They're in a **filing cabinet somewhere**, or on a clipboard in a truck, or photographed on someone's phone
+- And then **someone has to sit down, read each one, and type that data into your system.** Every. Single. Time.
+- The industry average error rate? **4%.** That means out of every 100 documents, 4 have something wrong. And you won't find out until there's a problem.
 
 ---
 
-## Slide 10: CONFIDENCE SCORING
-**AI Knows When It's Uncertain**
-
-### Who cares about this:
-- **Finance/Quality** - They need accuracy they can trust
-- **Anyone worried about AI making mistakes**
-
-### Talking points:
-
-"This is crucial for trust. Every field the AI extracts gets a confidence score.
-
-High confidence - 95% and above - auto-process. The system is sure. Let it go straight through.
-
-Medium confidence - 70 to 95% - flag for quick review. Someone glances at it, confirms it's right.
-
-Low confidence - under 70% - route to a human. The system is saying 'I'm not sure about this one.'
-
-This matters because the AI isn't a black box. It tells you when it's uncertain. And it asks for help.
-
-For your operation - routine invoices from regular suppliers? Probably auto-process. A new supplier with a weird format? Maybe flagged for review until the system learns.
-
-Adyen hits 93.4% accuracy. Thermo Fisher started at 82% and is pushing toward 85%+. With human review on flagged items? 99%+.
-
-The combination of AI plus human review on exceptions is where you get both speed and accuracy."
-
-### Transition:
-"And that brings us to how humans fit into this..."
+## 🌱 GREENHOUSE HOOK:
+> "Meanwhile, there's a **crop that needs scouting**. A **harvest that needs coordinating**. Production work that's NOT getting done because someone's tied to a desk doing data entry."
 
 ---
 
-## Slide 11: HUMAN-IN-THE-LOOP
-**When AI Defers to Human Expertise**
-
-### Who cares about this:
-- **Team members worried about their jobs** - This isn't about replacing them
-- **Quality-focused people** - Humans still have oversight
-
-### Talking points:
-
-"I want to be clear about something. This isn't about replacing people. It's about changing what people do.
-
-When AI is uncertain, it routes to a human. Your team sees the original document, the AI's guess, and why it's uncertain. One click to approve, correct, or escalate.
-
-Every correction trains the system. Next time it sees that pattern, it does better.
-
-The result? Routine stuff is handled automatically. Your team focuses on exceptions - the things that actually need human judgment.
-
-Nobody's job becomes typing data from one screen to another. That's waste. That's not why you hired people.
-
-Thermo Fisher - 53% of their invoices are touchless. Zero human intervention. Over 400,000 invoices a year just... process themselves. The other 47%? Quick human review.
-
-For a greenhouse operation - imagine your accounting person spending their time on actual accounting. Analysis. Vendor negotiations. Cash flow planning. Not data entry.
-
-Imagine your receiving team logging actual quality issues, not typing numbers from paper into spreadsheets.
-
-That's the shift."
-
-### Transition:
-"Let's talk about the actual business results..."
+## ❓ PAUSE AND ASK:
+> "Quick mental exercise — how many hours a week does your team spend on paperwork? Just... sit with that number for a second."
 
 ---
 
-# SECTION 4: BUSINESS IMPACT
-*Goal: Prove ROI - speak to their bottom line*
-*Time: ~8 minutes (5 slides)*
+## ➡️ TRANSITION:
+> **"That frustration you're feeling? It has a dollar sign attached. Let me show you what this actually costs..."**
 
 ---
 
-## Slide 12: THE ADOPTION WAVE
-**Enterprise AI Has Gone Mainstream**
-
-### Who cares about this:
-- **Leadership** - "Are we behind? Is everyone else doing this?"
-- **Anyone evaluating risk** - This is proven, not bleeding edge
-
-### Talking points:
-
-"This isn't experimental anymore. Let's look at the market.
-
-78% of enterprises now use AI in their business. That's up from 55% just one year ago. The adoption curve is steep.
-
-87% of large enterprises have implemented AI solutions.
-
-The IDP market specifically - $17.8 billion projected by 2032. It was $1.5 billion in 2022. That's not gradual growth.
-
-For agriculture specifically - the industry is starting to move on this. Larger operations are automating document processing. The question is whether you want to be ahead of that curve or behind it.
-
-The technology is proven. The ROI is proven. The risk is lower than it's ever been."
-
-### Transition:
-"So what kind of returns are companies actually seeing?"
+---
 
 ---
 
-## Slide 13: THE ROI REALITY
-**What Companies Actually See**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 4: THE REAL NUMBERS
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Finance** - The money conversation
-- **Leadership** - Investment justification
-
-### Talking points:
-
-"Real numbers from real companies.
-
-Coca-Cola Europacific Partners - €17 million in annual savings. 580,000 hours recovered. That's the equivalent of 278 full-time employees worth of work - now done automatically.
-
-Deliveroo - 23x efficiency increase. Invoice processing from 15 minutes to 45 seconds.
-
-Thermo Fisher - 70% reduction in processing time on over 800,000 invoices per year.
-
-ROI payback? Typically 5 to 12 months. Not years.
-
-Now scale this to your operation. How many invoices do you process monthly? What's your cost per document when you factor in labor time? What would you do with that time back?
-
-For a greenhouse operation - those hours saved aren't just cost savings. They're hours that can go back to production. Back to quality. Back to actually growing things.
-
-Tight margins mean you can't afford waste. Manual document processing is waste."
-
-### Transition:
-"Let me share some specific examples..."
+## 🎯 THE POINT:
+**Turn frustration into dollars. Let them do the math for their own operation and realize the scale.**
 
 ---
 
-## Slide 14: REAL SUCCESS STORIES
-**Named Companies, Verified Results**
+## 📊 DROP THESE NUMBERS:
 
-### Who cares about this:
-- **Skeptics** - These are real companies you can verify
-- **Leadership** - Social proof from major brands
-
-### Talking points:
-
-"These aren't made-up case studies. These are published results from named companies.
-
-Coca-Cola Europacific Partners - €800 million in orders processed, 99% faster than manual.
-
-JPMorgan Chase - loan agreements that took 360,000 hours of human work per year, now processed in seconds.
-
-Deutsche Bank - loan processing from 16 days to 24 hours.
-
-Landmark Group - retail, purchase orders from 90 minutes to 4 minutes.
-
-Adyen - payment processing in 23 countries, any language, with 7 people in accounts payable.
-
-Wolt - 60% automation, 11 countries, 9+ languages, 30% volume growth with same headcount.
-
-These are Fortune 500 companies and industry leaders. The technology works."
-
-### Transition:
-"Let me paint a picture of the ideal end state..."
+| Metric | Number |
+|--------|--------|
+| Cost per invoice (manual) | **$15-25** |
+| Finance time on data entry | **60%** |
+| Deliveroo before automation | **15 min/invoice** |
+| Deliveroo after | **45 seconds** |
 
 ---
 
-## Slide 15: THE "TOUCHLESS" INVOICE
-**When Automation Just Works**
+## 💬 MAKE IT REAL:
 
-### Who cares about this:
-- **Finance** - This is their dream state
-- **Operations** - Less interruptions for approvals
+> "Let's do some math together. Industry research puts the **fully-loaded cost** of manually processing one invoice at **$15 to $25 dollars.** That's not just salary — that's the back-and-forth, the corrections, the filing, the looking-it-up-later."
 
-### Talking points:
+**Build to the punchline:**
+> "If you're processing 100 invoices a month at $20 each... that's **$24,000 a year.** Just in processing cost. Not the goods — just the PAPERWORK."
 
-"The goal is what we call the 'touchless' invoice. Zero human intervention needed.
-
-Here's how it works:
-
-Invoice arrives by email from your supplier. AI extracts the vendor, PO number, line items, totals.
-
-System matches to the purchase order. Found it.
-
-Three-way match - PO versus invoice versus what receiving logged. Everything aligns.
-
-Auto-approve. Post to accounting system. Schedule payment based on terms.
-
-Human never sees it.
-
-Your team only sees exceptions - the ones where something doesn't match. A quantity discrepancy. A price that changed. A vendor that's not in the system.
-
-Thermo Fisher does this with 53% of their invoices. More than half of 824,000 invoices per year need no human touch.
-
-For your operation - imagine the majority of your routine supplier invoices just... processing. Your team focuses on the 10% that have actual issues."
-
-### Transition:
-"Let's be honest about what this investment looks like..."
+**Twist the knife:**
+- That doesn't count **late payment fees** when things get lost in the shuffle
+- It doesn't count the hours spent on **vendor disputes** because someone typed a wrong number
+- It's pure **waste.** Labor is expensive, and data entry adds zero value.
 
 ---
 
-## Slide 16: COST VS BENEFIT ANALYSIS
-**Understanding the Investment**
-
-### Who cares about this:
-- **Finance/Leadership** - They need the honest cost picture
-- **Decision makers** - They're weighing the investment
-
-### Talking points:
-
-"Let's be straightforward about costs.
-
-Initial investment - software, integration with your current systems, training your team. Typically around 12 weeks to design and roll out.
-
-Ongoing - subscription costs, maintenance, updates. This is usually a subscription model.
-
-What you get back - labor savings, faster processing, fewer errors, less time on disputes.
-
-And the intangible stuff - audit readiness because everything's documented and searchable. Compliance confidence. Your team working on meaningful tasks instead of data entry.
-
-Typical payback is 5 to 12 months.
-
-Here's the framing I'd use: The question isn't whether you can afford to do this. It's whether you can afford not to.
-
-Your competitors are looking at this. Labor is only getting more expensive. Compliance requirements are only increasing. Manual processing doesn't scale.
-
-Getting ahead of this now is cheaper than catching up later."
-
-### Transition:
-"Let's talk about practical applications for operations like yours..."
+## ➡️ TRANSITION:
+> **"Now — some of you are probably thinking: 'We've tried scanning documents. We looked at OCR. It didn't really work.' Am I right? Let me explain why that happened, and what's different now..."**
 
 ---
 
-# SECTION 5: APPLICATIONS
-*Goal: Make it concrete for greenhouse operations*
-*Time: ~5 minutes (5 slides)*
+---
 
 ---
 
-## Slide 17: SHIPPING & RECEIVING
-**The Three-Way Match**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 5: WHY TRADITIONAL OCR ISN'T ENOUGH
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Receiving team** - This is their daily reconciliation problem
-- **Finance** - They deal with discrepancy disputes
-- **Operations** - They need accurate inventory
-
-### Talking points:
-
-"Let's talk about a use case that every operation deals with - shipping and receiving.
-
-You've got five different data sources that should agree:
-
-Purchase order - what you ordered from the supplier.
-
-Bill of lading - what the supplier says they shipped.
-
-Invoice - what the supplier is charging you.
-
-Delivery receipt - what your team signed for at the dock.
-
-Actual count - what was really there when you opened the boxes.
-
-For a greenhouse - you're receiving seeds, nutrients, packaging materials, maybe equipment. Each shipment has documents. And they should all match.
-
-When they don't match - short shipment, wrong product, damaged goods - someone has to figure it out. That's time consuming. And produce operations move fast - you can't let a discrepancy sit for a week.
-
-AI compares all five data sources automatically. Instantly. Flags discrepancies the moment they're detected."
-
-### Transition:
-"And when it finds a problem, it routes it intelligently..."
+## 🎯 THE POINT:
+**Validate their past frustrations. Then show them why this time is different.**
 
 ---
 
-## Slide 18: INTELLIGENT ESCALATION
-**When AI Finds Problems, The Right People Know**
+## 💬 ACKNOWLEDGE THEIR SKEPTICISM:
 
-### Who cares about this:
-- **Operations** - They need the right problems surfaced to them
-- **Quality/Safety** - Critical issues need immediate attention
+> "If you've tried document scanning before and been disappointed... you're not alone. Traditional OCR has been around for decades, and for most use cases, it just doesn't cut it."
 
-### Talking points:
+**Explain the fundamental limitation:**
+> "Here's the problem: OCR reads characters. It sees '1-0-0' on a page. But it has NO IDEA if that's a **quantity, a price, a lot number, or part of a date.** It's like hiring someone who can read the letters but **doesn't actually speak the language.**"
 
-"When AI finds a discrepancy, it doesn't just throw an alert. It routes based on severity and type.
-
-Minor discrepancy - ordered 100 bags of nutrients, received 97. Log it, don't interrupt anyone. Probably just counting variance.
-
-Significant shortage - ordered 100, received 50. Something's wrong. Alert the receiving manager.
-
-Wrong product entirely - you ordered tomato seeds, cucumber seeds arrived. Immediate escalation. This affects production planning.
-
-Critical safety issue - contamination detected, temperature excursion, compliance failure. Notify safety, notify management, instantly.
-
-Each escalation includes context: what happened, where, when, how severe, what the recommended action is. Not just 'there's a problem' - actionable information.
-
-For a greenhouse operation, this matters because timing is everything. A shipping discrepancy on Tuesday can't wait until the monthly reconciliation. Produce is perishable. Planting schedules are tight."
-
-### Transition:
-"This fits into a broader data picture..."
+**Make it concrete:**
+- Handwriting? Traditional OCR gets maybe **60% accuracy.** That's almost half wrong.
+- Different invoice layouts? It breaks.
+- A vendor changes their form? It breaks again.
 
 ---
 
-## Slide 19: THE DATA FLOW
-**From Scattered Sources to Unified Insights**
+## 🎤 PERSONAL STORY (if time):
 
-### Who cares about this:
-- **Leadership** - Strategic visibility
-- **Operations** - Connected systems
-- **IT** - Architecture understanding
+> "I'll share a quick example. I built a system for a client — they were collecting business cards at conferences and needed to get that data into their CRM. Traditional approach: OCR extracts the text, then you use something called **regex** — pattern matching — to figure out what's what. 'This looks like a phone number, this looks like an email...'"
 
-### Talking points:
+> "The problem? I had to maintain these massive lists. Is this a job title? Well, 'Real Estate Agent' is. But so is 'Property Specialist.' And 'Real Estate Broker.' And 'Realty Consultant.' You keep adding synonyms, and the system STILL breaks on the next card because there's always something new."
 
-"Documents are one piece of a bigger data picture.
-
-For a greenhouse operation, you've got data coming from everywhere:
-
-ERP or accounting system. Climate control systems. Labor tracking. Inventory counts. Quality logs. Shipping and receiving.
-
-The problem most operations have - these are all separate. Getting a unified view means someone manually pulling data from five systems into a spreadsheet.
-
-The vision here - all of it flowing into one place. Documents processed automatically, combined with operational data, giving you dashboards and insights.
-
-Leadership sees KPIs - yield, cost, efficiency, quality.
-
-Operations sees alerts - problems as they happen.
-
-Growers see predictions - what's coming, what needs attention.
-
-Documents are the input. Unified insights are the output."
-
-### Transition:
-"Let me show you the technical architecture..."
+> "It was **fragile.** Constantly breaking. Because fundamentally — **it didn't actually KNOW what it was looking at.** It was just pattern matching."
 
 ---
 
-## Slide 20: DATA ARCHITECTURE
-**The Technical Pipeline**
-
-### Who cares about this:
-- **IT/Technical folks** - They want to understand the system
-- **Leadership** - High-level architecture view
-
-### Talking points:
-
-"This is the detailed view. You can zoom in to explore.
-
-Sources on the left - documents, ERP, sensors, manual inputs.
-
-ETL pipeline in the middle - cleaning and standardizing data.
-
-Data lake at the center - unified storage, single source of truth.
-
-AI layer - processing, analysis, predictions.
-
-Users on the right - different views for different roles.
-
-For technical folks - this is a modern data stack. Cloud-based. Scalable. Integrates with existing systems through APIs.
-
-The key point - documents aren't siloed anymore. They're part of the same data infrastructure as everything else."
-
-### Transition:
-"Here's what the transformation looks like..."
+**Pivot to the solution:**
+> "Modern AI is fundamentally different. It doesn't just see characters — it UNDERSTANDS context. It knows: 'This is an invoice from Supplier X. The total is HERE. The PO number is THERE. And this handwritten note says...' — it actually comprehends."
 
 ---
 
-## Slide 21: KPI TRANSFORMATION
-**From Daily Scramble to Real-Time Intelligence**
-
-### Who cares about this:
-- **Leadership** - Strategic visibility improvement
-- **Finance** - Reporting efficiency
-- **Operations** - Real-time awareness
-
-### Talking points:
-
-"This shows before and after.
-
-Before - scattered spreadsheets across departments. Manual reconciliation. Reports that take days to compile. By the time you see a number, it's already old.
-
-After - unified data. Automated processing. Same-day visibility. Dashboards that update in real-time.
-
-For a greenhouse operation specifically:
-
-Leadership gets a strategic dashboard - cost per unit, yield trends, quality metrics, labor efficiency. Updated automatically.
-
-Operations gets alerts - delivery arriving, discrepancy detected, inventory low, equipment issue.
-
-Growers get predictions - climate adjustments needed, harvest timing, pest pressure forecast.
-
-Nobody's job is pulling data into spreadsheets anymore. The data flows. People focus on decisions and actions."
-
-### Transition:
-"So how do you actually start?"
+## 📊 THE PROOF:
+**Deliveroo achieved 97.6% accuracy** with intelligent document processing. Not OCR — intelligent processing.
 
 ---
 
-# SECTION 6: NEXT STEPS
-*Goal: Make it achievable, then transition to demo*
-*Time: ~2 minutes (2 slides)*
+## ➡️ TRANSITION:
+> **"So what makes this 'intelligent' processing actually work? Let me break down the architecture..."**
 
 ---
 
-## Slide 22: GETTING STARTED
-**A Practical Implementation Path**
-
-### Who cares about this:
-- **Decision makers** - "What's the first step?"
-- **Anyone worried about complexity** - It's not all-or-nothing
-
-### Talking points:
-
-"You don't have to automate everything at once. That's not realistic, and honestly, it's not smart.
-
-Here's a practical path:
-
-Phase 1 - Pick one high-volume document type. For most operations, that's supplier invoices. It's repetitive, it's time-consuming, the ROI is clear.
-
-Phase 2 - Pilot. 30 to 60 days. Real documents, real workflows. See what works, what needs adjustment.
-
-Phase 3 - Measure. Accuracy. Time savings. Team feedback. Did it deliver?
-
-Phase 4 - Expand. Add purchase orders. Add receiving documents. Add compliance paperwork.
-
-Phase 5 - Integrate deeper. Connect to ERP. Automate workflows. Build the full data pipeline.
-
-Timeline? 3 to 6 months to see real production value.
-
-The key is starting somewhere concrete. Pick one problem. Solve it. Prove value. Then expand.
-
-For a greenhouse operation - start with the pain point that's most acute. If it's invoice processing, start there. If it's receiving reconciliation, start there. Get a win, then build on it."
-
-### Transition:
-"Alright - enough theory. Let's see this work."
+---
 
 ---
 
-## Slide 23: SEE IT IN ACTION
-**Live Demo: Document Processing Pipeline**
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 6: INTELLIGENT DOCUMENT PROCESSING
+# ══════════════════════════════════════════════════════════
 
-### Who cares about this:
-- **Everyone** - Theory is one thing, seeing it is another
-
-### Talking points:
-
-"So that's the theory. Let me show you what this actually looks like.
-
-What I'm going to walk through is an interactive pipeline - document processing from start to finish.
-
-We'll process real document types - invoices, bills of lading, receiving logs.
-
-You'll see AI extraction with confidence scoring - how sure the system is about each field.
-
-You'll see the human review queue - what it looks like when something needs a person.
-
-You'll see escalation routing - how problems get to the right people.
-
-And here's the interactive part - you can participate. There will be QR codes you can scan with your phone. You'll be part of the data flow. Submit a document, see it process, see the results.
-
-For this demo, we're simulating a greenhouse receiving operation. Products arriving. Documents being processed. Discrepancies being flagged.
-
-Get your phones ready. Let's see how this works."
+## 🎯 THE POINT:
+**IDP is the technical framework. Make it memorable with the "new employee" analogy.**
 
 ---
 
-# TIMING SUMMARY
+## 💬 USE THIS ANALOGY:
 
-| Section | Slides | Time |
-|---------|--------|------|
-| Introduction | 2 | ~3 min |
-| The Problem | 3 | ~5 min |
-| What is IDP | 6 | ~10 min |
-| Business Impact | 5 | ~8 min |
-| Applications | 5 | ~5 min |
-| Next Steps | 2 | ~2 min |
-| **Total Theory** | **23** | **~33 min** |
+> "Think about a new employee on their first day. You hand them an invoice — they can READ it, sure, but they don't know where to put the data, what to check it against, whether it looks right. Now think about that same person after a YEAR. They look at an invoice and instantly know: 'This is from our tomato supplier, the PO matches, the price is normal, route it to Accounts Payable.'"
 
----
+**Land the insight:**
+> "Intelligent Document Processing is like having that **experienced employee** — but one who never takes a day off, never gets tired, and processes documents in seconds instead of minutes."
 
-# QUICK REFERENCE - KEY STATS
-
-Keep these handy:
-
-- **80%** of business data is unstructured (in documents)
-- **$15-25** cost to manually process one invoice
-- **4%** human error rate in data entry
-- **78%** of enterprises now use AI
-- **76%** prioritize process automation
-- **€17M** Coca-Cola savings
-- **23x** Deliveroo efficiency increase
-- **70%** Thermo Fisher time reduction
-- **53%** Thermo Fisher touchless rate
-- **97.6%** Deliveroo accuracy
-- **5-12 months** typical ROI payback
+**Walk through the five steps:**
+1. **CLASSIFY** — AI identifies: "This is an invoice from Vendor X, not a packing slip"
+2. **EXTRACT** — Pulls the relevant data: "Total is $4,500, PO# is 12345, due date is..."
+3. **VALIDATE** — Cross-checks: "Does this match what we ordered? Is the price right?"
+4. **INTEGRATE** — If everything checks out → auto-posts to your accounting system
+5. **LEARN** — Every correction makes it smarter for next time
 
 ---
 
-# GREENHOUSE-SPECIFIC TALKING POINTS
-
-When you need to connect back to their reality:
-
-**Labor:**
-"Finding good labor is hard enough. Having skilled people do data entry instead of production work - that's expensive."
-
-**Margins:**
-"Agriculture runs on tight margins. Manual processing is pure waste - it doesn't add any value to your product."
-
-**Compliance:**
-"Audits are a fact of life. Having documents searchable and organized versus scrambling through file cabinets - that's the difference between a stressful week and a normal one."
-
-**Seasonality:**
-"Volume spikes during harvest. Manual processes don't scale. Automated ones do."
-
-**Perishability:**
-"You can't let a shipping discrepancy sit for a week. By then the product's rotted. You need to catch problems immediately."
-
-**Supplier Complexity:**
-"You've got dozens of suppliers - seeds, nutrients, packaging, equipment. Each one has different paperwork. AI handles all of them."
+## 🌱 GREENHOUSE HOOK:
+> "The result? Your team only sees the **exceptions** — the things that actually need human judgment. The routine stuff just... processes."
 
 ---
 
-# AUDIENCE ENGAGEMENT MOMENTS
-
-1. **Slide 3:** "How many hours a week does your team spend on paperwork?"
-2. **Slide 4:** "What's your cost per invoice when you add up labor time?"
-3. **Slide 5:** "Anyone tried basic scanning and been disappointed?"
-4. **Slide 12:** "Show of hands - who's already using some form of automation?"
-5. **Slide 17:** "Anyone here dealt with a significant receiving discrepancy recently?"
-6. **Demo transition:** "Get your phones out - you're going to be part of this."
+## ➡️ TRANSITION:
+> **"Let me show you what this workflow actually looks like in practice..."**
 
 ---
 
-*These are talking points, not a script. Make them your own. The best presentations feel like conversations, not lectures.*
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 7: THE IDP WORKFLOW
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Walk through the 5 steps visually. Use the interactive diagram.**
+
+---
+
+## 💬 KEY LINES:
+
+> "You can zoom in on this diagram..."
+
+| Step | What Happens |
+|------|--------------|
+| 1. CAPTURE | Document arrives (email, scan, upload) |
+| 2. CLASSIFY | AI identifies type, routes accordingly |
+| 3. EXTRACT | Pulls relevant fields based on doc type |
+| 4. VALIDATE | Cross-checks against your business rules |
+| 5. INTEGRATE | Pushes to ERP, triggers workflows |
+
+**"The magic is in steps 2-4. That's where AI replaces someone sitting at a desk typing."**
+
+---
+
+## ➡️ TRANSITION:
+> **"What made this actually work well is a recent AI breakthrough..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 8: THE LLM REVOLUTION
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**This is the "why now" slide. Explain what changed in the last 2 years that made all this actually work.**
+
+---
+
+## 💬 SET UP THE BREAKTHROUGH:
+
+> "I need to explain why this is working NOW when similar promises have been made before. Something fundamental changed in 2023."
+
+**Contrast the old way:**
+> "Traditional document AI needed **thousands of training examples.** You'd show the system a hundred invoices from one vendor, and MAYBE it could handle that vendor's format. New vendor? Start over. Different layout? Start over. It was expensive, slow, and fragile."
+
+**Reveal the breakthrough:**
+> "Large Language Models changed that equation completely. An LLM **already understands** that 'Invoice Total' and 'Amount Due' and 'Grand Total' all mean the same thing. It understands context the way a human does."
+
+**Make it tangible:**
+- New supplier with a weird invoice format? **The AI figures it out.**
+- Handwritten notes on a form? **It reads them in context.**
+- Multiple languages in one document? **No problem.**
+
+---
+
+## 📊 PROOF POINT:
+**Wolt** — the food delivery company — processes invoices in **9+ languages across 11 countries.** They've had **30% volume growth** with the **same headcount** in AP.
+
+---
+
+## ➡️ TRANSITION:
+> **"So with that foundation — what kinds of documents can this technology actually handle? The answer might surprise you..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 9: WHAT WE CAN PROCESS
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Expand their imagination. The scope is bigger than they think.**
+
+---
+
+## 💬 OPEN IT UP:
+
+> "So what kinds of documents can this actually handle? The short answer: **if a human can read it, AI can too.**"
+
+**Walk through the list:**
+- ✓ **Invoices and POs** — any format, any vendor, any layout
+- ✓ **Bills of lading and shipping documents** — the stuff that comes with every shipment
+- ✓ **Delivery receipts** — even with signatures and handwritten notes
+- ✓ **Quality certificates and lab reports** — including the weird formatting from third-party labs
+- ✓ **Compliance documentation** — food safety certs, audit forms, inspection records
+- ✓ **Even handwritten forms** — yes, really. The AI can read handwriting.
+
+---
+
+## 🌱 GREENHOUSE SPECIFIC:
+> "For produce operations specifically: phytosanitary certificates, pesticide application records, harvest logs, pack date documentation, temperature logs from cold chain... all of it."
+
+---
+
+## ➡️ TRANSITION:
+> **"Now, here's something important to understand — AI isn't always 100% confident in what it reads. And that's actually a FEATURE, not a bug. Let me explain..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 10: CONFIDENCE SCORING
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**This is what makes AI trustworthy. It knows what it doesn't know.**
+
+---
+
+## 💬 EXPLAIN WHY THIS MATTERS:
+
+> "Here's what makes modern AI different from a black box: **it tells you how confident it is.** Every field, every extraction, comes with a confidence score."
+
+**Walk through the thresholds:**
+
+| Confidence | What Happens |
+|------------|--------------|
+| **95%+** | Auto-process — no human needed |
+| **70-95%** | Flag for quick review — human glances at it |
+| **<70%** | Route to human expert — AI is saying "I'm not sure" |
+
+**Drive home the insight:**
+> "This is crucial for trust. The AI isn't a black box making decisions you can't see. **It shows its work.** And critically — **it knows when to ask for help.**"
+
+---
+
+## 📊 THE PROOF:
+- **Adyen** — the global payments company — achieves **93.4% accuracy** on first pass
+- With human review on flagged items? They hit **99%+** overall
+
+---
+
+## ➡️ TRANSITION:
+> **"Which brings us to the question everyone's really thinking about: how do humans fit into this system?"**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 11: HUMAN-IN-THE-LOOP
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Address the unspoken fear in the room. This isn't about replacing people — it's about upgrading what they do.**
+
+---
+
+## 💬 ADDRESS THE ELEPHANT:
+
+> "I want to be really clear about something, because I know there's a question in this room that no one's asking out loud: 'Are you talking about replacing my team?'"
+
+**Answer it directly:**
+> "No. Here's what actually happens: When the AI is confident, it processes automatically. When it's NOT confident — when something looks unusual or doesn't match — **it routes to a human.** Your people are still making the decisions that matter. They're just not doing the repetitive typing anymore."
+
+**Explain the virtuous cycle:**
+- Human reviews the flagged item
+- **One click** to approve, correct, or escalate
+- Every correction **teaches the system** — it gets smarter
+- Over time, fewer things need review
+
+**Land the key insight:**
+> "Nobody's job becomes 'type data from one screen to another.' That's waste. Their job becomes 'exercise judgment on the things that actually matter.'"
+
+---
+
+## 📊 THE PROOF:
+**Thermo Fisher** runs 53% of their invoices "touchless" — **400,000+ invoices per year** with zero human touch. The other 47%? Reviewed by humans. The humans focus ONLY on what needs their attention.
+
+---
+
+## 🌱 GREENHOUSE HOOK:
+> "Imagine your accounting person doing actual ACCOUNTING. Analysis. Vendor negotiations. Cash flow planning. Instead of copying numbers from PDFs."
+
+---
+
+## ➡️ TRANSITION:
+> **"Let's talk about what this looks like in business terms — the actual ROI companies are seeing..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 12: THE ADOPTION WAVE
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Create urgency through FOMO. This isn't experimental anymore — it's mainstream.**
+
+---
+
+## 📊 THE ADOPTION NUMBERS:
+
+| Metric | Number |
+|--------|--------|
+| Enterprises using AI | **78%** (up from 55% last year) |
+| Large enterprises with AI | **87%** |
+| IDP market by 2032 | **$17.8 billion** |
+
+---
+
+## 💬 CREATE THE URGENCY:
+
+> "I want to put this technology in context. This isn't early-adopter territory anymore. This isn't experimental."
+
+**Land the stats:**
+> "**78% of enterprises** are now using AI in some form — that's up from 55% just last year. Among large enterprises? **87%.** The IDP market specifically is projected to hit **$17.8 billion** by 2032."
+
+**Reframe the question:**
+> "The question isn't WHETHER this technology works. The proof is everywhere. The question is: **do you want to be ahead of your competitors, or behind them?**"
+
+---
+
+## ❓ ENGAGE THE ROOM:
+> "Quick show of hands — who's already using some form of document automation in their operation? Even basic scanning?"
+*(Take note of responses — acknowledge the range)*
+
+---
+
+## ➡️ TRANSITION:
+> **"So we know adoption is happening. But what kind of returns are companies actually seeing? Let me show you the numbers..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 13: THE ROI REALITY
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Credibility through specifics. These are public numbers from name-brand companies.**
+
+---
+
+## 📊 THE BIG NUMBERS:
+
+| Company | Result |
+|---------|--------|
+| **Coca-Cola** | €17M savings, 580K hours recovered |
+| **Deliveroo** | 23x efficiency, 15 min → 45 sec |
+| **Thermo Fisher** | 70% time reduction |
+| **Payback** | 5-12 months |
+
+---
+
+## 💬 DELIVER WITH WEIGHT:
+
+> "I want to show you some numbers. And I want to be clear — these aren't projections. These aren't 'potential savings.' These are **published results** from companies you've heard of."
+
+**Walk through each one:**
+- **Coca-Cola's** European operations saved €17 million euros and recovered 580,000 hours of labor
+- **Deliveroo** went from 15 minutes per invoice to 45 seconds — that's **23x efficiency**
+- **Thermo Fisher** — a $40 billion scientific company — cut document processing time by 70%
+
+**Drive home the payback:**
+> "And the typical payback period? **5 to 12 months.** This isn't a multi-year initiative. This is something you can see results from THIS YEAR."
+
+---
+
+## 🌱 GREENHOUSE HOOK:
+> "Those hours saved aren't just cost savings on a spreadsheet. They're hours that go back to **production.** To **quality control.** To actually **growing things** instead of processing paperwork."
+
+---
+
+## ➡️ TRANSITION:
+> **"Let me rapid-fire through a few more examples to give you a sense of the range..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 14: REAL SUCCESS STORIES
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Name-drop credible companies. Build social proof.**
+
+---
+
+## 💬 RAPID FIRE:
+
+- **Coca-Cola** — €800M orders, 99% faster
+- **JPMorgan** — 360K hours of work → seconds
+- **Deutsche Bank** — 16 days → 24 hours
+- **Landmark** — 90 min → 4 min per PO
+- **Adyen** — 23 countries, 7 people in AP
+- **Wolt** — 60% automation, 11 countries, same headcount
+
+> **"These are Fortune 500 companies. The technology works."**
+
+---
+
+## ➡️ TRANSITION:
+> **"Let me paint a picture of the ideal end state..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 15: THE "TOUCHLESS" INVOICE
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**The goal = invoices that process themselves.**
+
+---
+
+## 💬 THE FLOW:
+
+1. Invoice arrives by email
+2. AI extracts vendor, PO#, line items, totals
+3. System matches to purchase order
+4. Three-way match: PO vs Invoice vs Receipt
+5. If matched → **auto-approve, post, schedule payment**
+6. **Human never sees it**
+
+> **"Your team only sees EXCEPTIONS — the 10% that actually have issues."**
+
+---
+
+## 📊 STAT:
+**Thermo Fisher:** 53% touchless = **400,000+ invoices/year** zero human touch
+
+---
+
+## ➡️ TRANSITION:
+> **"Let's be honest about what this investment looks like..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 16: COST VS BENEFIT
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Be honest about costs. Frame as investment vs return.**
+
+---
+
+## 💬 KEY LINES:
+
+**COSTS:**
+- Initial: software, integration, training (~12 weeks)
+- Ongoing: subscription, maintenance
+
+**RETURNS:**
+- Labor savings, faster processing, fewer errors
+- Audit readiness, compliance confidence
+- Team working on **meaningful tasks**
+
+---
+
+## 📊 STAT:
+**Typical payback: 5-12 months**
+
+---
+
+## 💡 THE FRAME:
+> **"The question isn't whether you can AFFORD to do this. It's whether you can afford NOT to."**
+
+---
+
+## ➡️ TRANSITION:
+> **"Let's talk about practical applications for operations like yours..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 17: SHIPPING & RECEIVING
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Bring it to THEIR world. This is the use case they'll see in the demo.**
+
+---
+
+## 💬 CONNECT TO THEIR REALITY:
+
+> "Let me bring this back to something very concrete for produce operations: shipping and receiving. This is where documents COLLIDE."
+
+**Paint the complexity:**
+> "Think about it — for one shipment, you've got FIVE different data sources that should all agree:"
+
+| Source | What It Is |
+|--------|------------|
+| 1. **Purchase Order** | What you ORDERED |
+| 2. **Bill of Lading** | What the vendor says they SHIPPED |
+| 3. **Invoice** | What the vendor is CHARGING you |
+| 4. **Delivery Receipt** | What your team SIGNED for |
+| 5. **Actual Count** | What was REALLY there when you opened the boxes |
+
+**Land the insight:**
+> "In a manual world, reconciling these five sources is a headache. It happens late. Discrepancies get discovered weeks later when you're trying to pay the invoice. With AI? **All five get compared automatically. Instantly. The moment something doesn't match, you know about it.**"
+
+---
+
+## 🌱 GREENHOUSE HOOK:
+> "Produce operations move FAST. Product is perishable. You can't let a discrepancy sit for a week — by then the evidence is literally rotting."
+
+---
+
+## ➡️ TRANSITION:
+> **"And here's what makes this powerful — when the AI finds a problem, it doesn't just flag it. It routes it INTELLIGENTLY..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 18: INTELLIGENT ESCALATION
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**AI doesn't just find problems — it routes them to the RIGHT person.**
+
+---
+
+## 💬 KEY LINES:
+
+| Severity | Example | Action |
+|----------|---------|--------|
+| **Minor** | Ordered 100, got 97 | Log it, don't interrupt |
+| **Significant** | Ordered 100, got 50 | Alert receiving manager |
+| **Wrong product** | Tomato seeds → cucumber | Immediate escalation |
+| **Safety issue** | Contamination | Notify safety + management |
+
+> **"Not just 'there's a problem' — ACTIONABLE information."**
+
+---
+
+## ➡️ TRANSITION:
+> **"This fits into a broader data picture..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 19: THE DATA FLOW
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Documents are ONE piece of a bigger unified data system.**
+
+---
+
+## 💬 KEY LINES:
+
+> "Documents are one input. Unified insights are the output."
+
+**SOURCES:** ERP, climate systems, labor tracking, inventory, shipping
+**OUTPUT:**
+- Leadership → **KPI dashboards**
+- Operations → **real-time alerts**
+- Growers → **predictions**
+
+---
+
+## ➡️ TRANSITION:
+> **"Let me show you the technical architecture..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 20: DATA ARCHITECTURE
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**For technical folks. Use the interactive diagram.**
+
+---
+
+## 💬 KEY LINES:
+
+> "This is the detailed view. You can zoom in to explore."
+
+**Sources → ETL → Data Lake → AI Layer → Users**
+
+*"Documents aren't siloed anymore. They're part of the same infrastructure as everything else."*
+
+---
+
+## ➡️ TRANSITION:
+> **"Here's what the transformation looks like..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 21: KPI TRANSFORMATION
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Before/after. From chaos to clarity.**
+
+---
+
+## 💬 KEY LINES:
+
+| BEFORE | AFTER |
+|--------|-------|
+| Scattered spreadsheets | Unified data |
+| Manual reconciliation | Automated processing |
+| Reports take days | Same-day visibility |
+
+> **"Nobody's job is pulling data into spreadsheets anymore. The data FLOWS."**
+
+---
+
+## ➡️ TRANSITION:
+> **"So how do you actually start?"**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 22: GETTING STARTED
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Remove the "this is too big" objection. Show them the practical first step.**
+
+---
+
+## 💬 MAKE IT APPROACHABLE:
+
+> "If you're thinking 'this sounds great but it's a huge undertaking' — let me reframe that. You don't have to automate everything at once. That's not how successful implementations work."
+
+**Walk through the path:**
+
+| Phase | What Happens |
+|-------|--------------|
+| 1 | **Pick ONE high-volume document type** — usually invoices |
+| 2 | **Pilot for 30-60 days** — small scope, contained risk |
+| 3 | **Measure what matters** — accuracy, time saved, exceptions rate |
+| 4 | **Expand** — add more document types as you prove the model |
+| 5 | **Integrate** — connect to ERP, automate end-to-end |
+
+**Set expectations:**
+> "From kickoff to production value? **3 to 6 months.** That's not a multi-year transformation. That's a project with a real end date and measurable results."
+
+---
+
+## 💡 THE CALL TO ACTION:
+> **"Start with the pain point that's most acute. Get a win. Build credibility. Then expand from there. That's how this actually works."**
+
+---
+
+## ➡️ TRANSITION:
+> **"Alright — we've covered a lot of theory. Now let me show you what this actually LOOKS like when it's running..."**
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📍 SLIDE 23: SEE IT IN ACTION
+# ══════════════════════════════════════════════════════════
+
+## 🎯 THE POINT:
+**Energy shift. Theory is done. Now they get to experience it.**
+
+---
+
+## 💬 BUILD ANTICIPATION:
+
+> "Alright. We've covered a lot of ground — the problem, the technology, the results. But talking ABOUT something isn't the same as SEEING it work."
+
+**Set up what's coming:**
+> "What you're about to see is a working document processing pipeline. We're going to take a document through the entire flow — capture, classification, extraction, validation, and routing. You'll see the AI's confidence scores. You'll see how exceptions get handled. You'll see the data flow from document to dashboard."
+
+**Make it participatory:**
+> "And here's the fun part — **you're going to be part of it.** There will be QR codes you can scan with your phone. You'll submit data. You'll see your inputs flow through the system in real-time. You're not just watching a demo — **you're INSIDE the data pipeline.**"
+
+---
+
+## 🎤 ENERGY CUE:
+> **"So — get your phones out. Make sure you're connected to WiFi. And let's see what intelligent document processing actually looks like when it's running."**
+
+---
+
+## 💡 PRESENTER NOTE:
+*Take a breath here. Let the transition land. Then switch to the demo screen.*
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 📋 QUICK STATS CHEAT SHEET
+# ══════════════════════════════════════════════════════════
+
+| Stat | Number |
+|------|--------|
+| Business data in docs | **80%** |
+| Manual invoice cost | **$15-25** |
+| Human error rate | **4%** |
+| Enterprises using AI | **78%** |
+| Coca-Cola savings | **€17M** |
+| Deliveroo efficiency | **23x** |
+| Thermo Fisher touchless | **53%** |
+| Deliveroo accuracy | **97.6%** |
+| Typical payback | **5-12 months** |
+
+---
+
+---
+
+---
+
+# ══════════════════════════════════════════════════════════
+# 🌱 GREENHOUSE HOOKS (use when needed)
+# ══════════════════════════════════════════════════════════
+
+**LABOR:** *"Finding good labor is hard enough. Data entry is expensive waste."*
+
+**MARGINS:** *"Ag runs on tight margins. Manual processing adds ZERO value."*
+
+**COMPLIANCE:** *"Audits are a fact of life. Searchable docs vs. filing cabinets."*
+
+**SEASONALITY:** *"Volume spikes at harvest. Manual doesn't scale. Automated does."*
+
+**PERISHABILITY:** *"Can't let a discrepancy sit for a week. Product's rotted by then."*
+
+---
+
+---
+
+*REMEMBER: These are talking points, not a script. Build off the key ideas. Make it yours.*

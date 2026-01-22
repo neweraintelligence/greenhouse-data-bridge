@@ -421,17 +421,115 @@ export const incidentsNodeInfo: Record<string, NodeInfo> = {
 };
 
 // ============================================================================
+// TEMPLATE USE CASE NODE INFO (Build Your Own)
+// ============================================================================
+
+// Generic intro slide for template use cases - shown when selecting a template
+const templateIntroNodeInfo: Record<string, NodeInfo> = {
+  // Supplier Management
+  supplier_management: {
+    id: 'supplier_management-intro',
+    title: 'SUPPLIER MANAGEMENT',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'Vendor relationships generate mountains of paper: certifications, contracts, insurance documents, quality reports. What documents come in? What needs to come out? You decide.',
+    painPoint: 'Think about your supplier onboarding process. What documents do you chase? What gets lost in email? What expires without anyone noticing?',
+    solution: 'Scan the QR code and define the inputs and outputs for YOUR supplier management workflow. What documents come in? What reports or alerts should come out?',
+    keyInsight: 'There\'s no wrong answer here. This is YOUR process — we\'re just mapping it to an intelligent pipeline.',
+  },
+
+  // Customer Orders
+  customer_orders: {
+    id: 'customer_orders-intro',
+    title: 'CUSTOMER ORDERS',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'Orders flow in from multiple channels: emails, portals, EDI, phone calls transcribed. Confirmations, shipping notices, and invoices need to flow back out. What\'s your order-to-cash document chain?',
+    painPoint: 'Consider your order processing today. Where do orders get stuck? What documents are you manually cross-referencing? Where do errors creep in?',
+    solution: 'Define your input documents and desired outputs. PO emails? Portal exports? What confirmations or reports would make your life easier?',
+    keyInsight: 'Every business has a unique order flow. Map yours, and see how AI can bridge the gaps.',
+  },
+
+  // Regulatory & Inspections
+  regulatory_compliance: {
+    id: 'regulatory_compliance-intro',
+    title: 'REGULATORY & INSPECTIONS',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'Compliance isn\'t optional. Inspection reports, permits, certifications, audit findings — they pile up. What needs to be tracked? What triggers an alert? What reports keep you audit-ready?',
+    painPoint: 'When the auditor asks for documentation, how fast can you find it? What expires? What inspection findings are still open?',
+    solution: 'Define your compliance document types and what outputs you need: expiration alerts, compliance dashboards, audit-ready reports.',
+    keyInsight: 'Compliance is about knowing what you have and what\'s coming due. Let\'s design that visibility.',
+  },
+
+  // Equipment Maintenance
+  equipment_maintenance: {
+    id: 'equipment_maintenance-intro',
+    title: 'EQUIPMENT MAINTENANCE',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'Equipment generates data: maintenance logs, service reports, inspection results, warranty documents. What\'s being tracked in spreadsheets? What should trigger a work order?',
+    painPoint: 'When something breaks, do you know its maintenance history? When\'s the last service? Is it still under warranty? Where\'s that documentation?',
+    solution: 'Map your maintenance document flow. What comes in from technicians, vendors, inspections? What outputs keep equipment running?',
+    keyInsight: 'Preventive maintenance starts with document visibility. Design the inputs and outputs that matter.',
+  },
+
+  // Accounts Payable
+  accounts_payable: {
+    id: 'accounts_payable-intro',
+    title: 'ACCOUNTS PAYABLE',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'The classic three-way match: PO, invoice, receipt. But your reality might be more complex. What documents need to reconcile? What approvals are required? What reports does finance need?',
+    painPoint: 'How many invoices are sitting in someone\'s inbox right now? How many duplicate payments have you caught — or missed?',
+    solution: 'Define your AP document types: invoices, POs, receipts, contracts. What outputs matter: payment approvals, exception reports, aging dashboards?',
+    keyInsight: 'AP automation starts with understanding your document flow. Design it, then automate it.',
+  },
+
+  // HR & Training Records
+  hr_training: {
+    id: 'hr_training-intro',
+    title: 'HR & TRAINING RECORDS',
+    subtitle: 'Design Your Workflow',
+    imageOnLeft: false,
+    description:
+      'Employee documentation never ends: certifications, training completions, policy acknowledgements, performance reviews. What needs to be tracked? What expirations matter? What compliance reports are required?',
+    painPoint: 'Can you prove every employee completed required training? When certifications expire? Who acknowledged the new policy?',
+    solution: 'Define your HR document inputs and the compliance outputs you need: training status, certification tracking, audit reports.',
+    keyInsight: 'HR compliance is about documentation. Design the flow that keeps you covered.',
+  },
+};
+
+// Export function to get template intro info
+export function getTemplateIntroInfo(useCaseId: string): NodeInfo | null {
+  return templateIntroNodeInfo[useCaseId] || null;
+}
+
+// ============================================================================
 // USE CASE TRANSITION SLIDES ("Up Next")
 // ============================================================================
 
 // Define the presentation order of use cases
-export const useCasePresentationOrder = ['shipping', 'incidents', 'quality'];
+// 'templates' is a special marker for the "Build Your Own" section
+export const useCasePresentationOrder = ['shipping', 'incidents', 'templates'];
 
 // Use case details mapping
 const useCaseDetails: Record<string, { name: string; description: string }> = {
   shipping: { name: 'Shipping & Receiving', description: 'Reconcile shipments, match Bills of Lading, invoices, and delivery receipts' },
   incidents: { name: 'Incident / Maintenance Intake', description: 'AI-powered incident detection with severity-based routing' },
-  quality: { name: 'Quality & Compliance', description: 'Process COAs, lab reports, and compliance documents against standards' },
+  templates: { name: 'Build Your Own', description: 'Design your own workflow — define inputs, outputs, and watch it come to life' },
+  // Template use cases
+  supplier_management: { name: 'Supplier Management', description: 'Track vendor documents, certifications, and contract compliance' },
+  customer_orders: { name: 'Customer Orders', description: 'Process orders, confirmations, and delivery documentation' },
+  regulatory_compliance: { name: 'Regulatory & Inspections', description: 'Track inspection reports, permits, and regulatory filings' },
+  equipment_maintenance: { name: 'Equipment Maintenance', description: 'Log maintenance records, service reports, and equipment inspections' },
+  accounts_payable: { name: 'Accounts Payable', description: 'Match invoices, purchase orders, and payment approvals' },
+  hr_training: { name: 'HR & Training Records', description: 'Track employee certifications, training completions, and HR documents' },
 };
 
 // Get the first use case (for theory → first use case transition)
@@ -477,26 +575,26 @@ export const transitionNodeInfo: Record<string, NodeInfo> = {
     solution: 'Mobile incident reporting with AI analysis. Automatic severity scoring. Instant routing to the right team. No more lost requests.',
     keyInsight: 'Same data pipeline pattern, different use case. The power is in the architecture.',
   },
-  // After Incidents, transition to Quality
+  // After Incidents, transition to Build Your Own
   incidents: {
     id: 'upNext',
-    title: 'Up Next',
-    subtitle: 'Quality & Compliance',
+    title: 'Your Turn',
+    subtitle: 'Build Your Own Workflow',
     imageOnLeft: false,
     description:
-      'Watch how AI processes Certificates of Analysis and compliance documents, matching them against receiving logs and regulatory requirements.',
-    painPoint: 'COAs arrive as PDFs. Someone manually reads them, checks values against specs, and updates spreadsheets. Audit prep takes days.',
-    solution: 'AI extracts lab values, compares against specifications, flags out-of-spec results. Compliance documentation happens automatically.',
-    keyInsight: 'Document intelligence meets compliance automation. Auditors get answers in seconds.',
+      'Now it\'s your turn. Pick a use case from your own work — supplier management, accounts payable, customer orders, whatever you deal with daily. Define the inputs and outputs, and see the pattern in action.',
+    painPoint: 'You\'ve seen how it works for shipping and incidents. But what about YOUR documents? Your forms? Your reconciliation challenges?',
+    solution: 'Same architecture, your scenario. Scan the QR code, define your document types, and watch the workflow come together.',
+    keyInsight: 'The best way to understand a tool is to build something with it. Let\'s design YOUR workflow.',
   },
-  // After Quality - end of demo
-  quality: {
+  // After Templates - end of session
+  templates: {
     id: 'upNext',
     title: 'That\'s the Pipeline',
     subtitle: 'Questions & Discussion',
     imageOnLeft: false,
     description:
-      'You\'ve seen three use cases running through the same intelligent architecture. The pattern scales to any data reconciliation challenge.',
+      'You\'ve seen the live demos and designed your own workflows. The pattern scales to any data reconciliation challenge in your organization.',
     painPoint: 'Manual data matching is slow, error-prone, and doesn\'t scale. Every new workflow means more spreadsheets, more email, more delays.',
     solution: 'One platform, many use cases. Add new data sources, new rules, new outputs — same underlying intelligence.',
     keyInsight: 'The demo is over, but the conversation continues. What questions can we answer?',
@@ -506,6 +604,16 @@ export const transitionNodeInfo: Record<string, NodeInfo> = {
 // ============================================================================
 // HELPER FUNCTION
 // ============================================================================
+// Template use case IDs
+const templateUseCaseIds = [
+  'supplier_management',
+  'customer_orders',
+  'regulatory_compliance',
+  'equipment_maintenance',
+  'accounts_payable',
+  'hr_training',
+];
+
 export function getNodeInfo(
   useCase: string,
   nodeType: string,
@@ -514,6 +622,13 @@ export function getNodeInfo(
   // Handle transition slides
   if (nodeType === 'upNext') {
     return transitionNodeInfo[useCase] || null;
+  }
+
+  // Handle template use cases - return intro slide for any source node
+  if (templateUseCaseIds.includes(useCase)) {
+    // For template use cases, show the intro/design slide
+    // This applies to any node type since templates don't have detailed node-by-node content
+    return templateIntroNodeInfo[useCase] || null;
   }
 
   const contentMap: Record<string, Record<string, NodeInfo>> = {
