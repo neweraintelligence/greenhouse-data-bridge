@@ -786,6 +786,24 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               input_documents: record.input_documents,
               output_types: record.output_types,
             });
+            // Update output files with user-defined outputs
+            if (record.output_types && record.output_types.length > 0) {
+              // Map output type to file type
+              const typeToFileType: Record<string, 'pdf' | 'csv' | 'email' | 'alert'> = {
+                'report': 'pdf',
+                'export': 'csv',
+                'email': 'email',
+                'alert': 'alert',
+                'dashboard': 'pdf',
+                'ticket': 'pdf',
+              };
+              setOutputFiles(record.output_types.map((output, idx) => ({
+                id: `output-${idx}`,
+                name: output.name,
+                type: typeToFileType[output.type] || 'pdf',
+                ready: false,
+              })));
+            }
             // Notification now handled by ParticipantActivityLog via the green light indicator
           }
         }
@@ -2530,12 +2548,14 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       const outputIsFocused = focusedNodeId === 'output';
       const outputIsUnfocused = focusedNodeId && !outputIsFocused;
       const outputIsPresentationActive = presentationActiveNode === 'output';
+      // Use "Outputs" label for template use cases, "Reports" for regular ones
+      const outputLabel = selectedUseCase.isTemplate ? 'Outputs' : 'Reports';
       nodes.push({
         id: 'output',
         type: 'output',
         position: getPosition('output', { x: xSpacing * 6 - 40, y: 140 }),
         data: {
-          label: 'Reports',
+          label: outputLabel,
           files: outputFiles,
           onPreview: (file: OutputFile) => {
             if (file.id === 'reconciliation-report' && reconciliationReport) {
@@ -3209,7 +3229,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (infoNodeId === 'output') {
       return (
         <div className="p-4">
-          <p className="text-sm font-semibold text-emerald-700 mb-3">Generated Reports</p>
+          <p className="text-sm font-semibold text-emerald-700 mb-3">{selectedUseCase?.isTemplate ? 'Defined Outputs' : 'Generated Reports'}</p>
           <div className="space-y-2">
             {outputFiles.map(f => (
               <div key={f.id} className={`p-3 rounded-xl text-xs transition-all ${
