@@ -801,7 +801,7 @@ function InfoOverlayComponent({
                   <div className="flex flex-col items-center gap-3">
                     <QRCodeSVG
                       value={sourceType === 'workflow_template'
-                        ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
+                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
                         : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
                       }
                       size={160}
@@ -920,7 +920,7 @@ function InfoOverlayComponent({
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
                       value={sourceType === 'workflow_template'
-                        ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
+                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
                         : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
                       }
                       size={180}

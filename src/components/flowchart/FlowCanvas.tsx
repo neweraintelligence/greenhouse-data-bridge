@@ -2282,7 +2282,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         // For template use cases without data, show QR code to define workflow
         const isTemplateAwaiting = selectedUseCase.isTemplate && !workflowTemplateData;
         const templateQrUrl = isTemplateAwaiting
-          ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${selectedUseCase.id}&useCaseName=${encodeURIComponent(selectedUseCase.name)}&node=${encodeURIComponent(source.name)}`
+          ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${selectedUseCase.id}&useCaseName=${encodeURIComponent(selectedUseCase.name)}`
           : undefined;
 
         // Generate QR code URL for paper sources
