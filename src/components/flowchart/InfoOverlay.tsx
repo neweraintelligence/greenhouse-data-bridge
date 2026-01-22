@@ -16,6 +16,16 @@ const templateUseCaseIds = [
   'hr_training',
 ];
 
+// Map template use case IDs to display names (fallback if prop not passed)
+const templateUseCaseNames: Record<string, string> = {
+  'supplier_management': 'Supplier Management',
+  'customer_orders': 'Customer Orders',
+  'regulatory_compliance': 'Regulatory & Inspections',
+  'equipment_maintenance': 'Equipment Maintenance',
+  'accounts_payable': 'Accounts Payable',
+  'hr_training': 'HR & Training Records',
+};
+
 // Helper function to map node labels to Supabase source table names
 // Uses both node label AND use case context to determine correct routing
 function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
@@ -804,7 +814,7 @@ function InfoOverlayComponent({
                   <div className="flex flex-col items-center gap-3">
                     <QRCodeSVG
                       value={sourceType === 'workflow_template'
-                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(useCaseName || nodeLabel || '')}`
+                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(useCaseName || (useCase ? templateUseCaseNames[useCase] : '') || nodeLabel || '')}`
                         : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
                       }
                       size={160}
@@ -923,7 +933,7 @@ function InfoOverlayComponent({
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
                       value={sourceType === 'workflow_template'
-                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(useCaseName || nodeLabel || '')}`
+                        ? `${window.location.origin}/mobile-entry/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(useCaseName || (useCase ? templateUseCaseNames[useCase] : '') || nodeLabel || '')}`
                         : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
                       }
                       size={180}
