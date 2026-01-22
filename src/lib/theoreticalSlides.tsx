@@ -34,7 +34,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'DOCUMENTS ARE EVERYWHERE',
     subtitle: 'The Language of Business',
     imageOnLeft: false,
-    imagePath: '/demo_pack/theoretical/intro-documents.png',
+    imagePath: '/demo_pack/theoretical/intro-language.png',
     content: {
       headline: 'Every business transaction creates a paper trail. Always has, always will.',
       bullets: [
@@ -59,7 +59,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
     title: 'THE #1 AI USE CASE',
     subtitle: 'Why Document Processing Leads AI Adoption',
     imageOnLeft: true,
-    imagePath: '/demo_pack/theoretical/intro-adoption.png',
+    imagePath: '/demo_pack/theoretical/impact-leader.png',
     content: {
       headline: 'Document processing isn\'t just popular—it\'s the fastest-adopted AI application in enterprise.',
       bullets: [
