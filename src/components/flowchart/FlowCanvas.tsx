@@ -3521,13 +3521,26 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           if (!infoNodeId) return false;
           const navOrder = getNavigationOrder();
           const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
-          return currentIdx >= 0 && currentIdx < navOrder.length - 1;
+          // Normal case: more slides in current navigation
+          if (currentIdx >= 0 && currentIdx < navOrder.length - 1) return true;
+          // Template case: at end of template but there's a next template
+          if (selectedUseCase?.isTemplate && currentIdx >= navOrder.length - 1) {
+            const nextTemplate = getNextTemplateUseCase(selectedUseCase.id);
+            return nextTemplate !== null;
+          }
+          return false;
         })()}
         hasPrevious={(() => {
           if (!infoNodeId) return false;
           const navOrder = getNavigationOrder();
           const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
-          return currentIdx > 0;
+          // Normal case: previous slides in current navigation
+          if (currentIdx > 0) return true;
+          // Template case: at start of template but there's a previous template or incidents
+          if (selectedUseCase?.isTemplate && currentIdx === 0) {
+            return true; // Can always go back (either to prev template or incidents)
+          }
+          return false;
         })()}
         imageUrl={infoNodeType && selectedUseCase && infoNodeLabel ? getNodeImage(selectedUseCase.id, infoNodeType, infoNodeLabel) : null}
         nodeType={infoNodeType || undefined}
