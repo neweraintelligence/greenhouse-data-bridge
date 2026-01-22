@@ -788,12 +788,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             });
             // Update output files with user-defined outputs
             if (record.output_types && record.output_types.length > 0) {
-              // Map output type to file type
-              const typeToFileType: Record<string, 'pdf' | 'csv' | 'email' | 'alert'> = {
+              // Map output type to file type (OutputFile only supports 'pdf' | 'csv')
+              const typeToFileType: Record<string, 'pdf' | 'csv'> = {
                 'report': 'pdf',
                 'export': 'csv',
-                'email': 'email',
-                'alert': 'alert',
+                'email': 'pdf',      // Email templates shown as PDF
+                'alert': 'pdf',      // Alerts shown as PDF
                 'dashboard': 'pdf',
                 'ticket': 'pdf',
               };
