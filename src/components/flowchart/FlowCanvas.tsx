@@ -982,9 +982,21 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       // Select the next use case
       handleUseCaseSelect(useCaseObj);
 
-      // After a short delay, start presentation mode on the first source
+      // After a short delay, start presentation mode
       setTimeout(() => {
-        if (useCaseObj.sources.length > 0) {
+        // For template use cases, show the templateIntro slide
+        if (useCaseObj.isTemplate) {
+          handleShowInfo(
+            'templateIntro',
+            'templateIntro',
+            useCaseObj.name,
+            -1,
+            undefined,
+            undefined,
+            useCaseObj.id
+          );
+        } else if (useCaseObj.sources.length > 0) {
+          // For regular use cases, show the first source
           const firstSource = useCaseObj.sources[0];
           const firstNodeId = `source-${firstSource.name}`;
           handleShowInfo(
@@ -994,7 +1006,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             0,
             undefined,
             undefined,
-            useCaseObj.id // Pass the new use case ID explicitly
+            useCaseObj.id
           );
         }
       }, 300);
