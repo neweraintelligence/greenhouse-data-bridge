@@ -1058,13 +1058,13 @@ function InfoOverlayComponent({
           {/* Subtitle with mode badge - compact */}
           <div className="flex items-center gap-2 mb-4">
             <p
-              className="text-sm tracking-[0.15em] uppercase text-gray-500"
+              className="text-base tracking-[0.15em] uppercase text-gray-500"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               {info.subtitle}
             </p>
             {hasDirectionalContent && activeDirection !== 'both' && (
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
+              <span className={`text-sm px-2.5 py-1 rounded-full ${
                 activeDirection === 'inbound'
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-blue-100 text-blue-700'
@@ -1076,7 +1076,7 @@ function InfoOverlayComponent({
 
           {/* Title - fit screen */}
           <h1
-            className="text-5xl font-semibold text-gray-900 tracking-tight mb-6 leading-[1.1]"
+            className="text-6xl font-semibold text-gray-900 tracking-tight mb-6 leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {info.title}
@@ -1084,22 +1084,22 @@ function InfoOverlayComponent({
 
           {/* Description - fit screen */}
           <p
-            className="text-lg text-gray-700 leading-relaxed mb-8"
+            className="text-xl text-gray-700 leading-relaxed mb-8"
             style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
           >
             {getActiveContent('description')}
           </p>
 
           {/* Pain point - fit screen */}
-          <div className="mb-6">
+          <div className="mb-8">
             <p
-              className="text-xs tracking-[0.12em] uppercase text-amber-600 mb-2"
+              className="text-sm tracking-[0.12em] uppercase text-amber-600 mb-2"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Problem
             </p>
             <p
-              className="text-xl text-gray-800 leading-snug font-light"
+              className="text-2xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('painPoint')}"
@@ -1107,15 +1107,15 @@ function InfoOverlayComponent({
           </div>
 
           {/* Solution - fit screen */}
-          <div className="mb-6">
+          <div className="mb-8">
             <p
-              className="text-xs tracking-[0.12em] uppercase text-emerald-600 mb-2"
+              className="text-sm tracking-[0.12em] uppercase text-emerald-600 mb-2"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Solution
             </p>
             <p
-              className="text-xl text-gray-800 leading-snug font-light"
+              className="text-2xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('solution')}"
@@ -1124,9 +1124,9 @@ function InfoOverlayComponent({
 
           {/* Key insight - fit screen */}
           {getActiveContent('keyInsight') && (
-            <div className="border-l-2 border-gray-300 pl-4 mb-6">
+            <div className="border-l-3 border-gray-300 pl-5 mb-8">
               <p
-                className="text-base text-gray-600 italic"
+                className="text-lg text-gray-600 italic"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
               >
                 {getActiveContent('keyInsight')}
