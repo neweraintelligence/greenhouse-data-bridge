@@ -970,9 +970,9 @@ function InfoOverlayComponent({
         >
           <div className="max-w-3xl text-center px-8">
             {/* "Up Next" label with animated gradient */}
-            <div className="mb-6">
+            <div className="mb-4">
               <span
-                className="inline-block px-6 py-2 rounded-full text-sm font-semibold tracking-[0.2em] uppercase bg-gradient-to-r from-bmf-blue/10 to-nei-green/10 text-bmf-blue"
+                className="inline-block px-5 py-1.5 rounded-full text-xs font-semibold tracking-[0.2em] uppercase bg-gradient-to-r from-bmf-blue/10 to-nei-green/10 text-bmf-blue"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 {info.title}
@@ -981,7 +981,7 @@ function InfoOverlayComponent({
 
             {/* Use case name - large and prominent */}
             <h1
-              className="text-6xl font-bold text-gray-900 tracking-tight mb-8 leading-[1.1]"
+              className="text-5xl font-bold text-gray-900 tracking-tight mb-6 leading-[1.1]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {info.subtitle}
@@ -989,7 +989,7 @@ function InfoOverlayComponent({
 
             {/* Description */}
             <p
-              className="text-xl text-gray-600 leading-relaxed mb-12 max-w-2xl mx-auto"
+              className="text-lg text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto"
               style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
             >
               {info.description}
@@ -1002,22 +1002,22 @@ function InfoOverlayComponent({
                   e.stopPropagation();
                   onStartNextUseCase();
                 }}
-                className="group inline-flex items-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+                className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-bmf-blue to-nei-green hover:from-bmf-blue-dark hover:to-nei-green-dark text-white font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
-                <Play className="w-7 h-7 group-hover:scale-110 transition-transform" />
+                <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
                 <span>Start Demo</span>
-                <ArrowRight className="w-6 h-6 opacity-70 group-hover:translate-x-2 transition-transform" />
+                <ArrowRight className="w-5 h-5 opacity-70 group-hover:translate-x-2 transition-transform" />
               </button>
             ) : (
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-4 px-8 py-5 rounded-2xl bg-gray-100 text-gray-600">
-                  <MessageSquareMore className="w-7 h-7" />
-                  <span className="font-semibold text-xl" style={{ fontFamily: 'var(--font-display)' }}>
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-gray-100 text-gray-600">
+                  <MessageSquareMore className="w-6 h-6" />
+                  <span className="font-semibold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
                     Ready for Questions
                   </span>
                 </div>
-                <p className="text-sm text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
+                <p className="text-xs text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
                   Press Escape or click outside to close
                 </p>
               </div>
@@ -1025,9 +1025,9 @@ function InfoOverlayComponent({
 
             {/* Key insight - bottom quote */}
             {info.keyInsight && (
-              <div className="mt-16 pt-8 border-t border-gray-200">
+              <div className="mt-10 pt-6 border-t border-gray-200">
                 <p
-                  className="text-base text-gray-500 italic max-w-xl mx-auto"
+                  className="text-sm text-gray-500 italic max-w-xl mx-auto"
                   style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
                 >
                   "{info.keyInsight}"
@@ -1052,19 +1052,19 @@ function InfoOverlayComponent({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Text column (aligned with padding for X button) */}
-        <div className={`w-2/3 pr-12 pt-32 pb-16 flex flex-col justify-center overflow-y-auto ${
+        <div className={`w-2/3 pr-12 pt-24 pb-12 flex flex-col justify-center overflow-hidden ${
           info.imageOnLeft ? 'pr-24 pl-12' : 'pl-24'
         }`}>
           {/* Subtitle with mode badge - compact */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3">
             <p
-              className="text-base tracking-[0.15em] uppercase text-gray-500"
+              className="text-sm tracking-[0.15em] uppercase text-gray-500"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               {info.subtitle}
             </p>
             {hasDirectionalContent && activeDirection !== 'both' && (
-              <span className={`text-sm px-2.5 py-1 rounded-full ${
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
                 activeDirection === 'inbound'
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-blue-100 text-blue-700'
@@ -1076,7 +1076,7 @@ function InfoOverlayComponent({
 
           {/* Title - fit screen */}
           <h1
-            className="text-6xl font-semibold text-gray-900 tracking-tight mb-6 leading-[1.1]"
+            className="text-5xl font-semibold text-gray-900 tracking-tight mb-4 leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {info.title}
@@ -1084,22 +1084,22 @@ function InfoOverlayComponent({
 
           {/* Description - fit screen */}
           <p
-            className="text-xl text-gray-700 leading-relaxed mb-8"
+            className="text-lg text-gray-700 leading-relaxed mb-5"
             style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
           >
             {getActiveContent('description')}
           </p>
 
           {/* Pain point - fit screen */}
-          <div className="mb-8">
+          <div className="mb-5">
             <p
-              className="text-sm tracking-[0.12em] uppercase text-amber-600 mb-2"
+              className="text-xs tracking-[0.12em] uppercase text-amber-600 mb-1"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Problem
             </p>
             <p
-              className="text-2xl text-gray-800 leading-snug font-light"
+              className="text-xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('painPoint')}"
@@ -1107,15 +1107,15 @@ function InfoOverlayComponent({
           </div>
 
           {/* Solution - fit screen */}
-          <div className="mb-8">
+          <div className="mb-5">
             <p
-              className="text-sm tracking-[0.12em] uppercase text-emerald-600 mb-2"
+              className="text-xs tracking-[0.12em] uppercase text-emerald-600 mb-1"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               The Solution
             </p>
             <p
-              className="text-2xl text-gray-800 leading-snug font-light"
+              className="text-xl text-gray-800 leading-snug font-light"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               "{getActiveContent('solution')}"
@@ -1124,9 +1124,9 @@ function InfoOverlayComponent({
 
           {/* Key insight - fit screen */}
           {getActiveContent('keyInsight') && (
-            <div className="border-l-3 border-gray-300 pl-5 mb-8">
+            <div className="border-l-3 border-gray-300 pl-4 mb-5">
               <p
-                className="text-lg text-gray-600 italic"
+                className="text-base text-gray-600 italic"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
               >
                 {getActiveContent('keyInsight')}

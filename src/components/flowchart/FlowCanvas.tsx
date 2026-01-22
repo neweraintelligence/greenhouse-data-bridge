@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ReactFlow,
   Background,
@@ -299,9 +300,18 @@ function generateCustomerOrderEmails(): EmailItem[] {
 
 export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMode, onPresentationStart }: FlowCanvasProps) {
   const useCases = getAllUseCases();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Selected use case
-  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null);
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(() => {
+    // Initialize from URL params
+    const useCaseId = searchParams.get('useCase');
+    if (useCaseId) {
+      const found = useCases.find(uc => uc.id === useCaseId);
+      return found || null;
+    }
+    return null;
+  });
   const [hasInitialFit, setHasInitialFit] = useState(false);
 
   // Theory mode state
@@ -406,11 +416,38 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
   // Track info overlay
   const [infoOverlayContent, setInfoOverlayContent] = useState<NodeInfo | null>(null);
-  const [infoNodeId, setInfoNodeId] = useState<string | null>(null);
+  const [infoNodeId, setInfoNodeId] = useState<string | null>(() => {
+    // Initialize from URL params
+    return searchParams.get('slide') || null;
+  });
   const [infoNodeType, setInfoNodeType] = useState<string | null>(null);
   const [infoNodeLabel, setInfoNodeLabel] = useState<string | null>(null);
   const [infoNodeFetchHandler, setInfoNodeFetchHandler] = useState<(() => void) | null>(null);
   const [infoNodeCanFetch, setInfoNodeCanFetch] = useState(false);
+
+  // Sync state to URL params (replaces history so back button doesn't create many entries)
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+
+    if (selectedUseCase) {
+      newParams.set('useCase', selectedUseCase.id);
+    } else {
+      newParams.delete('useCase');
+    }
+
+    if (infoNodeId) {
+      newParams.set('slide', infoNodeId);
+    } else {
+      newParams.delete('slide');
+    }
+
+    // Only update if params changed
+    const currentString = searchParams.toString();
+    const newString = newParams.toString();
+    if (currentString !== newString) {
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [selectedUseCase, infoNodeId, searchParams, setSearchParams]);
 
   // Reset node positions to original
   const handleResetPositions = useCallback(() => {
@@ -626,6 +663,109 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       setInfoNodeCanFetch(status === 'pending' && nodeType !== 'paper');
     }
   }, [selectedUseCase]);
+
+  // Track if we've done URL restoration (to avoid running multiple times)
+  const hasRestoredFromUrl = useRef(false);
+  const hasInitializedUseCase = useRef(false);
+
+  // Initialize use case data when restored from URL (run once on mount)
+  useEffect(() => {
+    if (hasInitializedUseCase.current) return;
+    if (!selectedUseCase) return;
+    if (Object.keys(sourceStatuses).length > 0) return; // Already initialized
+
+    hasInitializedUseCase.current = true;
+
+    // Initialize source statuses
+    setSourceStatuses(Object.fromEntries(selectedUseCase.sources.map((s) => [s.name, 'pending'])));
+
+    // Initialize output files
+    setOutputFiles(selectedUseCase.outputTemplates.map((t) => ({
+      id: t.id,
+      name: t.name,
+      type: t.fileType,
+      ready: false,
+    })));
+
+    // Preload images
+    preloadUseCaseImages(selectedUseCase.id).then(count => {
+      debug.log(`Preloaded ${count} images for use case: ${selectedUseCase.id}`);
+    });
+
+    // Fetch incidents if needed
+    if (selectedUseCase.id === 'incidents' && sessionCode) {
+      supabase
+        .from('incidents')
+        .select('*')
+        .eq('session_code', sessionCode)
+        .order('reported_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) setIncidents(data);
+        });
+    }
+
+    // Fetch review queue items and decisions
+    if (sessionCode) {
+      supabase
+        .from('review_queue_items')
+        .select('*')
+        .eq('session_code', sessionCode)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) setReviewQueueItems(data);
+        });
+
+      supabase
+        .from('review_decisions')
+        .select('*')
+        .eq('session_code', sessionCode)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) setReviewDecisions(data);
+        });
+    }
+  }, [selectedUseCase, sourceStatuses, sessionCode]);
+
+  // Restore slide from URL on initial load
+  useEffect(() => {
+    // Only run once on initial mount when we have all prerequisites
+    if (hasRestoredFromUrl.current) return;
+    if (!selectedUseCase) return;
+    if (!infoNodeId) return;
+    if (infoOverlayContent) return; // Already have content
+
+    // Build navigation order to find the node
+    const navOrder: Array<{id: string; type: string; label: string; index: number}> = [];
+
+    // Add source nodes
+    selectedUseCase.sources.forEach((source, idx) => {
+      navOrder.push({
+        id: `source-${source.name}`,
+        type: source.type,
+        label: source.name,
+        index: idx,
+      });
+    });
+
+    // Add pipeline nodes
+    navOrder.push(
+      { id: 'etl', type: 'etl', label: 'ETL/Normalization', index: -1 },
+      { id: 'intake', type: 'intake', label: 'Intake Folder', index: -1 },
+      { id: 'processing', type: 'processing', label: 'Data Engine', index: -1 },
+      { id: 'review-queue', type: 'reviewQueue', label: 'Review Queue', index: -1 },
+      { id: 'escalation', type: 'escalation', label: 'Escalation Router', index: -1 },
+      { id: 'communications', type: 'communications', label: 'Communications', index: -1 },
+      { id: 'output', type: 'output', label: 'Reports', index: -1 },
+      { id: 'upNext', type: 'upNext', label: 'Up Next', index: -1 }
+    );
+
+    // Find the node matching the URL's slide param
+    const node = navOrder.find(n => n.id === infoNodeId);
+    if (node) {
+      hasRestoredFromUrl.current = true;
+      handleShowInfo(node.type, node.id, node.label, node.index, undefined, undefined);
+    }
+  }, [selectedUseCase, infoNodeId, infoOverlayContent, handleShowInfo]);
 
   // Toggle simulation
   const toggleSimulation = useCallback(() => {

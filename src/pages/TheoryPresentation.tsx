@@ -444,12 +444,12 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
         }}
       >
         {/* Text column - narrower when there's an interactive SVG */}
-        <div className={`${hasInteractiveSvg ? 'w-1/2' : 'w-2/3'} pr-12 pt-32 pb-16 flex flex-col justify-center overflow-y-auto ${
+        <div className={`${hasInteractiveSvg ? 'w-1/2' : 'w-2/3'} pr-12 pt-24 pb-12 flex flex-col justify-center overflow-hidden ${
           currentSlide.imageOnLeft ? 'pr-24 pl-12' : 'pl-24'
         }`}>
           {/* Subtitle - uppercase tracking */}
           <p
-            className="text-base tracking-[0.15em] uppercase text-gray-500 mb-4"
+            className="text-sm tracking-[0.15em] uppercase text-gray-500 mb-3"
             style={{ fontFamily: 'var(--font-body)' }}
           >
             {currentSlide.subtitle}
@@ -457,8 +457,8 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
 
           {/* Title */}
           <h1
-            className={`font-semibold text-gray-900 tracking-tight mb-6 leading-[1.1] ${
-              hasInteractiveSvg ? 'text-5xl' : 'text-6xl'
+            className={`font-semibold text-gray-900 tracking-tight mb-4 leading-[1.1] ${
+              hasInteractiveSvg ? 'text-4xl' : 'text-5xl'
             }`}
             style={{ fontFamily: 'var(--font-display)' }}
           >
@@ -468,7 +468,7 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
           {/* Headline/Description */}
           {currentSlide.content.headline && (
             <p
-              className={`text-gray-700 leading-relaxed mb-8 ${hasInteractiveSvg ? 'text-lg' : 'text-xl'}`}
+              className={`text-gray-700 leading-relaxed mb-5 ${hasInteractiveSvg ? 'text-base' : 'text-lg'}`}
               style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
             >
               {currentSlide.content.headline}
@@ -477,13 +477,13 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
 
           {/* Stats grid - only show if not an SVG slide (they take up space) */}
           {!hasInteractiveSvg && currentSlide.content.stats && currentSlide.content.stats.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-2 gap-3 mb-5">
               {currentSlide.content.stats.map((stat, idx) => (
-                <div key={idx} className="bg-gray-100/80 rounded-xl p-5 border border-gray-200/50">
-                  <p className="text-4xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+                <div key={idx} className="bg-gray-100/80 rounded-xl p-4 border border-gray-200/50">
+                  <p className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
                     {stat.value}
                   </p>
-                  <p className="text-base text-gray-600 mt-1" style={{ fontFamily: 'var(--font-body)' }}>
+                  <p className="text-sm text-gray-600 mt-1" style={{ fontFamily: 'var(--font-body)' }}>
                     {stat.label}
                   </p>
                 </div>
@@ -493,10 +493,10 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
 
           {/* Bullet points */}
           {currentSlide.content.bullets && currentSlide.content.bullets.length > 0 && (
-            <ul className={`space-y-3 mb-8 ${hasInteractiveSvg ? 'text-base' : 'text-lg'}`}>
+            <ul className={`space-y-2 mb-5 ${hasInteractiveSvg ? 'text-sm' : 'text-base'}`}>
               {currentSlide.content.bullets.map((bullet, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-gray-700" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                  <span className="w-2 h-2 rounded-full bg-gray-400 mt-2.5 flex-shrink-0" />
+                <li key={idx} className="flex items-start gap-2 text-gray-700" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -505,14 +505,14 @@ export function TheoryPresentation({ embedded: _embedded = false, onClose, onPro
 
           {/* Quote - styled like key insight */}
           {currentSlide.content.quote && (
-            <div className="border-l-3 border-gray-300 pl-5 mb-8">
+            <div className="border-l-3 border-gray-300 pl-4 mb-5">
               <p
-                className={`text-gray-600 italic ${hasInteractiveSvg ? 'text-base' : 'text-lg'}`}
+                className={`text-gray-600 italic ${hasInteractiveSvg ? 'text-sm' : 'text-base'}`}
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
               >
                 "{currentSlide.content.quote.text}"
               </p>
-              <p className="text-base text-gray-500 mt-2" style={{ fontFamily: 'var(--font-body)' }}>
+              <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'var(--font-body)' }}>
                 — {currentSlide.content.quote.attribution}
               </p>
             </div>
