@@ -401,6 +401,13 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
   // Track email viewer modal
   const [selectedEmail, setSelectedEmail] = useState<{id: string; recipient: string; subject: string; body?: string; sent_at: string} | null>(null);
 
+  // Track workflow template data (for template use cases)
+  const [workflowTemplateData, setWorkflowTemplateData] = useState<{
+    participant_name: string;
+    input_documents: Array<{name: string; format: string}>;
+    output_types: Array<{name: string; type: string}>;
+  } | null>(null);
+
   // Track toasts for notifications
   const [toasts, setToasts] = useState<Array<{id: string; type: ToastType; message: string; duration?: number}>>([]);
 
@@ -725,6 +732,76 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         });
     }
   }, [selectedUseCase, sourceStatuses, sessionCode]);
+
+  // Fetch and subscribe to workflow_templates for template use cases
+  useEffect(() => {
+    if (!selectedUseCase?.isTemplate || !sessionCode) {
+      setWorkflowTemplateData(null);
+      return;
+    }
+
+    // Fetch existing workflow template
+    const fetchTemplate = async () => {
+      const { data } = await supabase
+        .from('workflow_templates')
+        .select('participant_name, input_documents, output_types')
+        .eq('session_code', sessionCode)
+        .eq('use_case_id', selectedUseCase.id)
+        .maybeSingle();
+
+      if (data) {
+        setWorkflowTemplateData({
+          participant_name: data.participant_name,
+          input_documents: data.input_documents as Array<{name: string; format: string}>,
+          output_types: data.output_types as Array<{name: string; type: string}>,
+        });
+      } else {
+        setWorkflowTemplateData(null);
+      }
+    };
+
+    fetchTemplate();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel(`workflow-template-${sessionCode}-${selectedUseCase.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'workflow_templates',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload) => {
+          const record = payload.new as {
+            use_case_id: string;
+            participant_name: string;
+            input_documents: Array<{name: string; format: string}>;
+            output_types: Array<{name: string; type: string}>;
+          };
+          if (record.use_case_id === selectedUseCase.id) {
+            setWorkflowTemplateData({
+              participant_name: record.participant_name,
+              input_documents: record.input_documents,
+              output_types: record.output_types,
+            });
+            // Show toast notification
+            setToasts(prev => [...prev, {
+              id: Date.now().toString(),
+              type: 'success',
+              message: `${record.participant_name} defined the workflow!`,
+              duration: 5000,
+            }]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [selectedUseCase, sessionCode]);
 
   // Restore slide from URL on initial load
   useEffect(() => {
@@ -2040,9 +2117,31 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       // Add slight stagger for visual interest
       const staggerOffsets = [0, 15, -10, 20, -15];
 
-      // Source nodes
-      selectedUseCase.sources.forEach((source, index) => {
-        const yOffset = (index - (selectedUseCase.sources.length - 1) / 2) * ySpacing;
+      // Source nodes - use workflow template data if available for template use cases
+      const sourcesToRender = selectedUseCase.isTemplate && workflowTemplateData
+        ? workflowTemplateData.input_documents.map((input, idx) => {
+            // Map format to source type
+            const formatToType: Record<string, 'outlook' | 'onedrive' | 'excel' | 'paper'> = {
+              'email': 'outlook',
+              'spreadsheet': 'excel',
+              'pdf_word': 'onedrive',
+              'paper_scan': 'paper',
+              'photo': 'paper',
+              'api_system': 'excel',
+            };
+            return {
+              type: formatToType[input.format] || 'excel',
+              name: input.name,
+              icon: 'FileText',
+              description: `Format: ${input.format}`,
+              originalIndex: idx,
+              optional: false,
+            };
+          })
+        : selectedUseCase.sources;
+
+      sourcesToRender.forEach((source, index) => {
+        const yOffset = (index - (sourcesToRender.length - 1) / 2) * ySpacing;
         const stagger = staggerOffsets[index % staggerOffsets.length];
         const data = sourceData[source.name] || {};
         const nodeId = `source-${source.name}`;
@@ -2052,29 +2151,36 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         // Check if this node is active in presentation mode
         const isPresentationActive = presentationActiveNode === nodeId;
 
+        // For template use cases without data, show QR code to define workflow
+        const isTemplateAwaiting = selectedUseCase.isTemplate && !workflowTemplateData;
+        const templateQrUrl = isTemplateAwaiting
+          ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${selectedUseCase.id}&useCaseName=${encodeURIComponent(selectedUseCase.name)}&node=${encodeURIComponent(source.name)}`
+          : undefined;
+
         // Generate QR code URL for paper sources
         const qrCodeUrl = source.type === 'paper'
           ? `${window.location.origin}/upload/${sessionCode}/${encodeURIComponent(source.name)}`
-          : undefined;
+          : templateQrUrl;
 
         nodes.push({
           id: nodeId,
           type: 'source',
           position: getPosition(nodeId, { x: xSpacing + stagger, y: 180 + yOffset }),
           data: {
-            label: source.name,
+            label: isTemplateAwaiting ? `Input ${index + 1}` : source.name,
             type: source.type,
-            status: sourceStatuses[source.name],
+            status: isTemplateAwaiting ? 'pending' : sourceStatuses[source.name],
             optional: source.optional,
+            isTemplateAwaiting,
             onActivate: () => handleSourceActivate(source.name, source.type),
             onExpand: () => handleExpandNode(source.name, source.type),
             onShowInfo: () => handleShowInfo(
               source.type,
               nodeId,
-              source.name,
+              isTemplateAwaiting ? `Input ${index + 1}` : source.name,
               index, // Pass the source index
               () => handleSourceActivate(source.name, source.type),
-              sourceStatuses[source.name]
+              isTemplateAwaiting ? 'pending' : sourceStatuses[source.name]
             ),
             isFocused,
             emails: data.emails,

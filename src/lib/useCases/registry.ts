@@ -69,27 +69,116 @@ registerUseCase({
   ],
 });
 
+// ========================================
+// TEMPLATE USE CASES (Participant-Filled)
+// ========================================
+
+// Greenhouse-specific templates
 registerUseCase({
-  id: 'quality',
-  name: 'Quality & Compliance Documents',
-  description: 'Process COAs, lab reports, and compliance documents against CanadaGAP standards',
-  icon: 'ShieldCheck',
-  color: 'emerald',
+  id: 'supplier_management',
+  name: 'Supplier Management',
+  description: 'Track vendor documents, certifications, and contract compliance',
+  icon: 'Building2',
+  color: 'teal',
+  isTemplate: true,
   sources: [
-    { type: 'outlook', name: 'COA/Lab Report Email', icon: 'Mail', description: 'Certificate of Analysis from supplier or lab' },
-    { type: 'paper', name: 'COA Document Scan', icon: 'FileSignature', description: 'Scanned COA or quality certificate' },
-    { type: 'excel', name: 'Receiving Log', icon: 'ClipboardCheck', description: 'Incoming materials log to match' },
-    { type: 'onedrive', name: 'CanadaGAP Reference', icon: 'BookOpen', description: 'CanadaGAP manual for compliance queries', optional: true },
+    { type: 'excel', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'outlook', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'paper', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
   ],
   outputTemplates: [
-    { id: 'compliance-summary', name: 'Compliance Summary', fileType: 'pdf', description: 'Overview of compliance status for received materials' },
-    { id: 'exception-report', name: 'Exception Report', fileType: 'pdf', description: 'Failed tests or missing documentation' },
-    { id: 'quality-log-export', name: 'Quality Log Export', fileType: 'csv', description: 'Full quality records for audit' },
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
   ],
-  dashboardQueries: [
-    { id: 'pending-review', name: 'Pending Review', description: 'COAs awaiting verification' },
-    { id: 'failed-tests', name: 'Failed Tests', description: 'Materials with out-of-spec results' },
-    { id: 'expiring-materials', name: 'Expiring Materials', description: 'Items approaching expiration' },
-    { id: 'supplier-compliance', name: 'Supplier Compliance Score', description: 'Compliance rate by supplier' },
+  dashboardQueries: [],
+});
+
+registerUseCase({
+  id: 'customer_orders',
+  name: 'Customer Orders',
+  description: 'Process orders, confirmations, and delivery documentation',
+  icon: 'ShoppingCart',
+  color: 'amber',
+  isTemplate: true,
+  sources: [
+    { type: 'outlook', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'excel', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'paper', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
   ],
+  outputTemplates: [
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
+  ],
+  dashboardQueries: [],
+});
+
+registerUseCase({
+  id: 'regulatory_compliance',
+  name: 'Regulatory & Inspections',
+  description: 'Track inspection reports, permits, and regulatory filings',
+  icon: 'ClipboardCheck',
+  color: 'emerald',
+  isTemplate: true,
+  sources: [
+    { type: 'paper', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'outlook', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'excel', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
+  ],
+  outputTemplates: [
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
+  ],
+  dashboardQueries: [],
+});
+
+registerUseCase({
+  id: 'equipment_maintenance',
+  name: 'Equipment Maintenance',
+  description: 'Log maintenance records, service reports, and equipment inspections',
+  icon: 'Wrench',
+  color: 'slate',
+  isTemplate: true,
+  sources: [
+    { type: 'excel', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'paper', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'outlook', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
+  ],
+  outputTemplates: [
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
+  ],
+  dashboardQueries: [],
+});
+
+// Generic templates (work anywhere)
+registerUseCase({
+  id: 'accounts_payable',
+  name: 'Accounts Payable',
+  description: 'Match invoices, purchase orders, and payment approvals',
+  icon: 'DollarSign',
+  color: 'green',
+  isTemplate: true,
+  sources: [
+    { type: 'outlook', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'excel', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'onedrive', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
+  ],
+  outputTemplates: [
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
+  ],
+  dashboardQueries: [],
+});
+
+registerUseCase({
+  id: 'hr_training',
+  name: 'HR & Training Records',
+  description: 'Track employee certifications, training completions, and HR documents',
+  icon: 'UserPlus',
+  color: 'purple',
+  isTemplate: true,
+  sources: [
+    { type: 'excel', name: 'Input 1', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'paper', name: 'Input 2', icon: 'FileQuestion', description: 'Awaiting definition...' },
+    { type: 'outlook', name: 'Input 3', icon: 'FileQuestion', description: 'Awaiting definition...' },
+  ],
+  outputTemplates: [
+    { id: 'template-report', name: 'Generated Report', fileType: 'pdf', description: 'Summary report based on workflow' },
+  ],
+  dashboardQueries: [],
 });

@@ -35,6 +35,8 @@ export interface SourceNodeData {
   onConfirm?: () => void;
   // QR code URL for paper sources
   qrCodeUrl?: string;
+  // Template use case: workflow awaiting definition
+  isTemplateAwaiting?: boolean;
 }
 
 const iconMap = {
@@ -105,6 +107,70 @@ function SourceNodeComponent({ data }: SourceNodeProps) {
     e.stopPropagation();
     data.onShowInfo?.();
   };
+
+  // Template awaiting state - show placeholder with QR code
+  if (data.isTemplateAwaiting) {
+    return (
+      <div className="min-w-[200px] relative mt-3 rounded-2xl bg-white border-2 border-dashed border-purple-300 shadow-sm">
+        <Handle type="target" position={Position.Left} className="!bg-white !border-2 !border-gray-400 !w-3 !h-3" />
+        <Handle type="source" position={Position.Right} className="!bg-white !border-2 !border-purple-400 !w-3 !h-3" />
+
+        {/* Template awaiting badge */}
+        <div className="absolute -top-3 left-3 z-10">
+          <div className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white text-[10px] font-medium rounded-full shadow-md">
+            <QrCode className="w-3 h-3" />
+            <span>Define</span>
+          </div>
+        </div>
+
+        <div
+          className="px-4 py-2.5 bg-gradient-to-r from-purple-400 to-purple-500 cursor-pointer flex items-center justify-between rounded-t-2xl"
+          onClick={handleHeaderClick}
+        >
+          <div className="flex items-center gap-2.5">
+            <FileText className="w-4 h-4 text-white" />
+            <span className="text-sm font-medium text-white">{data.label}</span>
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            {displayMode === 'preview' ? (
+              <ChevronUp className="w-4 h-4 text-white/60" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-white/60" />
+            )}
+          </div>
+        </div>
+
+        {/* Show QR code to define workflow */}
+        {displayMode === 'preview' && data.qrCodeUrl && (
+          <div className="p-4 bg-white rounded-b-2xl">
+            <div className="text-center">
+              <p className="text-xs text-gray-600 mb-3">Scan to define this input</p>
+              <div className="bg-purple-50 p-3 rounded-xl inline-block">
+                <QRCodeSVG
+                  value={data.qrCodeUrl}
+                  size={120}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">
+                Participant will define document name & format
+              </p>
+            </div>
+          </div>
+        )}
+
+        {displayMode === 'collapsed' && (
+          <div className="px-4 py-3 bg-white rounded-b-2xl">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse" />
+              <span className="text-xs text-gray-500">Awaiting definition...</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Collapsed mode - compact header with essential controls
   if (displayMode === 'collapsed') {

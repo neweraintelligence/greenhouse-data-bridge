@@ -28,6 +28,7 @@ export interface UseCase {
   sources: SourceConfig[];
   outputTemplates: OutputTemplate[];
   dashboardQueries: QueryConfig[];
+  isTemplate?: boolean; // If true, this is a blank template that participants fill in
 }
 
 // Registry type

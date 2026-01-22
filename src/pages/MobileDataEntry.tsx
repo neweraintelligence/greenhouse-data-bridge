@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database, ScanBarcode } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Plus, Package, User, FileText, AlertTriangle, Mail, Send, Calculator, ClipboardCheck, Database, ScanBarcode, Trash2, FolderInput, FolderOutput } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { IncidentPhotoReporter } from '../components/incidents/IncidentPhotoReporter';
 import { IncidentReviewQueueMobile } from '../components/incidents/IncidentReviewQueueMobile';
@@ -9,7 +9,36 @@ import { ReviewQueueMobile } from '../components/review/ReviewQueueMobile';
 import { ReconciliationQuizMobile } from '../components/reconciliation/ReconciliationQuizMobile';
 import { Toast } from '../components/ui/Toast';
 
-type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'incident_dashboard' | 'incident_info' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz' | 'reconciliation_report' | 'training_compliance' | 'training_quiz';
+type SourceType = 'shipments_expected' | 'training_roster' | 'incidents' | 'incident_review' | 'incident_dashboard' | 'incident_info' | 'customer_orders' | 'quality_issues' | 'communications' | 'barcode_scans' | 'billing_challenge' | 'review_queue' | 'reconciliation_quiz' | 'reconciliation_report' | 'training_compliance' | 'training_quiz' | 'workflow_template';
+
+// Types for workflow template
+interface WorkflowInputDoc {
+  name: string;
+  format: string;
+}
+
+interface WorkflowOutputDoc {
+  name: string;
+  type: string;
+}
+
+const FORMAT_OPTIONS = [
+  { value: 'email', label: 'Email' },
+  { value: 'spreadsheet', label: 'Spreadsheet (Excel/CSV)' },
+  { value: 'pdf_word', label: 'PDF / Word Document' },
+  { value: 'paper_scan', label: 'Paper / Scanned Form' },
+  { value: 'photo', label: 'Photo' },
+  { value: 'api_system', label: 'API / System Data' },
+];
+
+const OUTPUT_TYPE_OPTIONS = [
+  { value: 'report', label: 'Report (PDF)' },
+  { value: 'dashboard', label: 'Dashboard View' },
+  { value: 'alert', label: 'Alert / Notification' },
+  { value: 'csv_export', label: 'Data Export (CSV)' },
+  { value: 'email_response', label: 'Email Response' },
+  { value: 'work_order', label: 'Work Order / Ticket' },
+];
 
 export function MobileDataEntry() {
   const { sessionCode } = useParams<{ sessionCode: string }>();
@@ -51,6 +80,18 @@ export function MobileDataEntry() {
     subject: 'Re: Order Acknowledgment',
     body: '',
   });
+
+  // Form state for workflow template
+  const [workflowInputs, setWorkflowInputs] = useState<WorkflowInputDoc[]>([
+    { name: '', format: 'email' },
+  ]);
+  const [workflowOutputs, setWorkflowOutputs] = useState<WorkflowOutputDoc[]>([
+    { name: '', type: 'report' },
+  ]);
+
+  // Get use case info from URL params for workflow template
+  const useCaseId = searchParams.get('useCase') || '';
+  const useCaseName = searchParams.get('useCaseName') || 'Workflow';
 
   // Check for returning participant on mount (session persistence)
   useEffect(() => {
@@ -266,6 +307,89 @@ export function MobileDataEntry() {
     }
   };
 
+  const handleSubmitWorkflowTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    // Validate at least one input with a name
+    const validInputs = workflowInputs.filter(i => i.name.trim());
+    const validOutputs = workflowOutputs.filter(o => o.name.trim());
+
+    if (validInputs.length === 0) {
+      setError('Please add at least one input document.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error: insertError } = await supabase.from('workflow_templates').upsert({
+        session_code: sessionCode,
+        use_case_id: useCaseId,
+        participant_name: participantName,
+        input_documents: validInputs,
+        output_types: validOutputs,
+        submitted_at: new Date().toISOString(),
+      }, {
+        onConflict: 'session_code,use_case_id',
+      });
+
+      if (insertError) throw insertError;
+
+      setSubmitComplete(true);
+      setToast({
+        message: '✓ Workflow template submitted! Check the main screen.',
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Submission error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to submit workflow. Please try again.');
+      setToast({
+        message: 'Failed to submit workflow. Please try again.',
+        type: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Helpers for workflow template form
+  const addWorkflowInput = () => {
+    if (workflowInputs.length < 6) {
+      setWorkflowInputs([...workflowInputs, { name: '', format: 'email' }]);
+    }
+  };
+
+  const removeWorkflowInput = (index: number) => {
+    if (workflowInputs.length > 1) {
+      setWorkflowInputs(workflowInputs.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateWorkflowInput = (index: number, field: 'name' | 'format', value: string) => {
+    const updated = [...workflowInputs];
+    updated[index][field] = value;
+    setWorkflowInputs(updated);
+  };
+
+  const addWorkflowOutput = () => {
+    if (workflowOutputs.length < 4) {
+      setWorkflowOutputs([...workflowOutputs, { name: '', type: 'report' }]);
+    }
+  };
+
+  const removeWorkflowOutput = (index: number) => {
+    if (workflowOutputs.length > 1) {
+      setWorkflowOutputs(workflowOutputs.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateWorkflowOutput = (index: number, field: 'name' | 'type', value: string) => {
+    const updated = [...workflowOutputs];
+    updated[index][field] = value;
+    setWorkflowOutputs(updated);
+  };
+
   const handleReset = () => {
     setSubmitComplete(false);
     setError(null);
@@ -293,6 +417,9 @@ export function MobileDataEntry() {
         subject: 'Re: Order Acknowledgment',
         body: '',
       });
+    } else if (sourceType === 'workflow_template') {
+      setWorkflowInputs([{ name: '', format: 'email' }]);
+      setWorkflowOutputs([{ name: '', type: 'report' }]);
     }
   };
 
@@ -837,6 +964,148 @@ export function MobileDataEntry() {
           </div>
         );
 
+      case 'workflow_template':
+        return (
+          <form onSubmit={handleSubmitWorkflowTemplate} className="space-y-5">
+            {/* Header info */}
+            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100">
+              <p className="text-xs text-purple-600 font-medium mb-1">Defining workflow for:</p>
+              <p className="text-sm font-semibold text-gray-800">{useCaseName}</p>
+            </div>
+
+            {/* INPUT DOCUMENTS Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <FolderInput className="w-4 h-4 text-blue-600" />
+                <h3 className="text-sm font-semibold text-gray-800">Input Documents</h3>
+              </div>
+
+              <div className="space-y-3">
+                {workflowInputs.map((input, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="text"
+                        value={input.name}
+                        onChange={(e) => updateWorkflowInput(index, 'name', e.target.value)}
+                        placeholder={`Input ${index + 1} name (e.g., "Purchase Order")`}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
+                      />
+                      <select
+                        value={input.format}
+                        onChange={(e) => updateWorkflowInput(index, 'format', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
+                      >
+                        {FORMAT_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {workflowInputs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWorkflowInput(index)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {workflowInputs.length < 6 && (
+                <button
+                  type="button"
+                  onClick={addWorkflowInput}
+                  className="mt-3 flex items-center gap-1.5 text-sm text-bmf-blue hover:text-bmf-blue-dark font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Input
+                </button>
+              )}
+            </div>
+
+            {/* OUTPUT DOCUMENTS Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <FolderOutput className="w-4 h-4 text-emerald-600" />
+                <h3 className="text-sm font-semibold text-gray-800">Output Documents</h3>
+              </div>
+
+              <div className="space-y-3">
+                {workflowOutputs.map((output, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="text"
+                        value={output.name}
+                        onChange={(e) => updateWorkflowOutput(index, 'name', e.target.value)}
+                        placeholder={`Output ${index + 1} name (e.g., "Summary Report")`}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
+                      />
+                      <select
+                        value={output.type}
+                        onChange={(e) => updateWorkflowOutput(index, 'type', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-bmf-blue/20 focus:border-bmf-blue"
+                      >
+                        {OUTPUT_TYPE_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {workflowOutputs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWorkflowOutput(index)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {workflowOutputs.length < 4 && (
+                <button
+                  type="button"
+                  onClick={addWorkflowOutput}
+                  className="mt-3 flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Output
+                </button>
+              )}
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3 px-4 rounded-xl bg-bmf-blue text-white font-medium hover:bg-bmf-blue-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Submit Workflow
+                </>
+              )}
+            </button>
+          </form>
+        );
+
       default:
         return (
           <div className="text-center py-8">
@@ -884,6 +1153,8 @@ export function MobileDataEntry() {
         return { title: 'Compliance Report', icon: ClipboardCheck };
       case 'training_quiz':
         return { title: 'Compliance Check', icon: Database };
+      case 'workflow_template':
+        return { title: 'Define Workflow', icon: FolderInput };
       default:
         return { title: 'Add Data', icon: Plus };
     }
