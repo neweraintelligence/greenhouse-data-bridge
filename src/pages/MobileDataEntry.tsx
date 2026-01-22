@@ -104,7 +104,7 @@ export function MobileDataEntry() {
       // Check if participant already exists in this session (prevents duplicates)
       const { data: existing } = await supabase
         .from('session_participants')
-        .select('id')
+        .select('id, node_name')
         .eq('session_code', sessionCode)
         .eq('participant_name', trimmedName)
         .maybeSingle();
@@ -119,6 +119,15 @@ export function MobileDataEntry() {
         });
 
         if (insertError) throw insertError;
+      } else if (existing.node_name !== nodeName) {
+        // Existing participant joining a different challenge - update their node_name
+        // This allows participants who first joined via /join/ to be tracked for specific challenges
+        const { error: updateError } = await supabase
+          .from('session_participants')
+          .update({ node_name: nodeName, joined_at: joinedAt })
+          .eq('id', existing.id);
+
+        if (updateError) throw updateError;
       }
 
       // Persist participant to localStorage for session continuity

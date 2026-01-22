@@ -410,7 +410,7 @@ function InfoOverlayComponent({
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Listen for INSERT and UPDATE (when existing participant joins a challenge)
           schema: 'public',
           table: 'session_participants',
           filter: `session_code=eq.${sessionCode}`,
@@ -418,6 +418,8 @@ function InfoOverlayComponent({
         (payload) => {
           // Check if this participant joined the current challenge
           const newParticipant = payload.new as { participant_name: string; node_name: string };
+          if (!newParticipant) return;
+
           const participantNodeName = newParticipant.node_name?.toLowerCase() || '';
           const currentNodeLabel = nodeLabel?.toLowerCase() || '';
 
@@ -429,7 +431,8 @@ function InfoOverlayComponent({
             participantNodeName.trim() === currentNodeLabel.trim()
           );
 
-          console.log('[Challenge Lobby] New participant:', {
+          console.log('[Challenge Lobby] Participant event:', {
+            event: payload.eventType,
             name: newParticipant.participant_name,
             node_name: newParticipant.node_name,
             currentNodeLabel: nodeLabel,
@@ -443,7 +446,10 @@ function InfoOverlayComponent({
               }
               return prev;
             });
-            setChallengeParticipants(prev => prev + 1);
+            // Only increment count for new participants (INSERT) or if they weren't in our list
+            if (payload.eventType === 'INSERT') {
+              setChallengeParticipants(prev => prev + 1);
+            }
           }
         }
       )
