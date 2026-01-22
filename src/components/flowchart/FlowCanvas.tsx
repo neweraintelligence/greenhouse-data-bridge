@@ -952,8 +952,26 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       return;
     }
 
+    // Special case: 'templates' is a marker for the "Build Your Own" section
+    // Navigate to the first template use case
+    let targetUseCaseId = nextUseCase.id;
+    if (targetUseCaseId === 'templates') {
+      // Find the first template use case
+      const firstTemplate = useCases.find(uc => uc.isTemplate);
+      if (firstTemplate) {
+        targetUseCaseId = firstTemplate.id;
+      } else {
+        // No templates found - just close the overlay
+        setInfoOverlayContent(null);
+        setInfoNodeId(null);
+        setInfoNodeType(null);
+        setInfoNodeLabel(null);
+        return;
+      }
+    }
+
     // Find the full use case object
-    const useCaseObj = useCases.find(uc => uc.id === nextUseCase.id);
+    const useCaseObj = useCases.find(uc => uc.id === targetUseCaseId);
     if (useCaseObj) {
       // Close current overlay
       setInfoOverlayContent(null);
