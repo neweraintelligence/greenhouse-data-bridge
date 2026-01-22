@@ -600,9 +600,10 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     sourceName: string,
     _sourceIndex: number, // Unused but kept for compatibility
     onActivate?: () => void,
-    status?: string
+    status?: string,
+    useCaseOverride?: string // Optional override for transitions
   ) => {
-    const useCaseId = selectedUseCase?.id || 'shipping';
+    const useCaseId = useCaseOverride || selectedUseCase?.id || 'shipping';
     const info = getNodeInfo(useCaseId, nodeType, sourceName);
     if (info) {
       setInfoOverlayContent(info);
@@ -750,7 +751,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
             firstSource.name,
             0,
             undefined,
-            undefined
+            undefined,
+            useCaseObj.id // Pass the new use case ID explicitly
           );
         }
       }, 300);
@@ -3113,7 +3115,8 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
                     firstSource.name,
                     0,
                     undefined,
-                    'pending'
+                    'pending',
+                    selectedUseCase.id // Pass use case ID explicitly
                   );
                 }
               }
