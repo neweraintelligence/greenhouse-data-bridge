@@ -37,6 +37,7 @@ import type { SpreadsheetData } from './nodes/mini-apps/ExcelMiniApp';
 import { getAllUseCases } from '../../lib/useCases/registry';
 import { getNodeInfo, getNextUseCase, getFirstUseCase } from '../../lib/nodeInfoContent';
 import { getNodeImage } from '../../lib/nodeImages';
+import { preloadImage, preloadUseCaseImages } from '../../lib/imagePreloader';
 import { GlassButton } from '../design-system';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { reconcileShipments } from '../../lib/processing/compareShipments';
@@ -664,6 +665,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     setFocusedNodeId(null);
     setPresentationActiveNode(null);
     setIncidents([]);
+
+    // Preload all images for this use case in the background
+    preloadUseCaseImages(useCase.id).then(count => {
+      debug.log(`Preloaded ${count} images for use case: ${useCase.id}`);
+    });
 
     // Fetch incidents if this is the incidents use case
     if (useCase.id === 'incidents' && sessionCode) {
@@ -1502,8 +1508,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (currentIdx >= 0 && currentIdx < navOrder.length - 1) {
       const next = navOrder[currentIdx + 1];
       handleShowInfo(next.type, next.id, next.label, next.index, undefined, undefined);
+
+      // Preload images for upcoming slides (2 ahead)
+      if (selectedUseCase) {
+        for (let i = 2; i <= 3; i++) {
+          const futureIdx = currentIdx + i;
+          if (futureIdx < navOrder.length) {
+            const futureNode = navOrder[futureIdx];
+            const imageUrl = getNodeImage(selectedUseCase.id, futureNode.type, futureNode.label);
+            if (imageUrl) {
+              preloadImage(imageUrl);
+            }
+          }
+        }
+      }
     }
-  }, [infoNodeId, getNavigationOrder, handleShowInfo]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase]);
 
   const handlePreviousSlide = useCallback(() => {
     if (!infoNodeId) return;
@@ -1514,8 +1534,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     if (currentIdx > 0) {
       const prev = navOrder[currentIdx - 1];
       handleShowInfo(prev.type, prev.id, prev.label, prev.index, undefined, undefined);
+
+      // Preload images for previous slides (2 behind)
+      if (selectedUseCase) {
+        for (let i = 2; i <= 3; i++) {
+          const pastIdx = currentIdx - i;
+          if (pastIdx >= 0) {
+            const pastNode = navOrder[pastIdx];
+            const imageUrl = getNodeImage(selectedUseCase.id, pastNode.type, pastNode.label);
+            if (imageUrl) {
+              preloadImage(imageUrl);
+            }
+          }
+        }
+      }
     }
-  }, [infoNodeId, getNavigationOrder, handleShowInfo]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase]);
 
   // Check if can process
   const canProcess = selectedUseCase

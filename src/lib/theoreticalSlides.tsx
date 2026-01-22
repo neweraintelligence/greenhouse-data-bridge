@@ -46,7 +46,7 @@ export const theoreticalSlides: TheoreticalSlide[] = [
       ],
       stats: [
         { value: '80%', label: 'of business data lives in documents' },
-        { value: '2.5B', label: 'invoices processed annually in the US alone' },
+        { value: '1.3M', label: 'Canadian businesses processing documents daily' },
       ],
     },
     speakerNotes: 'Start soft. This isn\'t about problems yet - it\'s about recognizing the universal truth: documents are the lifeblood of commerce. Everyone in the room deals with this.',
