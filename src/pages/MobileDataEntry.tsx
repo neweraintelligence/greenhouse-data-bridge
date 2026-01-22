@@ -968,9 +968,10 @@ export function MobileDataEntry() {
         return (
           <form onSubmit={handleSubmitWorkflowTemplate} className="space-y-5">
             {/* Header info */}
-            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100">
-              <p className="text-xs text-purple-600 font-medium mb-1">Defining workflow for:</p>
-              <p className="text-sm font-semibold text-gray-800">{useCaseName}</p>
+            <div className="p-4 rounded-xl bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200">
+              <p className="text-xs text-purple-600 font-medium mb-1 uppercase tracking-wide">Defining workflow for</p>
+              <p className="text-lg font-bold text-gray-900">{useCaseName}</p>
+              <p className="text-xs text-gray-500 mt-1">Add your input documents and desired outputs below</p>
             </div>
 
             {/* INPUT DOCUMENTS Section */}
@@ -1154,7 +1155,7 @@ export function MobileDataEntry() {
       case 'training_quiz':
         return { title: 'Compliance Check', icon: Database };
       case 'workflow_template':
-        return { title: 'Define Workflow', icon: FolderInput };
+        return { title: `Define ${useCaseName}`, icon: FolderInput };
       default:
         return { title: 'Add Data', icon: Plus };
     }
@@ -1176,9 +1177,9 @@ export function MobileDataEntry() {
             />
             <div className="flex items-center justify-center gap-2 mb-2">
               <Icon className="w-7 h-7 text-bmf-blue" />
-              <h1 className="text-2xl font-semibold text-gray-800">Join Activity</h1>
+              <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
             </div>
-            <p className="text-gray-600 mb-1">{nodeName}</p>
+            <p className="text-gray-600 mb-1">{sourceType === 'workflow_template' ? useCaseName : nodeName}</p>
             <p className="text-sm text-gray-500">
               Session: <span className="font-mono">{sessionCode}</span>
             </p>
