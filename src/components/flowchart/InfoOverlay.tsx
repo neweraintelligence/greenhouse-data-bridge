@@ -418,7 +418,25 @@ function InfoOverlayComponent({
         (payload) => {
           // Check if this participant joined the current challenge
           const newParticipant = payload.new as { participant_name: string; node_name: string };
-          if (nodeLabel && newParticipant.node_name?.toLowerCase().includes(nodeLabel.toLowerCase())) {
+          const participantNodeName = newParticipant.node_name?.toLowerCase() || '';
+          const currentNodeLabel = nodeLabel?.toLowerCase() || '';
+
+          // More robust matching: check if either contains the other, or if they share significant overlap
+          const isMatch = currentNodeLabel && participantNodeName && (
+            participantNodeName.includes(currentNodeLabel) ||
+            currentNodeLabel.includes(participantNodeName) ||
+            // Also check for exact match after trimming
+            participantNodeName.trim() === currentNodeLabel.trim()
+          );
+
+          console.log('[Challenge Lobby] New participant:', {
+            name: newParticipant.participant_name,
+            node_name: newParticipant.node_name,
+            currentNodeLabel: nodeLabel,
+            isMatch,
+          });
+
+          if (isMatch) {
             setLobbyParticipantNames(prev => {
               if (!prev.includes(newParticipant.participant_name)) {
                 return [newParticipant.participant_name, ...prev];
@@ -429,9 +447,12 @@ function InfoOverlayComponent({
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Challenge Lobby] Subscription status:', status, { sessionCode, challengeType, nodeLabel });
+      });
 
     return () => {
+      console.log('[Challenge Lobby] Unsubscribing from channel');
       channel.unsubscribe();
     };
   }, [sessionCode, isCompetitionSlide, getChallengeType, nodeLabel]);
@@ -710,13 +731,19 @@ function InfoOverlayComponent({
           {/* Competition button - trophy icon with amber color and shimmer for billing/reconciliation challenges */}
           {sessionCode && !isInformationalSlide && isCompetitionSlide && (
             <div
-              onMouseEnter={() => setShowJoinQR(true)}
-              onMouseLeave={() => setShowJoinQR(false)}
+              className="relative"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                onClick={(e) => e.stopPropagation()}
-                className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 hover:from-amber-600 hover:via-yellow-500 hover:to-orange-600 text-white font-medium shadow-lg transition-all overflow-hidden"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowJoinQR(!showJoinQR);
+                }}
+                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all overflow-hidden ${
+                  showJoinQR
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 hover:from-amber-600 hover:via-yellow-500 hover:to-orange-600 text-white'
+                }`}
               >
                 {/* Metallic shimmer overlay */}
                 <span
@@ -738,9 +765,16 @@ function InfoOverlayComponent({
               {/* QR Code Tooltip with Start Button */}
               {showJoinQR && (
                 <div
-                  className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200 min-w-[280px]"
+                  className="absolute top-full right-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200 min-w-[280px]"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {/* Close button */}
+                  <button
+                    onClick={() => setShowJoinQR(false)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-gray-500" />
+                  </button>
                   <div className="flex flex-col items-center gap-3">
                     <QRCodeSVG
                       value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
@@ -829,13 +863,19 @@ function InfoOverlayComponent({
           {/* Join button - regular participation for workflow slides */}
           {sessionCode && !isInformationalSlide && !isCompetitionSlide && (
             <div
-              onMouseEnter={() => setShowJoinQR(true)}
-              onMouseLeave={() => setShowJoinQR(false)}
+              className="relative"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bmf-blue hover:bg-bmf-blue-dark text-white font-medium shadow-lg transition-all"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowJoinQR(!showJoinQR);
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-medium shadow-lg transition-all ${
+                  showJoinQR
+                    ? 'bg-bmf-blue-dark text-white'
+                    : 'bg-bmf-blue hover:bg-bmf-blue-dark text-white'
+                }`}
               >
                 <UserPlus className="w-4 h-4" />
                 <span className="text-sm">Join</span>
@@ -843,7 +883,14 @@ function InfoOverlayComponent({
 
               {/* QR Code Tooltip */}
               {showJoinQR && (
-                <div className="absolute top-full right-0 mt-3 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+                <div className="absolute top-full right-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in duration-200">
+                  {/* Close button */}
+                  <button
+                    onClick={() => setShowJoinQR(false)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-gray-500" />
+                  </button>
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
                       value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
