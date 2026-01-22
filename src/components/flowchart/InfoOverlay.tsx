@@ -390,7 +390,22 @@ function InfoOverlayComponent({
         .maybeSingle();
 
       if (existing) {
-        setChallengeStatus(existing.status);
+        // Check if session is stale (started more than 15 minutes ago and still 'active' or 'finished')
+        // Auto-reset to lobby for a fresh presentation
+        const isStale = existing.started_at &&
+          (Date.now() - new Date(existing.started_at).getTime() > 15 * 60 * 1000);
+
+        if (isStale && (existing.status === 'active' || existing.status === 'finished')) {
+          console.log('[Challenge] Auto-resetting stale session to lobby');
+          await supabase
+            .from('challenge_sessions')
+            .update({ status: 'lobby', started_at: null })
+            .eq('session_code', sessionCode)
+            .eq('challenge_type', challengeType);
+          setChallengeStatus('lobby');
+        } else {
+          setChallengeStatus(existing.status);
+        }
       } else {
         // Create new session in lobby state
         await supabase.from('challenge_sessions').insert({

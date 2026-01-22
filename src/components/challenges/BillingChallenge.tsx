@@ -208,9 +208,20 @@ export function BillingChallenge({ sessionCode, participantName, onComplete }: B
         .single();
 
       if (existing) {
-        setLobbyStatus(existing.status as 'lobby' | 'active' | 'finished');
-        if (existing.started_at) {
-          setChallengeStartedAt(new Date(existing.started_at));
+        // Check if session is stale (started more than 15 minutes ago)
+        // If so, treat as lobby - presenter should reset it
+        const isStale = existing.started_at &&
+          (Date.now() - new Date(existing.started_at).getTime() > 15 * 60 * 1000);
+
+        if (isStale && (existing.status === 'active' || existing.status === 'finished')) {
+          // Stale session - show as lobby, presenter needs to restart
+          console.log('[Challenge] Stale session detected, waiting for presenter to start');
+          setLobbyStatus('lobby');
+        } else {
+          setLobbyStatus(existing.status as 'lobby' | 'active' | 'finished');
+          if (existing.started_at && existing.status === 'active') {
+            setChallengeStartedAt(new Date(existing.started_at));
+          }
         }
       } else {
         // Create new challenge session in lobby state
