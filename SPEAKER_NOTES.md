@@ -66,6 +66,12 @@
 
 ---
 
+## 🎤 PERSONAL VALIDATION:
+
+> "And I can tell you from our own practice — we've had clients reach out specifically for the invoice and receipt use case. Finance teams doing manual reconciliation, spending hours matching paperwork. It's a pain point people are actively trying to solve. This isn't us convincing anyone they have a problem — **they already know they do.**"
+
+---
+
 ## ➡️ TRANSITION:
 > **"So let's get concrete. What does this problem actually LOOK like in a real operation? I'd bet money this sounds familiar..."**
 
@@ -241,6 +247,16 @@
 
 ---
 
+## 🎤 REAL EXAMPLE (if time):
+
+> "I built a system like this for a client in the startup incubation space. They'd go to these conferences — 'Inventive Vacations' they called them — and come back with stacks of business cards. The old way? Someone would spend HOURS manually typing everything into a spreadsheet. Then more hours crafting individual follow-up emails. The whole process would drag across weeks."
+
+> "The problem? **By the time they reached out, those leads had forgotten their faces.** The impression they made at the conference had faded."
+
+> "The new system: scan the card, AI extracts and categorizes into their CRM, drafts a personalized email, connects to Gmail, sends. **Same day.** While the connection is still fresh."
+
+---
+
 ## ➡️ TRANSITION:
 > **"Let me show you what this workflow actually looks like in practice..."**
 
@@ -302,6 +318,16 @@
 
 **Reveal the breakthrough:**
 > "Large Language Models changed that equation completely. An LLM **already understands** that 'Invoice Total' and 'Amount Due' and 'Grand Total' all mean the same thing. It understands context the way a human does."
+
+---
+
+## 🎤 CALLBACK TO EARLIER STORY (if you told it):
+
+> "Remember the business card system I mentioned? Once I added an LLM layer, everything changed. I stopped trying to teach the system what a job title looks like. Instead: **just extract everything. Let the AI figure out which is which.**"
+
+> "It went from constantly breaking to **98% accuracy.** Because the AI actually KNOWS that 'Property Specialist' and 'Real Estate Agent' mean the same thing. I didn't have to teach it — it already understood."
+
+---
 
 **Make it tangible:**
 - New supplier with a weird invoice format? **The AI figures it out.**
@@ -384,6 +410,14 @@
 
 **Drive home the insight:**
 > "This is crucial for trust. The AI isn't a black box making decisions you can't see. **It shows its work.** And critically — **it knows when to ask for help.**"
+
+---
+
+## 🎤 MAKE IT HUMAN:
+
+> "When the confidence is low — maybe there was a glare on the scan, or the handwriting was messy, or something just doesn't look right — the AI essentially says: **'Hey boss, I'm not too sure about this one. Could you take a look?'**"
+
+> "That's not a weakness. That's exactly what you WANT. An AI that knows the limits of its own confidence."
 
 ---
 

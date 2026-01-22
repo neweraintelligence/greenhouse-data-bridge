@@ -599,6 +599,73 @@ export const transitionNodeInfo: Record<string, NodeInfo> = {
     solution: 'One platform, many use cases. Add new data sources, new rules, new outputs — same underlying intelligence.',
     keyInsight: 'The demo is over, but the conversation continues. What questions can we answer?',
   },
+  // Template use case transitions - each points to the next template
+  supplier_management: {
+    id: 'upNext',
+    title: 'Next Workflow',
+    subtitle: 'Customer Orders',
+    imageOnLeft: false,
+    description:
+      'Let\'s try another common scenario. Orders flow in from multiple channels — emails, portals, phone calls. How do you reconcile them?',
+    painPoint: 'Think about your order-to-cash cycle. Where do orders get stuck? What\'s being manually cross-referenced?',
+    solution: 'Define your inputs and outputs. We\'ll map another workflow together.',
+    keyInsight: 'Same pattern, different documents. The architecture adapts to your process.',
+  },
+  customer_orders: {
+    id: 'upNext',
+    title: 'Next Workflow',
+    subtitle: 'Regulatory & Inspections',
+    imageOnLeft: false,
+    description:
+      'Compliance documentation piles up fast. Inspection reports, permits, certifications, audit findings. How do you stay audit-ready?',
+    painPoint: 'When the auditor asks for documentation, how fast can you find it? What expires without anyone noticing?',
+    solution: 'Map your compliance document flow. See how visibility keeps you ahead of deadlines.',
+    keyInsight: 'Compliance is documentation. Let\'s design the system that keeps you covered.',
+  },
+  regulatory_compliance: {
+    id: 'upNext',
+    title: 'Next Workflow',
+    subtitle: 'Equipment Maintenance',
+    imageOnLeft: false,
+    description:
+      'Equipment generates data: maintenance logs, service reports, inspection results, warranty documents. What triggers a work order?',
+    painPoint: 'When something breaks, do you know its maintenance history? Where\'s the documentation?',
+    solution: 'Define the inputs from technicians, vendors, and inspections. Map the outputs that keep equipment running.',
+    keyInsight: 'Preventive maintenance starts with document visibility.',
+  },
+  equipment_maintenance: {
+    id: 'upNext',
+    title: 'Next Workflow',
+    subtitle: 'Accounts Payable',
+    imageOnLeft: false,
+    description:
+      'The classic three-way match: PO, invoice, receipt. But your reality might be more complex. What approvals are required?',
+    painPoint: 'How many invoices are sitting in someone\'s inbox right now? How many duplicate payments have you caught?',
+    solution: 'Define your AP document types and the outputs that matter: payment approvals, exception reports.',
+    keyInsight: 'AP automation starts with understanding your document flow.',
+  },
+  accounts_payable: {
+    id: 'upNext',
+    title: 'Next Workflow',
+    subtitle: 'HR & Training Records',
+    imageOnLeft: false,
+    description:
+      'Employee documentation never ends. Certifications, training completions, policy acknowledgements. What needs to be tracked?',
+    painPoint: 'Can you prove every employee completed required training? When certifications expire?',
+    solution: 'Define your HR document inputs and the compliance outputs you need.',
+    keyInsight: 'HR compliance is about documentation. Let\'s design the flow.',
+  },
+  hr_training: {
+    id: 'upNext',
+    title: 'That\'s the Pipeline',
+    subtitle: 'Questions & Discussion',
+    imageOnLeft: false,
+    description:
+      'You\'ve seen live demos and designed your own workflows. The pattern scales to any data reconciliation challenge.',
+    painPoint: 'Manual data matching is slow, error-prone, and doesn\'t scale. Every new workflow means more spreadsheets.',
+    solution: 'One platform, many use cases. Add new data sources, new rules, new outputs — same underlying intelligence.',
+    keyInsight: 'The demo is over, but the conversation continues. What questions can we answer?',
+  },
 };
 
 // ============================================================================

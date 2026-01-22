@@ -1694,12 +1694,67 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     }
   }, [startPresentationMode, selectedUseCase, handleShowInfo, handleSourceActivate, sourceStatuses, onPresentationStart]);
 
+  // Template use case IDs for special navigation handling
+  const templateUseCaseIds = [
+    'supplier_management',
+    'customer_orders',
+    'regulatory_compliance',
+    'equipment_maintenance',
+    'accounts_payable',
+    'hr_training',
+  ];
+
+  // Get the next template use case (for template-to-template navigation)
+  const getNextTemplateUseCase = useCallback((currentId: string) => {
+    const currentIdx = templateUseCaseIds.indexOf(currentId);
+    if (currentIdx === -1 || currentIdx >= templateUseCaseIds.length - 1) {
+      return null; // No more templates
+    }
+    const nextId = templateUseCaseIds[currentIdx + 1];
+    const nextUseCase = useCases.find(uc => uc.id === nextId);
+    return nextUseCase || null;
+  }, [useCases]);
+
+  // Get the previous template use case (for backward navigation)
+  const getPreviousTemplateUseCase = useCallback((currentId: string) => {
+    const currentIdx = templateUseCaseIds.indexOf(currentId);
+    if (currentIdx <= 0) {
+      return null; // No previous template (first one)
+    }
+    const prevId = templateUseCaseIds[currentIdx - 1];
+    const prevUseCase = useCases.find(uc => uc.id === prevId);
+    return prevUseCase || null;
+  }, [useCases]);
+
   // Build complete navigation order (all nodes, not just sources)
   const getNavigationOrder = useCallback(() => {
     if (!selectedUseCase) return [];
 
     const navOrder: Array<{id: string; type: string; label: string; index: number}> = [];
 
+    // For template use cases, simplified navigation: just intro slide
+    if (selectedUseCase.isTemplate) {
+      // Template intro slide
+      navOrder.push({
+        id: 'templateIntro',
+        type: 'templateIntro',
+        label: selectedUseCase.name,
+        index: -1,
+      });
+
+      // Add "Up Next" to next template or final slide
+      const nextTemplate = getNextTemplateUseCase(selectedUseCase.id);
+      navOrder.push({
+        id: 'upNext',
+        type: 'upNext',
+        label: nextTemplate ? `Up Next: ${nextTemplate.name}` : 'Questions & Discussion',
+        index: -1,
+      });
+
+      return navOrder;
+    }
+
+    // Regular use cases: full pipeline navigation
     // Add source nodes
     selectedUseCase.sources.forEach((source, idx) => {
       navOrder.push({
@@ -1731,7 +1786,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
     });
 
     return navOrder;
-  }, [selectedUseCase]);
+  }, [selectedUseCase, getNextTemplateUseCase]);
 
   // Navigate to next/previous slide (through ALL nodes)
   const handleNextSlide = useCallback(() => {
@@ -1739,6 +1794,23 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
 
     const navOrder = getNavigationOrder();
     const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+
+    // Check if we're at the end of a template use case navigation
+    if (currentIdx >= navOrder.length - 1 && selectedUseCase?.isTemplate) {
+      // We're on the last slide (upNext) of a template - transition to next template
+      const nextTemplate = getNextTemplateUseCase(selectedUseCase.id);
+      if (nextTemplate) {
+        // Select the next template use case
+        handleUseCaseSelect(nextTemplate);
+        // Show its intro slide after a short delay
+        setTimeout(() => {
+          handleShowInfo('templateIntro', 'templateIntro', nextTemplate.name, -1, undefined, undefined, nextTemplate.id);
+        }, 100);
+        return;
+      }
+      // No more templates - stay on final slide
+      return;
+    }
 
     if (currentIdx >= 0 && currentIdx < navOrder.length - 1) {
       const next = navOrder[currentIdx + 1];
@@ -1758,13 +1830,37 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         }
       }
     }
-  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase, getNextTemplateUseCase, handleUseCaseSelect]);
 
   const handlePreviousSlide = useCallback(() => {
     if (!infoNodeId) return;
 
     const navOrder = getNavigationOrder();
     const currentIdx = navOrder.findIndex(n => n.id === infoNodeId);
+
+    // Check if we're at the start of a template use case navigation
+    if (currentIdx === 0 && selectedUseCase?.isTemplate) {
+      // We're on the first slide (templateIntro) of a template
+      const prevTemplate = getPreviousTemplateUseCase(selectedUseCase.id);
+      if (prevTemplate) {
+        // Go to previous template's upNext slide
+        handleUseCaseSelect(prevTemplate);
+        setTimeout(() => {
+          handleShowInfo('upNext', 'upNext', `Up Next: ${selectedUseCase.name}`, -1, undefined, undefined, prevTemplate.id);
+        }, 100);
+        return;
+      } else {
+        // First template - go back to Incidents use case's upNext slide
+        const incidentsUseCase = useCases.find(uc => uc.id === 'incidents');
+        if (incidentsUseCase) {
+          handleUseCaseSelect(incidentsUseCase);
+          setTimeout(() => {
+            handleShowInfo('upNext', 'upNext', 'Your Turn: Build Your Own Workflow', -1, undefined, undefined, 'incidents');
+          }, 100);
+          return;
+        }
+      }
+    }
 
     if (currentIdx > 0) {
       const prev = navOrder[currentIdx - 1];
@@ -1784,7 +1880,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
         }
       }
     }
-  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase]);
+  }, [infoNodeId, getNavigationOrder, handleShowInfo, selectedUseCase, getPreviousTemplateUseCase, handleUseCaseSelect, useCases]);
 
   // Check if can process
   const canProcess = selectedUseCase
