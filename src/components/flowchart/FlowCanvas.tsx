@@ -2847,6 +2847,22 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           spreadsheet = source.name === 'Acknowledgements'
             ? generateTrainingAcknowledgements()
             : generateTrainingRoster();
+        } else if (selectedUseCase.id === 'incidents' && source.name.toLowerCase().includes('raci')) {
+          // Business Rules & RACI Matrix for incident routing
+          spreadsheet = {
+            sheetName: 'Business Rules & RACI',
+            headers: ['Severity', 'Category', 'Responsible', 'Accountable', 'Consulted', 'Informed'],
+            rows: [
+              ['5 - Critical', 'Safety Hazard', 'Safety Team', 'Maria Santos (Safety Mgr)', 'Ops Director', 'safety@bigmarblefarms.com'],
+              ['5 - Critical', 'Equipment Failure', 'Maintenance Lead', 'Maria Santos (Safety Mgr)', 'Ops Director', 'maintenance.lead@bigmarblefarms.com'],
+              ['4 - Urgent', 'Pest/Disease', 'Head Grower', 'Roberto Chen (Ops Mgr)', 'Quality Team', 'head.grower@bigmarblefarms.com'],
+              ['4 - Urgent', 'Equipment Issue', 'Maintenance Team', 'James Wilson (Maint Lead)', 'Shift Lead', 'maintenance@bigmarblefarms.com'],
+              ['3 - Moderate', 'Irrigation Leak', 'Shift Lead', 'Roberto Chen (Ops Mgr)', '-', 'shift.lead@bigmarblefarms.com'],
+              ['3 - Moderate', 'Environmental', 'Head Grower', 'Roberto Chen (Ops Mgr)', '-', 'head.grower@bigmarblefarms.com'],
+              ['2 - Minor', 'Housekeeping', 'Shift Lead', 'Shift Lead', '-', 'Log Only'],
+              ['1 - Info', 'General Observation', 'Reporter', 'Shift Lead', '-', 'Log Only'],
+            ],
+          };
         } else {
           spreadsheet = generateDemoSpreadsheet();
         }
