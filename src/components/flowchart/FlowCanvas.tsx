@@ -786,13 +786,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
               input_documents: record.input_documents,
               output_types: record.output_types,
             });
-            // Show toast notification with workflow name
-            setToasts(prev => [...prev, {
-              id: Date.now().toString(),
-              type: 'success',
-              message: `${record.participant_name} defined the ${selectedUseCase.name} workflow!`,
-              duration: 5000,
-            }]);
+            // Notification now handled by ParticipantActivityLog via the green light indicator
           }
         }
       )

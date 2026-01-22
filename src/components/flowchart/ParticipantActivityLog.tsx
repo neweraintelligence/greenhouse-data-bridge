@@ -6,9 +6,19 @@ interface Activity {
   id: string;
   message: string;
   timestamp: Date;
-  type: 'join' | 'shipment' | 'training' | 'incident' | 'scan' | 'order' | 'quality' | 'email' | 'challenge';
+  type: 'join' | 'shipment' | 'training' | 'incident' | 'scan' | 'order' | 'quality' | 'email' | 'challenge' | 'workflow';
   isCorrect?: boolean; // For challenge results
 }
+
+// Map use_case_id to display name for workflow templates
+const useCaseDisplayNames: Record<string, string> = {
+  supplier_management: 'Supplier Management',
+  customer_orders: 'Customer Orders',
+  regulatory_compliance: 'Regulatory & Inspections',
+  equipment_maintenance: 'Equipment Maintenance',
+  accounts_payable: 'Accounts Payable',
+  hr_training: 'HR & Training Records',
+};
 
 interface ParticipantActivityLogProps {
   sessionCode: string;
@@ -117,6 +127,16 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
             ? `${r.participant_name} got it right in ${time}s!`
             : `${r.participant_name} answered in ${time}s`;
           addActivity(message, 'challenge', r.is_correct);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'workflow_templates', filter: `session_code=eq.${sessionCode}` },
+        (payload) => {
+          console.log('[ActivityLog] Workflow defined:', payload.new);
+          const w = payload.new as { participant_name: string; use_case_id: string };
+          const workflowName = useCaseDisplayNames[w.use_case_id] || w.use_case_id;
+          addActivity(`${w.participant_name} defined the ${workflowName} workflow`, 'workflow');
         }
       )
       .subscribe((status) => {
@@ -303,6 +323,7 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
                         activity.type === 'challenge' ? (activity.isCorrect ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500') :
                         activity.type === 'incident' ? 'bg-red-100 text-red-600' :
                         activity.type === 'quality' ? 'bg-amber-100 text-amber-600' :
+                        activity.type === 'workflow' ? 'bg-purple-100 text-purple-600' :
                         'bg-gray-100 text-gray-600'
                       }`}>
                         {activity.type === 'challenge' ? (
@@ -320,7 +341,8 @@ export function ParticipantActivityLog({ sessionCode }: ParticipantActivityLogPr
                              activity.type === 'scan' ? '📱' :
                              activity.type === 'order' ? '🛒' :
                              activity.type === 'quality' ? '🔍' :
-                             activity.type === 'email' ? '✉️' : '•'}
+                             activity.type === 'email' ? '✉️' :
+                             activity.type === 'workflow' ? '🔧' : '•'}
                           </span>
                         )}
                       </div>
