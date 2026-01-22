@@ -183,6 +183,23 @@ body {
   pointer-events: auto;
 }
 
+/* Template use case - muted middle nodes to focus on inputs/outputs */
+.node-template-muted {
+  opacity: 0.25;
+  filter: grayscale(0.7);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  pointer-events: none !important;
+}
+
+.react-flow__node.node-template-muted {
+  z-index: 0 !important;
+}
+
+/* Template edges - muted to de-emphasize the pipeline */
+.edge-template-muted {
+  opacity: 0.2 !important;
+}
+
 /* ============================================
    ANIMATED GRADIENT BACKGROUND
    ============================================ */

@@ -2397,6 +2397,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       const etlIsFocused = focusedNodeId === 'etl';
       const etlIsUnfocused = focusedNodeId && !etlIsFocused;
       const etlIsPresentationActive = presentationActiveNode === 'etl';
+      const isTemplateMuted = selectedUseCase.isTemplate; // Grey out middle nodes for BYO templates
       nodes.push({
         id: 'etl',
         type: 'etl',
@@ -2407,7 +2408,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           transformations: etlStatus === 'complete' ? transformations : undefined,
           onShowInfo: () => handleShowInfo('etl', 'etl', 'ETL/Normalization', -1, undefined, undefined),
         },
-        className: etlIsUnfocused ? 'node-unfocused' : etlIsFocused ? 'node-focused' : etlIsPresentationActive ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : etlIsUnfocused ? 'node-unfocused' : etlIsFocused ? 'node-focused' : etlIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Intake node
@@ -2425,7 +2426,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onProcess: handleProcess,
           onShowInfo: () => handleShowInfo('intake', 'intake', 'Intake Folder', -1, undefined, undefined),
         },
-        className: intakeIsUnfocused ? 'node-unfocused' : intakeIsFocused ? 'node-focused' : intakeIsPresentationActive ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : intakeIsUnfocused ? 'node-unfocused' : intakeIsFocused ? 'node-focused' : intakeIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Processing node - build source statuses for status messages
@@ -2451,7 +2452,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onShowInfo: () => handleShowInfo('processing', 'processing', 'Data Engine', -1, undefined, undefined),
           onViewDiscrepancies: () => setShowDiscrepancyList(true),
         },
-        className: processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : processingIsPresentationActive ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : processingIsUnfocused ? 'node-unfocused' : processingIsFocused ? 'node-focused' : processingIsPresentationActive ? 'node-presentation-active' : '',
       });
 
       // Review Queue node (NEW - branch from processing)
@@ -2485,7 +2486,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onViewQueue: () => setShowDiscrepancyList(true),
           onShowInfo: () => handleShowInfo('reviewQueue', 'review-queue', 'Review Queue', -1, undefined, undefined),
         },
-        className: presentationActiveNode === 'review-queue' ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : presentationActiveNode === 'review-queue' ? 'node-presentation-active' : '',
       });
 
       // Escalation node (NEW - branch from processing)
@@ -2522,7 +2523,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           onViewEscalations: () => debug.log('View escalations'),
           onShowInfo: () => handleShowInfo('escalation', 'escalation', 'Escalation Router', -1, undefined, undefined),
         },
-        className: presentationActiveNode === 'escalation' ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : presentationActiveNode === 'escalation' ? 'node-presentation-active' : '',
       });
 
       // Communications node (NEW - parallel to output)
@@ -2541,7 +2542,7 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
           },
           onShowInfo: () => handleShowInfo('communications', 'communications', 'Communications', -1, undefined, undefined),
         },
-        className: presentationActiveNode === 'communications' ? 'node-presentation-active' : '',
+        className: isTemplateMuted ? 'node-template-muted' : presentationActiveNode === 'communications' ? 'node-presentation-active' : '',
       });
 
       // Output node (repositioned)
@@ -2689,16 +2690,21 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       });
     });
 
+    // For template use cases, mute the middle edges to focus on inputs/outputs
+    const isTemplateUseCase = selectedUseCase.isTemplate;
+    const templateMutedOpacity = 0.15;
+
     // Edge from ETL to intake
     const etlComplete = etlStatus === 'complete';
     edges.push({
       id: 'edge-etl-intake',
       source: 'etl',
       target: 'intake',
-      animated: etlStatus === 'processing',
+      animated: !isTemplateUseCase && etlStatus === 'processing',
       style: {
         stroke: etlComplete ? '#a855f7' : '#94a3b8',
         strokeWidth: etlComplete ? 3 : 2.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : 1,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -2714,10 +2720,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       id: 'edge-intake-processing',
       source: 'intake',
       target: 'processing',
-      animated: isProcessing,
+      animated: !isTemplateUseCase && isProcessing,
       style: {
         stroke: isComplete ? '#10b981' : isProcessing ? '#8b5cf6' : '#94a3b8',
         strokeWidth: isComplete || isProcessing ? 3 : 2.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : 1,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -2735,11 +2742,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       id: 'edge-processing-review',
       source: 'processing',
       target: 'review-queue',
-      animated: isComplete && hasDiscrepancies,
+      animated: !isTemplateUseCase && isComplete && hasDiscrepancies,
       style: {
         stroke: isComplete && hasDiscrepancies ? '#f59e0b' : '#94a3b8',
         strokeWidth: isComplete && hasDiscrepancies ? 3 : 2.5,
-        opacity: isComplete && hasDiscrepancies ? 1 : 0.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : (isComplete && hasDiscrepancies ? 1 : 0.5),
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -2752,12 +2759,12 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       id: 'edge-processing-escalation',
       source: 'processing',
       target: 'escalation',
-      animated: isComplete && hasCritical,
+      animated: !isTemplateUseCase && isComplete && hasCritical,
       style: {
         stroke: isComplete && hasCritical ? '#ef4444' : '#94a3b8',
         strokeWidth: isComplete && hasCritical ? 3 : 2.5,
         strokeDasharray: '5,5',
-        opacity: isComplete && hasCritical ? 1 : 0.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : (isComplete && hasCritical ? 1 : 0.5),
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -2770,11 +2777,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       id: 'edge-processing-communications',
       source: 'processing',
       target: 'communications',
-      animated: isComplete && hasComms,
+      animated: !isTemplateUseCase && isComplete && hasComms,
       style: {
         stroke: isComplete && hasComms ? '#3b82f6' : '#94a3b8',
         strokeWidth: isComplete && hasComms ? 3 : 2.5,
-        opacity: isComplete && hasComms ? 1 : 0.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : (isComplete && hasComms ? 1 : 0.5),
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -2787,10 +2794,11 @@ export function FlowCanvas({ sessionCode, onProcessComplete, startPresentationMo
       id: 'edge-processing-output',
       source: 'processing',
       target: 'output',
-      animated: isComplete,
+      animated: !isTemplateUseCase && isComplete,
       style: {
         stroke: isComplete ? '#10b981' : '#94a3b8',
         strokeWidth: isComplete ? 3 : 2.5,
+        opacity: isTemplateUseCase ? templateMutedOpacity : 1,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
