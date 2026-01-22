@@ -73,10 +73,6 @@ export const theoreticalSlides: TheoreticalSlide[] = [
         { value: '76%', label: 'of enterprises prioritize process automation' },
         { value: '#1', label: 'AI use case by adoption rate' },
       ],
-      quote: {
-        text: 'This is my favorite AI use case to talk about. It\'s not flashy like ChatGPT, but it\'s where AI delivers the most tangible value today.',
-        attribution: 'Workshop Presenter',
-      },
     },
     speakerNotes: 'Share your genuine enthusiasm. Explain WHY this matters to you personally. The audience connects with passion. This is the "why should I care" slide before diving into problems.',
     imagePrompt: 'Upward trending adoption chart with document AI highlighted as the leader. Clean data visualization showing different AI use cases as bars, with document processing/IDP clearly at the top. Professional blue and green color scheme. Subtle glow on the leading bar. Background suggests enterprise/corporate setting. Numbers floating: 76%, #1. Style: modern business infographic with depth and polish.',
