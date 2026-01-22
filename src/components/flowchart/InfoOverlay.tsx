@@ -713,10 +713,10 @@ function InfoOverlayComponent({
                       <button
                         onClick={handleStartChallenge}
                         disabled={isStartingChallenge || challengeParticipants === 0}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-full shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Play className="w-5 h-5" />
-                        <span>Start Challenge</span>
+                        <Play className="w-4 h-4" />
+                        <span>Start</span>
                       </button>
                     )}
 
@@ -736,8 +736,7 @@ function InfoOverlayComponent({
                     )}
 
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-gray-900">Scan to Challenge</p>
-                      <p className="text-xs text-gray-500 mt-1">How fast can you spot it?</p>
+                      <p className="text-sm font-medium text-gray-700">Scan to join</p>
                     </div>
                   </div>
                 </div>
