@@ -7,6 +7,7 @@ import { useSessionStore } from '../store/sessionStore';
 import { seedSession } from '../lib/seedSession';
 
 const DEMO_SESSION_CODE = 'DEMO26';
+const LIVE_SESSION_CODE = 'LIVE01';
 
 export function Landing() {
   const [name, setName] = useState('');
@@ -26,6 +27,15 @@ export function Landing() {
     }, 100);
   };
 
+  const handleJoinLive = () => {
+    // Pre-fill LIVE01 code for clean presentations
+    setCode(LIVE_SESSION_CODE);
+    // Focus on name input
+    setTimeout(() => {
+      document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
+    }, 100);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -36,8 +46,8 @@ export function Landing() {
 
       if (sessionCode) {
         // Resume existing session
-        // Skip validation for demo session
-        if (sessionCode !== DEMO_SESSION_CODE && !isValidSessionCode(sessionCode)) {
+        // Skip validation for demo/live sessions
+        if (sessionCode !== DEMO_SESSION_CODE && sessionCode !== LIVE_SESSION_CODE && !isValidSessionCode(sessionCode)) {
           throw new Error('Invalid session code format');
         }
 
@@ -149,34 +159,54 @@ export function Landing() {
 
           {/* Form card */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            {/* Quick Demo Banner */}
+            {/* Quick Session Buttons */}
             {!code && (
               <div className="bg-bmf-blue px-8 py-6">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Workshop Demo
+                    Quick Start
                   </h3>
                   <p className="text-blue-100 text-sm mb-4">
-                    Join the shared demo session
+                    Choose a session mode
                   </p>
-                  <button
-                    onClick={handleJoinDemo}
-                    type="button"
-                    className="w-full py-3 px-6 bg-white hover:bg-gray-50 text-bmf-blue font-semibold rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm"
-                  >
-                    <span>Use Session</span>
-                    <span className="font-mono tracking-wider">{DEMO_SESSION_CODE}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleJoinLive}
+                      type="button"
+                      className="w-full py-3 px-6 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm"
+                    >
+                      <span>Presentation Mode</span>
+                      <span className="font-mono tracking-wider bg-emerald-600 px-2 py-0.5 rounded">{LIVE_SESSION_CODE}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleJoinDemo}
+                      type="button"
+                      className="w-full py-3 px-6 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-xl flex items-center justify-center gap-3 transition-all"
+                    >
+                      <span>Test/Development</span>
+                      <span className="font-mono tracking-wider opacity-70">{DEMO_SESSION_CODE}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {code === DEMO_SESSION_CODE && (
+              <div className="bg-amber-50 px-8 py-4 border-b border-amber-100">
+                <div className="flex items-center justify-center gap-2 text-amber-700">
+                  <Check className="w-5 h-5" />
+                  <span className="font-medium">Test/Dev session selected. Enter your name below.</span>
+                </div>
+              </div>
+            )}
+
+            {code === LIVE_SESSION_CODE && (
               <div className="bg-emerald-50 px-8 py-4 border-b border-emerald-100">
                 <div className="flex items-center justify-center gap-2 text-emerald-700">
                   <Check className="w-5 h-5" />
-                  <span className="font-medium">Demo session selected. Enter your name below.</span>
+                  <span className="font-medium">Presentation mode selected. Enter your name below.</span>
                 </div>
               </div>
             )}
@@ -208,8 +238,8 @@ export function Landing() {
                 </div>
               </div>
 
-              {/* Session code input - hidden when DEMO26 is selected */}
-              {code !== DEMO_SESSION_CODE && (
+              {/* Session code input - hidden when DEMO26 or LIVE01 is selected */}
+              {code !== DEMO_SESSION_CODE && code !== LIVE_SESSION_CODE && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Or Resume Session
@@ -245,14 +275,14 @@ export function Landing() {
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    <span>{code === DEMO_SESSION_CODE ? 'Join Workshop Demo' : code ? 'Resume Session' : 'Start New Session'}</span>
+                    <span>{code === LIVE_SESSION_CODE ? 'Start Presentation' : code === DEMO_SESSION_CODE ? 'Join Test/Dev Session' : code ? 'Resume Session' : 'Start New Session'}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
               </button>
 
-              {/* Clear demo selection */}
-              {code === DEMO_SESSION_CODE && (
+              {/* Clear session selection */}
+              {(code === DEMO_SESSION_CODE || code === LIVE_SESSION_CODE) && (
                 <button
                   type="button"
                   onClick={() => setCode('')}
