@@ -19,6 +19,34 @@ export function MobileJoinSession() {
     }
   }, []);
 
+  // Check for returning participant on mount (session persistence)
+  useEffect(() => {
+    if (!sessionCode) return;
+
+    const storageKey = `bmf_participant_${sessionCode}`;
+    const stored = localStorage.getItem(storageKey);
+
+    if (stored) {
+      try {
+        const participant = JSON.parse(stored);
+        if (participant.name) {
+          // Returning participant - auto-show success state
+          setName(participant.name);
+          setHasJoined(true);
+
+          // Also ensure sessionStorage is set for other flows
+          sessionStorage.setItem('user_identity', JSON.stringify({
+            name: participant.name,
+            role: 'Workshop Participant',
+            joinedAt: participant.joinedAt,
+          }));
+        }
+      } catch (e) {
+        localStorage.removeItem(storageKey);
+      }
+    }
+  }, [sessionCode]);
+
   // Fetch participant count and subscribe to updates
   useEffect(() => {
     if (!sessionCode) return;
@@ -76,7 +104,15 @@ export function MobileJoinSession() {
         .maybeSingle();
 
       if (existing) {
-        // Already joined - just show success
+        // Already joined - persist and show success
+        const joinedAt = new Date().toISOString();
+        const storageKey = `bmf_participant_${sessionCode}`;
+        localStorage.setItem(storageKey, JSON.stringify({ name: trimmedName, joinedAt }));
+        sessionStorage.setItem('user_identity', JSON.stringify({
+          name: trimmedName,
+          role: 'Workshop Participant',
+          joinedAt,
+        }));
         setHasJoined(true);
         return;
       }
@@ -92,6 +128,16 @@ export function MobileJoinSession() {
       if (insertError) {
         throw insertError;
       }
+
+      // Persist participant to localStorage for session continuity
+      const joinedAt = new Date().toISOString();
+      const storageKey = `bmf_participant_${sessionCode}`;
+      localStorage.setItem(storageKey, JSON.stringify({ name: trimmedName, joinedAt }));
+      sessionStorage.setItem('user_identity', JSON.stringify({
+        name: trimmedName,
+        role: 'Workshop Participant',
+        joinedAt,
+      }));
 
       setHasJoined(true);
     } catch (err) {

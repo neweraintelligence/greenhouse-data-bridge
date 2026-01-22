@@ -52,6 +52,36 @@ export function MobileDataEntry() {
     body: '',
   });
 
+  // Check for returning participant on mount (session persistence)
+  useEffect(() => {
+    if (!sessionCode) return;
+
+    // Check localStorage for previously joined participant in this session
+    const storageKey = `bmf_participant_${sessionCode}`;
+    const stored = localStorage.getItem(storageKey);
+
+    if (stored) {
+      try {
+        const participant = JSON.parse(stored);
+        if (participant.name) {
+          // Returning participant - auto-join
+          setParticipantName(participant.name);
+          setHasJoined(true);
+
+          // Also set sessionStorage for barcode scanner compatibility
+          sessionStorage.setItem('user_identity', JSON.stringify({
+            name: participant.name,
+            role: 'Workshop Participant',
+            joinedAt: participant.joinedAt,
+          }));
+        }
+      } catch (e) {
+        // Invalid stored data, clear it
+        localStorage.removeItem(storageKey);
+      }
+    }
+  }, [sessionCode]);
+
   useEffect(() => {
     // Set viewport for mobile
     const viewport = document.querySelector('meta[name=viewport]');
@@ -77,6 +107,21 @@ export function MobileDataEntry() {
       });
 
       if (insertError) throw insertError;
+
+      // Persist participant to localStorage for session continuity
+      const storageKey = `bmf_participant_${sessionCode}`;
+      const joinedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify({
+        name: participantName.trim(),
+        joinedAt,
+      }));
+
+      // Also set sessionStorage for barcode scanner compatibility
+      sessionStorage.setItem('user_identity', JSON.stringify({
+        name: participantName.trim(),
+        role: 'Workshop Participant',
+        joinedAt,
+      }));
 
       setHasJoined(true);
       setToast({
