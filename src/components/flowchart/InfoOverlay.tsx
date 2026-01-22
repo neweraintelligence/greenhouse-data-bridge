@@ -6,11 +6,28 @@ import { ReconciliationDataView } from '../reconciliation/ReconciliationDataView
 import { supabase } from '../../lib/supabase';
 import { preloadImage, isImagePreloaded } from '../../lib/imagePreloader';
 
+// Template use case IDs
+const templateUseCaseIds = [
+  'supplier_management',
+  'customer_orders',
+  'regulatory_compliance',
+  'equipment_maintenance',
+  'accounts_payable',
+  'hr_training',
+];
+
 // Helper function to map node labels to Supabase source table names
 // Uses both node label AND use case context to determine correct routing
 function getSourceTypeFromNode(nodeLabel: string, useCase?: string): string {
   const label = nodeLabel.toLowerCase();
   const useCaseLower = useCase?.toLowerCase() || '';
+
+  // ==========================================
+  // TEMPLATE USE CASES (check first)
+  // ==========================================
+  if (useCase && templateUseCaseIds.includes(useCase)) {
+    return 'workflow_template';
+  }
 
   // ==========================================
   // USE CASE SPECIFIC ROUTING (check first)
@@ -783,7 +800,10 @@ function InfoOverlayComponent({
                   </button>
                   <div className="flex flex-col items-center gap-3">
                     <QRCodeSVG
-                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
+                      value={sourceType === 'workflow_template'
+                        ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
+                        : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
+                      }
                       size={160}
                       level="M"
                       includeMargin
@@ -899,14 +919,17 @@ function InfoOverlayComponent({
                   </button>
                   <div className="flex flex-col items-center gap-2">
                     <QRCodeSVG
-                      value={`${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`}
+                      value={sourceType === 'workflow_template'
+                        ? `${window.location.origin}/upload/${sessionCode}?source=workflow_template&useCase=${useCase || ''}&useCaseName=${encodeURIComponent(nodeLabel || '')}`
+                        : `${window.location.origin}/mobile-entry/${sessionCode}?source=${sourceType}&node=${encodeURIComponent(nodeLabel)}&useCase=${useCase || ''}`
+                      }
                       size={180}
                       level="M"
                       includeMargin
                       className="rounded-lg"
                     />
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-gray-900">Scan to Participate</p>
+                      <p className="text-sm font-semibold text-gray-900">{sourceType === 'workflow_template' ? 'Scan to Define Workflow' : 'Scan to Participate'}</p>
                       <p className="text-xs text-gray-500 mt-1">Use your phone camera</p>
                     </div>
                   </div>
